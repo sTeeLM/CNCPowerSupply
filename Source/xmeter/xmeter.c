@@ -1177,6 +1177,11 @@ bit xmeter_output_status(void)
   return XMETER_OUTPUT_SWITCH == 0;
 }
 
+bit xmeter_cc_status(void)
+{
+  return XMETER_CC == 0;
+}
+
 bit xmeter_output_on(void)
 {
   XMETER_OUTPUT_SWITCH = 0;
@@ -1335,6 +1340,34 @@ void xmeter_dec_dac_v(bit coarse)
   }  
 }
 
+void xmeter_set_dac_v(const xmeter_value_t * val)
+{
+  xmeter_value_t temp;
+  
+  xmeter_assign_value(val, &temp);
+  
+  if(xmeter_compare_value(&temp, &xmeter_zero3) < 0) {
+    xmeter_assign_value(&xmeter_zero3, &temp);
+  }else if(xmeter_compare_value(&temp, &xmeter_dac_max_voltage) > 0) {
+    xmeter_assign_value(&xmeter_dac_max_voltage, &temp);
+  }  
+  xmeter_assign_value(&temp, &xmeter_dac_voltage);
+}
+
+void xmeter_set_dac_c(const xmeter_value_t * val)
+{
+  xmeter_value_t temp;
+  
+  xmeter_assign_value(val, &temp);
+  
+  if(xmeter_compare_value(&temp, &xmeter_zero3) < 0) {
+    xmeter_assign_value(&xmeter_zero3, &temp);
+  }else if(xmeter_compare_value(&temp, &xmeter_dac_max_current) > 0) {
+    xmeter_assign_value(&xmeter_dac_max_current, &temp);
+  }  
+  xmeter_assign_value(&temp, &xmeter_dac_current);
+}
+
 void xmeter_inc_dac_c(bit coarse)
 {
   xmeter_inc_value(&xmeter_dac_current, coarse);
@@ -1398,15 +1431,33 @@ void xmeter_prev_preset_dac_c(void)
 /* load xmeter_dac_ from preset slot */
 void xmeter_load_preset_dac_v(void)
 {
-  xmeter_assign_value(
-    &xmeter_dac_preset_voltage[xmeter_dac_preset_voltage_index],
-    &xmeter_dac_voltage);
+  xmeter_load_preset_dac_v_by_index(xmeter_dac_preset_voltage_index);
 }
 
 void xmeter_load_preset_dac_c(void)
 {
+  xmeter_load_preset_dac_c_by_index(xmeter_dac_preset_current_index);
+}
+
+void xmeter_load_preset_dac_v_by_index(uint8_t index)
+{
+  if(index > xmeter_get_max_preset_index_v()) {
+    index = xmeter_get_max_preset_index_v();
+  }
+  
   xmeter_assign_value(
-    &xmeter_dac_preset_current[xmeter_dac_preset_current_index],
+    &xmeter_dac_preset_voltage[index],
+    &xmeter_dac_voltage);
+}
+
+void xmeter_load_preset_dac_c_by_index(uint8_t index)
+{
+  if(index > xmeter_get_max_preset_index_c()) {
+    index = xmeter_get_max_preset_index_c();
+  }
+  
+  xmeter_assign_value(
+    &xmeter_dac_preset_current[index],
     &xmeter_dac_current);
 }
 
@@ -1472,6 +1523,36 @@ void xmeter_dec_preset_dac_c(bit coarse)
   }  
   
   xmeter_load_preset_dac_c();
+}
+
+void xmeter_store_preset_dac_c(uint8_t index)
+{
+  if(index > xmeter_get_max_preset_index_c()) {
+    index = xmeter_get_max_preset_index_c();
+  }
+  
+  xmeter_assign_value(&xmeter_dac_current,
+    &xmeter_dac_preset_current[index]);
+}
+
+void xmeter_store_preset_dac_v(uint8_t index)
+{
+  if(index > xmeter_get_max_preset_index_v()) {
+    index = xmeter_get_max_preset_index_v();
+  }
+  
+  xmeter_assign_value(&xmeter_dac_voltage,
+    &xmeter_dac_preset_voltage[index]);
+}
+
+uint8_t xmeter_get_max_preset_index_c(void)
+{
+  return XMETER_PRESET_CNT - 1;
+}
+
+uint8_t xmeter_get_max_preset_index_v(void)
+{
+  return XMETER_PRESET_CNT - 1;
 }
 
 void xmeter_write_rom_preset_dac_v(void)
@@ -1552,6 +1633,50 @@ void xmeter_dec_temp_lo(void)
   }  
 }
 
+void xmeter_set_temp_hi(const xmeter_value_t * val)
+{
+  xmeter_value_t p5 = {0, 2, 0, 500}; /* 0.5 */
+  xmeter_value_t diff;
+  
+  
+  if(xmeter_compare_value(val, &xmeter_max_temp_hi) > 0) {  
+    xmeter_assign_value(&xmeter_max_temp_hi, &xmeter_temp_hi);
+    return;
+  }  
+  
+  xmeter_assign_value(&xmeter_temp_lo, &diff);
+  xmeter_add_sub_value(&diff, &p5, 1);
+  
+  if(xmeter_compare_value(val, &diff) <= 0) {
+    xmeter_assign_value(&diff, &xmeter_temp_hi);
+    return;
+  }
+  
+  xmeter_assign_value(val, &xmeter_temp_hi);
+}
+
+void xmeter_set_temp_lo(const xmeter_value_t * val)
+{
+  xmeter_value_t p5 = {0, 2, 0, 500}; /* 0.5 */
+  xmeter_value_t diff;
+  
+  
+  if(xmeter_compare_value(val, &xmeter_min_temp_lo) <= 0) {  
+    xmeter_assign_value(&xmeter_min_temp_lo, &xmeter_temp_lo);
+    return;
+  }  
+  
+  xmeter_assign_value(&xmeter_temp_hi, &diff);
+  xmeter_add_sub_value(&diff, &p5, 0);
+  
+  if(xmeter_compare_value(val, &diff) >= 0) {
+    xmeter_assign_value(&diff, &xmeter_temp_lo);
+    return;
+  }
+  
+  xmeter_assign_value(val, &xmeter_temp_lo);
+}
+
 void xmeter_write_rom_temp_lo()
 {
   CDBG("xmeter_write_rom_temp_lo\n");
@@ -1586,6 +1711,21 @@ void xmeter_dec_max_power_diss(void)
   }
 }
 
+void xmeter_set_max_power_diss(const xmeter_value_t * val)
+{
+  if(xmeter_compare_value(val, &xmeter_max_power_diss_min) < 0) {
+    xmeter_assign_value(&xmeter_max_power_diss_min, &xmeter_max_power_diss);
+    return;
+  }
+  
+  if(xmeter_compare_value(val, &xmeter_max_power_diss_max) > 0) {
+    xmeter_assign_value(&xmeter_max_power_diss_max, &xmeter_max_power_diss);
+    return;
+  }
+  
+  xmeter_assign_value(val, &xmeter_max_power_diss);
+}
+
 void xmeter_write_rom_max_power_diss(void)
 {
   CDBG("xmeter_write_rom_max_power_diss\n");
@@ -1597,10 +1737,7 @@ void xmeter_inc_temp_overheat(void)
 {
   xmeter_value_t p5 = {0, 2, 0, 500}; /* 0.5 */
   
-  xmeter_add_sub_value(&xmeter_temp_overheat, &p5, 1);
-  
-  xmeter_dump_value("xmeter_temp_overheat", &xmeter_temp_overheat, 1);
-  xmeter_dump_value("xmeter_max_temp_hi", &xmeter_max_temp_hi, 1);  
+  xmeter_add_sub_value(&xmeter_temp_overheat, &p5, 1); 
   
   if(xmeter_compare_value(&xmeter_temp_overheat, &xmeter_max_temp_hi) > 0) {
     xmeter_assign_value(&xmeter_max_temp_hi, &xmeter_temp_overheat);
@@ -1616,6 +1753,21 @@ void xmeter_dec_temp_overheat(void)
   if(xmeter_compare_value(&xmeter_temp_overheat, &xmeter_min_temp_lo) < 0) {
     xmeter_assign_value(&xmeter_min_temp_lo, &xmeter_temp_overheat);
   }
+}
+
+void xmeter_set_temp_overheat(const xmeter_value_t * val)
+{
+  if(xmeter_compare_value(val, &xmeter_max_temp_hi) > 0) {
+    xmeter_assign_value(&xmeter_max_temp_hi, &xmeter_temp_overheat);
+    return;
+  }
+  
+  if(xmeter_compare_value(val, &xmeter_min_temp_lo) < 0) {
+    xmeter_assign_value(&xmeter_min_temp_lo, &xmeter_temp_overheat);
+    return;
+  }
+  
+  xmeter_assign_value(val, &xmeter_temp_overheat);
 }
 
 void xmeter_write_rom_temp_overheat(void)
@@ -1858,4 +2010,34 @@ void xmeter_write_dac_current(void)
 void xmeter_write_rom_dac_current(void)
 {
   rom_write_struct(ROM_XMETER_DAC_LAST_CURRENT, &xmeter_dac_current, sizeof(xmeter_dac_current));
+}
+
+void xmeter_get_voltage_steps(xmeter_value_t * coarse, xmeter_value_t * fine)
+{
+  xmeter_value_t c = {0, 3, 0, 100}; /* 0.1 */
+  xmeter_value_t f = {0, 3, 0, 1}; /* 0.001 */  
+  xmeter_assign_value(&c, coarse);
+  xmeter_assign_value(&f, fine);
+}
+
+void xmeter_get_current_steps(xmeter_value_t * coarse, xmeter_value_t * fine)
+{
+  xmeter_value_t c = {0, 3, 0, 100}; /* 0.1 */
+  xmeter_value_t f = {0, 3, 0, 1}; /* 0.001 */  
+  xmeter_assign_value(&c, coarse);
+  xmeter_assign_value(&f, fine);
+}
+
+void xmeter_get_temp_steps(xmeter_value_t * coarse, xmeter_value_t * fine)
+{
+  xmeter_value_t p5 = {0, 2, 0, 500}; /* 0.5 */
+  xmeter_assign_value(&p5, coarse);
+  xmeter_assign_value(&p5, fine);
+}
+
+void xmeter_get_power_steps(xmeter_value_t * coarse, xmeter_value_t * fine)
+{
+  xmeter_value_t p5 = {0, 2, 0, 500}; /* 0.5 */
+  xmeter_assign_value(&p5, coarse);
+  xmeter_assign_value(&p5, fine);
 }

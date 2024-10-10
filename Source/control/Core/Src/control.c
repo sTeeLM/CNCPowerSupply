@@ -2,6 +2,8 @@
 #include "debug.h"
 #include "usart.h"
 #include "usbd_cdc_if.h"
+#include "gpio.h"
+
 #include <string.h>
 
 
@@ -43,12 +45,28 @@ bool control_parse_cmd(control_msg_t * cmd, const uint8_t * buffer, uint32_t len
   
   control_dump_msg("receive cmd", cmd);
   
-	return true;
+  return true;
 }
 
 static void control_select_channel(uint8_t channel)
 {
-  
+  switch(channel)
+  {
+    case 0:
+      HAL_GPIO_WritePin(GPIOA, CHANEL_SEL0_Pin|CHANEL_SEL1_Pin, GPIO_PIN_RESET);
+      break;
+    case 1:
+      HAL_GPIO_WritePin(GPIOA, CHANEL_SEL0_Pin, GPIO_PIN_RESET);
+      HAL_GPIO_WritePin(GPIOA, CHANEL_SEL1_Pin, GPIO_PIN_SET);
+      break; 
+    case 2:
+      HAL_GPIO_WritePin(GPIOA, CHANEL_SEL0_Pin, GPIO_PIN_SET);
+      HAL_GPIO_WritePin(GPIOA, CHANEL_SEL1_Pin, GPIO_PIN_RESET);
+      break; 
+    case 3:
+      HAL_GPIO_WritePin(GPIOA, CHANEL_SEL0_Pin|CHANEL_SEL1_Pin, GPIO_PIN_SET);
+      break;
+  }
 }
 
 static uint8_t control_hal_error(HAL_StatusTypeDef status)

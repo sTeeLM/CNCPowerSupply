@@ -68,7 +68,7 @@ void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(DATA_TRANS_GPIO_Port, DATA_TRANS_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, CHANEL_SEL0_Pin|CHANEL_SEL1_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOA, CHANEL_SEL0_Pin|CHANEL_SEL1_Pin, GPIO_PIN_RESET);
 
 }
 

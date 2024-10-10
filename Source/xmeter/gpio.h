@@ -44,6 +44,7 @@ sbit LCD_E  = P1 ^ 2;
 /* xmeter */
 sbit XMETER_OUTPUT_SWITCH       =  P1 ^ 3;
 sbit XMETER_FAN_SWITCH          =  P1 ^ 4;
+sbit XMETER_CC                  =  P1 ^ 5;
 sbit XMETER_CONV_RDY            =  P1 ^ 6;
 
 void gpio_initialize (void);

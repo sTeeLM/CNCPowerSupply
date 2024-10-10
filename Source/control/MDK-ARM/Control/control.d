@@ -31,4 +31,5 @@ control/control.o: ..\Core\Src\control.c ..\Core\Inc\control.h \
   ..\Middlewares\ST\STM32_USB_Device_Library\Core\Inc\usbd_def.h \
   ..\USB_DEVICE\Target\usbd_conf.h \
   ..\Middlewares\ST\STM32_USB_Device_Library\Core\Inc\usbd_core.h \
-  ..\Middlewares\ST\STM32_USB_Device_Library\Core\Inc\usbd_ctlreq.h
+  ..\Middlewares\ST\STM32_USB_Device_Library\Core\Inc\usbd_ctlreq.h \
+  ..\Core\Inc\gpio.h

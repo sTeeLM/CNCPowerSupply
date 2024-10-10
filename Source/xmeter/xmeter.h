@@ -37,6 +37,7 @@ bit xmeter_output_status(void);
 bit xmeter_fan_on(void);
 bit xmeter_fan_off(void);
 bit xmeter_fan_status(void);
+bit xmeter_cc_status(void);
 
 /* directlly read adc bits */
 uint16_t xmeter_get_adc_bits_voltage_in(void);
@@ -72,10 +73,15 @@ void xmeter_inc_dac_v(bit coarse);
 void xmeter_dec_dac_v(bit coarse);
 void xmeter_inc_dac_c(bit coarse);
 void xmeter_dec_dac_c(bit coarse);
+void xmeter_set_dac_v(const xmeter_value_t * val);
+void xmeter_set_dac_c(const xmeter_value_t * val);
 
 /* load xmeter_dac_ from preset slot, not change DAC */
 void xmeter_load_preset_dac_v(void);
 void xmeter_load_preset_dac_c(void);
+
+void xmeter_load_preset_dac_v_by_index(uint8_t index);
+void xmeter_load_preset_dac_c_by_index(uint8_t index);
 
 /* load xmeter_dac_ with preset slot, and update preset slot index 
    not change DAC
@@ -90,7 +96,8 @@ uint8_t xmeter_get_preset_index_c(void);
 uint8_t xmeter_get_preset_index_v(void);
 void xmeter_reset_preset_index_c(void);
 void xmeter_reset_preset_index_v(void);
-
+uint8_t xmeter_get_max_preset_index_c(void);
+uint8_t xmeter_get_max_preset_index_v(void);
 /* change preset config 
    not change DAC
 */
@@ -98,6 +105,8 @@ void xmeter_inc_preset_dac_v(bit coarse);
 void xmeter_dec_preset_dac_v(bit coarse);
 void xmeter_inc_preset_dac_c(bit coarse);
 void xmeter_dec_preset_dac_c(bit coarse);
+void xmeter_store_preset_dac_c(uint8_t index);
+void xmeter_store_preset_dac_v(uint8_t index);
 void xmeter_write_rom_preset_dac_v(void);
 void xmeter_write_rom_preset_dac_c(void);
 
@@ -106,6 +115,8 @@ void xmeter_inc_temp_hi(void);
 void xmeter_inc_temp_lo(void);
 void xmeter_dec_temp_hi(void);
 void xmeter_dec_temp_lo(void);
+void xmeter_set_temp_hi(const xmeter_value_t * val);
+void xmeter_set_temp_lo(const xmeter_value_t * val);
 void xmeter_write_rom_temp_lo();
 void xmeter_write_rom_temp_hi();
 
@@ -122,11 +133,13 @@ bit xmeter_temp_safe(void);
 /* change power diss limit config */  
 void xmeter_inc_max_power_diss(void);
 void xmeter_dec_max_power_diss(void);
+void xmeter_set_max_power_diss(const xmeter_value_t * val);
 void xmeter_write_rom_max_power_diss(void);
   
 /* change overheat config */
 void xmeter_inc_temp_overheat(void);  
-void xmeter_dec_temp_overheat(void);  
+void xmeter_dec_temp_overheat(void);
+void xmeter_set_temp_overheat(const xmeter_value_t * val);  
 void xmeter_write_rom_temp_overheat(void);
 
 /* inc dec xmeter_value */
@@ -140,6 +153,12 @@ void xmeter_write_rom_adc_voltage_out_kb(double k, double b);
 void xmeter_write_rom_adc_current_kb(double k, double b);
 void xmeter_write_rom_dac_current_kb(double k, double b);
 void xmeter_write_rom_dac_voltage_kb(double k, double b);
+
+/* 调整步长 */
+void xmeter_get_voltage_steps(xmeter_value_t * coarse, xmeter_value_t * fine);
+void xmeter_get_current_steps(xmeter_value_t * coarse, xmeter_value_t * fine);
+void xmeter_get_temp_steps(xmeter_value_t * coarse, xmeter_value_t * fine);
+void xmeter_get_power_steps(xmeter_value_t * coarse, xmeter_value_t * fine);
 
 /* 解线性方程，获得斜率k，偏移b */  
 bit xmeter_cal(uint16_t x1, uint16_t x2, double y1, double y2, double * k, double * b);  

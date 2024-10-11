@@ -81,7 +81,7 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   MX_USB_DEVICE_Init();
-
+  
   delay_init();
   debug_init();
 

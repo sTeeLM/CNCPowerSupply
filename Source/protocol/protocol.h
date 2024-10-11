@@ -154,11 +154,14 @@ typedef struct _control_msg_t
   control_msg_body_t    msg_body;
 } control_msg_t;
 
-
-#define CONTROL_MSG_MAGIC_CODE 0x1234
+#if defined ( __C51__ ) || (defined ( __X86__ ))
+#define CONTROL_MSG_MAGIC_CODE 0x3412 /* for C51 or X86, big-endian*/
+#else
+#define CONTROL_MSG_MAGIC_CODE 0x1234 /* for ARM, little-endian*/
+#endif
 
 #define CONTROL_MSG_MAX_CHANNEL 4
-	
+
 void control_fill_msg_crc(control_msg_t * msg);
 bool control_verify_msg_crc(const control_msg_t * msg);
 bool control_verify_msg(const control_msg_t * msg, uint8_t len);

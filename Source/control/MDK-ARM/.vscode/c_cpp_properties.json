@@ -3,7 +3,7 @@
         {
             "name": "Control",
             "includePath": [
-                "d:\\Lab\\CNCPowerSupply\\Source\\inc",
+                "d:\\Lab\\CNCPowerSupply\\Source\\protocol",
                 "d:\\Lab\\CNCPowerSupply\\Source\\control\\Core\\Inc",
                 "d:\\Lab\\CNCPowerSupply\\Source\\control\\Drivers\\STM32F1xx_HAL_Driver\\Inc",
                 "d:\\Lab\\CNCPowerSupply\\Source\\control\\Drivers\\STM32F1xx_HAL_Driver\\Inc\\Legacy",

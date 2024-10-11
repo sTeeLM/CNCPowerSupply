@@ -14,12 +14,12 @@
 
 #define    baudrate 9600                        // 9600 bps communication baudrate
 
-#define    OLEN  8                              // size of serial transmission buffer
+#define    OLEN  32                              // size of serial transmission buffer
 static unsigned   char  ostart;                 // transmission buffer start index
 static unsigned   char  oend;                   // transmission buffer end index
 static char idata outbuf[OLEN];                 // storage for transmission buffer
 
-#define    ILEN  8                              // size of serial receiving buffer
+#define    ILEN  32                              // size of serial receiving buffer
 static unsigned   char  istart;                 // receiving buffer start index
 static unsigned   char  iend;                   // receiving buffer end index
 static char idata inbuf[ILEN];                  // storage for receiving buffer
@@ -149,23 +149,6 @@ char com_try_get_key(void)
 }
 
 
-static char com_get_key_timeout(uint16_t timeoms)
-{
-  char c;
-  while (iend == istart && timeoms) {
-    delay_ms(1); 
-    timeoms --;
-  }
-  
-  if(iend == istart && timeoms == 0)
-    return 0;
-  
-  ES = 0;                                      // disable serial interrupts during buffer update
-  c = inbuf[istart++ & (ILEN-1)];
-  ES = 1;                                      // enable serial interrupts again
-  return (c);  
-}
-
 /*
 ret: 
 1: ok, full bytes received
@@ -173,22 +156,26 @@ ret:
 */
 bit com_recv_buffer(uint8_t * buffer, uint16_t * len, uint16_t timeoms)
 {
-  uint16_t i = 0, len_save;
+  uint16_t save_len;
   char c;
   
-  len_save = *len;
-  while(*len --) {
-    c = com_get_key_timeout(timeoms);
+  save_len = *len;
+  *len = 0;
+  
+  while(1) {
+    c = com_try_get_key();
     if(c) {
-      buffer[i++] = c;
+      buffer[(*len)++] = c;
+      if((*len) == save_len)
+        break;
     } else {
-      break;
+      delay_ms(1);
+      if(timeoms --)
+        break;
     }
   }
   
-  *len = i;
-  
-  return len_save == *len;
+  return save_len == *len;
 }
 
 void com_send_buffer(uint8_t * buffer, uint16_t len)

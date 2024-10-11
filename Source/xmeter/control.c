@@ -13,7 +13,7 @@
 #include <string.h>
 
 #define CONTROL_MAX_IDLE_SEC 10 // second
-#define CONTROL_MAX_WAIT_MS  10 // ms
+#define CONTROL_MAX_WAIT_MS  100 // ms
 
 static control_msg_t control_cmd;
 static control_msg_t control_res;
@@ -452,11 +452,12 @@ static control_fun_t code control_funs[CONTROL_MSG_CODE_CNT] =
 
 void control_initilize(void)
 {
-	CDBG(("control_initilize\n"));
+	CDBG("control_initilize, sizeof(control_msg_t) is %bu\n", sizeof(control_msg_t));
 }
 
 static void control_enter(void)
 {
+  CDBG("control_enter\n");
   debug_onoff(0);
   xmeter_output_on();
   xmeter_fan_off();
@@ -473,19 +474,23 @@ static void control_leave(void)
   lcd_clear();
   lcd_refresh();
   sm_initialize();
+  CDBG("control_leave\n");
 }
 
 static void control_run_cmd(void)
 {
   control_fun_t fun;
   
-  if(!control_verify_msg(&control_res, sizeof(control_msg_t))) {
-    return;
+  if(!control_verify_msg(&control_cmd, sizeof(control_msg_t))) {
+    memcpy(&control_res, &control_cmd, sizeof(control_msg_t));
+    control_res.msg_header.msg_code |= 0x80;
+    control_res.msg_header.msg_body_len = 0;
+    control_res.msg_header.msg_status  = CONTROL_MSG_STATUS_PROTO;
+    control_fill_msg_crc(&control_res);
+  } else {
+    fun = control_funs[control_res.msg_header.msg_code];
+    fun();
   }
-  
-  fun = control_funs[control_res.msg_header.msg_code];
-  
-  fun();
 }
 
 static void control_send_response(void)

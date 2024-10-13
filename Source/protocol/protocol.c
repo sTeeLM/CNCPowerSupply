@@ -5,8 +5,13 @@ void control_fill_msg_crc(control_msg_t * msg)
 {
   uint8_t * p = (uint8_t *)msg;
   uint8_t index, crc = 0;
+  uint8_t len;
   msg->msg_header.msg_crc = 0;
-  for(index = 0 ; index < msg->msg_header.msg_body_len + sizeof(control_msg_t); index ++) {
+  len = msg->msg_header.msg_body_len + sizeof(control_msg_header_t);
+  if(len > sizeof(control_msg_t)) {
+    len = sizeof(control_msg_t);
+  }
+  for(index = 0 ; index < len; index ++) {
     crc += p[index];
   }
   msg->msg_header.msg_crc = (~crc) + 1;
@@ -16,7 +21,12 @@ bool control_verify_msg_crc(const control_msg_t * msg)
 {
   uint8_t * p = (uint8_t *)msg;
   uint8_t index, crc = 0;
-  for(index = 0 ; index < msg->msg_header.msg_body_len + sizeof(control_msg_t); index ++) {
+  uint8_t len;
+  len = msg->msg_header.msg_body_len + sizeof(control_msg_header_t);
+  if(len > sizeof(control_msg_t)) {
+    len = sizeof(control_msg_t);
+  }
+  for(index = 0 ; index < len; index ++) {
     crc += p[index];
   }
   return crc == 0;

@@ -85,6 +85,8 @@ int main(void)
   delay_init();
   debug_init();
 
+  CDBG("sizeof(control_msg_t) is %d", sizeof(control_msg_t));
+  
   while (1)
   {
     while(CDC_Com_Open) {
@@ -98,7 +100,7 @@ int main(void)
         control_send_heatbeat(&control_cmd, &control_res, channel_index); /* send heart beat to keep channel open*/
         channel_index = (channel_index + 1) % CONTROL_MSG_MAX_CHANNEL;
       }
-      delay_ms(100);
+      delay_ms(500);
     }
     delay_ms(1000);
   }

@@ -12,9 +12,9 @@
 #define    XTAL 11059200
 #endif
 
-#define    baudrate 9600                        // 9600 bps communication baudrate
+#define    baudrate 115200                       // 115200 bps communication baudrate
 
-#define    OLEN  32                              // size of serial transmission buffer
+#define    OLEN  32                             // size of serial transmission buffer
 static unsigned   char  ostart;                 // transmission buffer start index
 static unsigned   char  oend;                   // transmission buffer end index
 static char idata outbuf[OLEN];                 // storage for transmission buffer
@@ -68,15 +68,22 @@ void com_initialize (void) {
   sendactive = 0;                              // transmitter is not active
   sendfull = 0;                                // clear 'sendfull' flag
 
+
   SCON = 0x50;                                 // serial port MODE 1, enable serial receiver
                                                // Configure timer 1 as a baud rate generator
   PCON |= 0x80;                                // 0x80=SMOD: set serial baudrate doubler
   TMOD |= 0x20;                                // put timer 1 into MODE 2
 
+  AUXR &= 0xBF;
+  AUXR &= 0xFE;
+  
   TH1 = (unsigned char) (256 - (XTAL / (16L * 12L * baudrate)));
+  TL1 = TH1;
   TR1 = 1;                                     // start timer 1
+  ET1 = 0;
   REN = 1;
   ES = 1;                                      // enable serial interrupts
+
 }
 
 //   SCON  = 0xDA;        // SCON: mode 1, 8-bit UART, enable rcvr      */
@@ -136,16 +143,15 @@ char _getkey (void) {
   return (c);
 }
 
-char com_try_get_key(void) 
+static bit com_try_get_key(char * c) 
 {
-  char c;
   if (iend == istart) {
      return 0;                                         // wait until there are characters
   }
   ES = 0;                                      // disable serial interrupts during buffer update
-  c = inbuf[istart++ & (ILEN-1)];
+  *c = inbuf[istart++ & (ILEN-1)];
   ES = 1;                                      // enable serial interrupts again
-  return (c);
+  return 1;
 }
 
 
@@ -163,8 +169,7 @@ bit com_recv_buffer(uint8_t * buffer, uint16_t * len, uint16_t timeoms)
   *len = 0;
   
   while(1) {
-    c = com_try_get_key();
-    if(c) {
+    if(com_try_get_key(&c)) {
       buffer[(*len)++] = c;
       if((*len) == save_len)
         break;

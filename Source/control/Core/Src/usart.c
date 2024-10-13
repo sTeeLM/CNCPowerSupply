@@ -22,15 +22,15 @@
 #include "delay.h"
 /* USER CODE BEGIN 0 */
 
-#define MX_USART_TRANSMIT_TIMEOUT 10 //ms
-#define MX_USART_RECEIVE_TIMEOUT  10
+#define MX_USART_TRANSMIT_TIMEOUT 200 //ms
+#define MX_USART_RECEIVE_TIMEOUT  200 //ms
 #define MX_USART_BUSY_TRY_CNT     3
 #define MX_USART_BUSY_WAIT_DELAT  10 //ms
 /* USER CODE END 0 */
 
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
-
+static uint8_t USART2_Receive_Cplt;
 /* USART1 init function */
 
 void MX_USART1_UART_Init(void)
@@ -44,7 +44,7 @@ void MX_USART1_UART_Init(void)
 
   /* USER CODE END USART1_Init 1 */
   huart1.Instance = USART1;
-  huart1.Init.BaudRate = 9600;
+  huart1.Init.BaudRate = 115200;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
   huart1.Init.Parity = UART_PARITY_NONE;
@@ -145,7 +145,8 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /* USER CODE BEGIN USART2_MspInit 1 */
-
+    HAL_NVIC_SetPriority(USART2_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(USART2_IRQn);
   /* USER CODE END USART2_MspInit 1 */
   }
 }
@@ -184,9 +185,10 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
     PA3     ------> USART2_RX
     */
     HAL_GPIO_DeInit(GPIOA, GPIO_PIN_2|GPIO_PIN_3);
-
+    /* USART2 interrupt Deinit */
+    HAL_NVIC_DisableIRQ(USART2_IRQn);
   /* USER CODE BEGIN USART2_MspDeInit 1 */
-
+    
   /* USER CODE END USART2_MspDeInit 1 */
   }
 }
@@ -215,6 +217,16 @@ static HAL_StatusTypeDef MX_USART_Receive(UART_HandleTypeDef * huart, uint8_t *p
   return status; 
 }
 
+static HAL_StatusTypeDef MX_USART_Receive_IT(UART_HandleTypeDef * huart, uint8_t *pData, uint16_t Size)
+{
+  uint8_t try_cnt = MX_USART_BUSY_TRY_CNT;
+  HAL_StatusTypeDef status;
+  do {
+    status = HAL_UART_Receive_IT(huart, pData, Size);
+    delay_ms(MX_USART_BUSY_WAIT_DELAT);
+  }while(status == HAL_BUSY && try_cnt--);
+  return status; 
+}
 
 HAL_StatusTypeDef USART1_Transmit(uint8_t *pData, uint16_t Size)
 {
@@ -226,9 +238,38 @@ HAL_StatusTypeDef USART2_Transmit(uint8_t *pData, uint16_t Size)
   return MX_USART_Transmit(&huart2, pData, Size);
 }
 
-HAL_StatusTypeDef USART2_Receive(uint8_t *pData, uint16_t Size)
+HAL_StatusTypeDef USART2_Receive_IT(uint8_t *pData, uint16_t Size)
 {
-  return MX_USART_Receive(&huart2, pData, Size);
+  USART2_Receive_Cplt = 0;
+  return MX_USART_Receive_IT(&huart2, pData, Size);
 }
 
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+  if(huart->Instance == USART2) {
+    USART2_Receive_Cplt = 1;
+  }
+}
+
+HAL_StatusTypeDef USART2_Receive_Wait(uint32_t TimeOut)
+{
+  uint32_t tickstart = 0U;
+  
+  tickstart = HAL_GetTick();
+  
+  while(1) {
+    if(USART2_Receive_Cplt) {
+      break;
+    } else if((HAL_GetTick() - tickstart) > TimeOut || TimeOut == 0) {
+      break;
+    }
+  }
+  
+  if(!USART2_Receive_Cplt) {
+    HAL_UART_AbortReceive_IT(&huart2);
+  }
+  
+  return USART2_Receive_Cplt ? HAL_OK : HAL_TIMEOUT;
+  
+}
 /* USER CODE END 1 */

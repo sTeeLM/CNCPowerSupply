@@ -6,21 +6,25 @@
 
 #include <string.h>
 
+#define CONTROL_MSG_WAIT_TIMEOUT_MS 200 //ms
 
 void control_dump_msg(const char * fmt, const control_msg_t * msg)
 {
   uint8_t * p = (uint8_t *)(&(msg->msg_body));
   uint8_t body_len, print_len, i;
-	CDBG("control_dump_msg %s", fmt);
+	CDBG("%s", fmt);
   CDBG("  msg_header.msg_magic:    %04x", msg->msg_header.msg_magic);  
-  CDBG("  msg_header.msg_code:     %d", msg->msg_header.msg_code);
-  CDBG("  msg_header.msg_status:   %d", msg->msg_header.msg_status);
-  CDBG("  msg_header.msg_channel:  %d", msg->msg_header.msg_channel);
-  CDBG("  msg_header.msg_crc:      %d", msg->msg_header.msg_crc);
-  CDBG("  msg_header.msg_body_len: %d", msg->msg_header.msg_body_len);
+  CDBG("  msg_header.msg_code:     %02x", msg->msg_header.msg_code);
+  CDBG("  msg_header.msg_status:   %02x", msg->msg_header.msg_status);
+  CDBG("  msg_header.msg_channel:  %02x", msg->msg_header.msg_channel);
+  CDBG("  msg_header.msg_crc:      %02x", msg->msg_header.msg_crc);
+  CDBG("  msg_header.msg_body_len: %02x", msg->msg_header.msg_body_len);
   if(msg->msg_header.msg_body_len > 0) {
     CDBG("  msg_body:"); 
     body_len = msg->msg_header.msg_body_len;
+    if(body_len > sizeof(control_msg_t) - sizeof(control_msg_header_t)) {
+      body_len = sizeof(control_msg_t) - sizeof(control_msg_header_t);
+    }
     do {
       print_len = body_len > 16 ? 16 : body_len;
       for(i = 0; i < print_len ; i ++) {
@@ -37,13 +41,14 @@ bool control_parse_cmd(control_msg_t * cmd, const uint8_t * buffer, uint32_t len
 {
   control_msg_t * pcmd = (control_msg_t *)buffer;
   
+  CDBG("control_parse_cmd: new msg come");
+  control_dump_msg("receive cmd", pcmd);
+  
   if(!control_verify_msg(pcmd, len)) {
     return false;
   }
   
   memcpy(cmd, pcmd, pcmd->msg_header.msg_body_len + sizeof(control_msg_header_t));
-  
-  control_dump_msg("receive cmd", cmd);
   
   return true;
 }
@@ -99,7 +104,20 @@ void control_relay_cmd(const control_msg_t * cmd, control_msg_t * res)
 {
   HAL_StatusTypeDef status;
   uint8_t error_code;
+  
   control_select_channel(cmd->msg_header.msg_channel);
+  // control_select_channel(0);
+  
+  memset((uint8_t *)res, 0, sizeof(control_msg_t));
+  
+  status = USART2_Receive_IT((uint8_t *)res, sizeof(control_msg_t));
+  if(HAL_OK != status) {
+    error_code = control_hal_error(status);
+    CERR("control_relay_cmd: USART2_Receive_IT failed %d", status);
+    goto err;
+  }
+  
+  control_dump_msg("control_relay_cmd send msg", cmd);
   
   status = USART2_Transmit((uint8_t *)cmd, sizeof(control_msg_t));
   
@@ -109,13 +127,15 @@ void control_relay_cmd(const control_msg_t * cmd, control_msg_t * res)
     goto err;
   }
   
-  status = USART2_Receive((uint8_t *)res, sizeof(control_msg_t));
+  status = USART2_Receive_Wait(CONTROL_MSG_WAIT_TIMEOUT_MS);
   
   if(HAL_OK != status) {
     error_code = control_hal_error(status);
-    CERR("control_relay_cmd: USART2_Receive failed %d", status);
+    CERR("control_relay_cmd: USART2_Receive_Wait failed %d", status);
     goto err;
   }
+  
+  control_dump_msg("control_relay_cmd recv res", res);
   
   if(!control_verify_msg(res, sizeof(control_msg_t)) || (res->msg_header.msg_code & 0x80) == 0) {
     error_code = CONTROL_MSG_STATUS_PROTO;

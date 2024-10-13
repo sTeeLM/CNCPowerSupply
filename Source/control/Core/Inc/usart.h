@@ -39,8 +39,8 @@ extern UART_HandleTypeDef huart2;
 /* USER CODE BEGIN Private defines */
 HAL_StatusTypeDef USART1_Transmit(uint8_t *pData, uint16_t Size);
 HAL_StatusTypeDef USART2_Transmit(uint8_t *pData, uint16_t Size);
-HAL_StatusTypeDef USART2_Receive(uint8_t *pData, uint16_t Size);
-
+HAL_StatusTypeDef USART2_Receive_IT(uint8_t *pData, uint16_t Size);
+HAL_StatusTypeDef USART2_Receive_Wait(uint32_t TimeOut);
 
 /* USER CODE END Private defines */
 

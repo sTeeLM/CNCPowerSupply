@@ -13,18 +13,28 @@
 #include <string.h>
 
 #define CONTROL_MAX_IDLE_SEC 10 // second
-#define CONTROL_MAX_WAIT_MS  100 // ms
+#define CONTROL_MAX_WAIT_MS  200 // ms
 
 static control_msg_t control_cmd;
 static control_msg_t control_res;
 
 static uint32_t last_msg_sec;
+static bit control_is_enter_bit;
+static bit control_remote_override;
 
 typedef bool (* control_fun_t)(void);
  
 bool control_do_none(void)
 {
   return false;
+}
+
+static void control_fail_msg(uint8_t msg_status)
+{
+  control_res.msg_header.msg_code |= 0x80;
+  control_res.msg_header.msg_body_len = 0;
+  control_res.msg_header.msg_status  = msg_status;
+  control_fill_msg_crc(&control_res);
 }
 
 static void control_finish_msg(uint16_t msg_body_len)
@@ -46,14 +56,29 @@ static bool control_do_hearbeat(void)
   return true;
 }
 
+static bool control_do_remote_override(void)
+{
+  memcpy(&control_res, &control_cmd, sizeof(control_msg_t));
+  
+  control_remote_override = control_cmd.msg_body.enable.enable;
+  
+  control_finish_msg(sizeof(control_msg_body_enable_t));
+
+  return true;
+}
+
 static bool control_do_start_stop_fan(void)
 {
   memcpy(&control_res, &control_cmd, sizeof(control_msg_t));
   
-  if(control_cmd.msg_body.enable.enable) {
-    xmeter_fan_on();
+  if(control_remote_override) {
+    if(control_cmd.msg_body.enable.enable) {
+      xmeter_fan_on();
+    } else {
+      xmeter_fan_off();
+    }
   } else {
-    xmeter_fan_off();
+    control_fail_msg(CONTROL_MSG_STATUS_LOCKED);
   }
   control_res.msg_body.enable.enable = xmeter_fan_status();
   
@@ -66,12 +91,16 @@ static bool control_do_start_stop_switch(void)
 {
   memcpy(&control_res, &control_cmd, sizeof(control_msg_t));
   
-  if(control_cmd.msg_body.enable.enable) {
-    xmeter_output_on();
+  if(control_remote_override) {
+    if(control_cmd.msg_body.enable.enable) {
+      xmeter_output_on();
+    } else {
+      xmeter_output_off();
+    }
   } else {
-    xmeter_output_off();
+    control_fail_msg(CONTROL_MSG_STATUS_LOCKED);
   }
-
+  
   control_res.msg_body.enable.enable = xmeter_output_status();
   
   control_finish_msg(sizeof(control_msg_body_enable_t));
@@ -83,6 +112,7 @@ static bool control_do_get_xmeter_status(void)
 {
   memcpy(&control_res, &control_cmd, sizeof(control_msg_t));
   
+  control_res.msg_body.status.override_on = control_remote_override;
   control_res.msg_body.status.fan_on = xmeter_fan_status();
   control_res.msg_body.status.switch_on = xmeter_output_status();  
   control_res.msg_body.status.cc_on = xmeter_cc_status();  
@@ -417,6 +447,7 @@ static control_fun_t code control_funs[CONTROL_MSG_CODE_CNT] =
 {
   control_do_none,
   control_do_hearbeat,
+  control_do_remote_override,
   control_do_start_stop_fan,
   control_do_start_stop_switch,
   control_do_get_xmeter_status,
@@ -453,28 +484,40 @@ static control_fun_t code control_funs[CONTROL_MSG_CODE_CNT] =
 void control_initilize(void)
 {
 	CDBG("control_initilize, sizeof(control_msg_t) is %bu\n", sizeof(control_msg_t));
+  control_is_enter_bit = 0;
+  control_remote_override = 0;
+}
+
+static bit control_is_enter(void)
+{
+  return control_is_enter_bit;
 }
 
 static void control_enter(void)
 {
-  CDBG("control_enter\n");
-  debug_onoff(0);
-  xmeter_output_on();
-  xmeter_fan_off();
-  lcd_clear();
-  lcd_set_string(0, 0, " REMOTE CONTROL ");
-  lcd_refresh();
+  if(!control_is_enter_bit) {
+    CDBG("control_enter\n");
+    xmeter_output_on();
+    xmeter_fan_off();
+    lcd_clear();
+    lcd_set_string(0, 0, " REMOTE CONTROL ");
+    lcd_refresh();
+    control_is_enter_bit = 1;
+    control_remote_override = 0;
+  }
 }
 
 static void control_leave(void)
 {
-  debug_onoff(1);
-  xmeter_output_off();
-  xmeter_fan_off();
-  lcd_clear();
-  lcd_refresh();
-  sm_initialize();
-  CDBG("control_leave\n");
+  if(control_is_enter_bit) {
+    xmeter_output_off();
+    xmeter_fan_off();
+    lcd_clear();
+    lcd_refresh();
+    sm_initialize();
+    control_is_enter_bit = 0;
+    CDBG("control_leave\n");
+  }
 }
 
 static void control_run_cmd(void)
@@ -483,12 +526,14 @@ static void control_run_cmd(void)
   
   if(!control_verify_msg(&control_cmd, sizeof(control_msg_t))) {
     memcpy(&control_res, &control_cmd, sizeof(control_msg_t));
+    control_res.msg_header.msg_magic = CONTROL_MSG_MAGIC_CODE;   
     control_res.msg_header.msg_code |= 0x80;
-    control_res.msg_header.msg_body_len = 0;
     control_res.msg_header.msg_status  = CONTROL_MSG_STATUS_PROTO;
+    /* channel not change */
+    control_res.msg_header.msg_body_len = 0;
     control_fill_msg_crc(&control_res);
   } else {
-    fun = control_funs[control_res.msg_header.msg_code];
+    fun = control_funs[control_cmd.msg_header.msg_code];
     fun();
   }
 }
@@ -502,52 +547,53 @@ static void control_do_basic_operation(void)
 {
   xmeter_read_adc();
   
-  if(task_test(EV_TEMP_LO)) {
-    xmeter_fan_off();
-    task_clr(EV_TEMP_LO);
-  }
+  if(!control_remote_override) {
   
-  if(task_test(EV_TEMP_HI)) {
-    xmeter_fan_on();
-    task_clr(EV_TEMP_HI);
-  }
-  
-  if(task_test(EV_OVER_HEAT)) {
-    xmeter_fan_on();
-    xmeter_output_off();
-    task_clr(EV_OVER_HEAT);
+    if(task_test(EV_TEMP_LO)) {
+      xmeter_fan_off();
+      task_clr(EV_TEMP_LO);
+    }
+    
+    if(task_test(EV_TEMP_HI)) {
+      xmeter_fan_on();
+      task_clr(EV_TEMP_HI);
+    }
+    
+    if(task_test(EV_OVER_HEAT)) {
+      xmeter_fan_on();
+      xmeter_output_off();
+      task_clr(EV_OVER_HEAT);
+    }  
+    
+    if(task_test(EV_OVER_PD)) {
+      xmeter_fan_on();
+      xmeter_output_off();
+      task_clr(EV_OVER_PD);
+    }  
   }  
-  
-  if(task_test(EV_OVER_PD)) {
-    xmeter_fan_on();
-    xmeter_output_off();
-    task_clr(EV_OVER_PD);
-  }   
 }
 
 void control_run(void)
 {
   uint16_t len;
-  len = sizeof(control_msg_t);
-	if(com_recv_buffer((uint8_t *)&control_cmd, &len, CONTROL_MAX_WAIT_MS)) {
-    last_msg_sec = clock_get_now_sec();
-    control_enter();
-    control_run_cmd();
-    control_send_response();
-    while(1) {
-      len = sizeof(control_msg_t);
-      if(com_recv_buffer((uint8_t *)&control_cmd, &len, CONTROL_MAX_WAIT_MS)) {
-        control_run_cmd();
-        control_send_response();
-        last_msg_sec = clock_get_now_sec();
-      } else {
+  while(1) {
+    len = sizeof(control_msg_t);
+    if(com_recv_buffer((uint8_t *)&control_cmd, &len, CONTROL_MAX_WAIT_MS)) {
+      last_msg_sec = clock_get_now_sec();
+      control_enter();
+      control_run_cmd();
+      control_send_response();
+    } else {
+      if(control_is_enter()) {
         if(clock_diff_now_sec(last_msg_sec) > CONTROL_MAX_IDLE_SEC) {
+          control_leave();
           break;
         }
         control_do_basic_operation();
+      } else {
+        break;
       }
     }
-    control_leave();
   }
 }
 

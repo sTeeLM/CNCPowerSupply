@@ -2,130 +2,519 @@
 import serial
 import sys
 import struct
+import itertools
 
+####CONSTANTS BEGIN####
 MSG_LEN         = 19
-MSG_HEADER_LEN  = 7
 MSG_HEADER      = '>HBBBBB'
+MSG_HEADER_LEN  = 7
 MSG_BODY_ENABLE = '>B'
-MSG_BODY_STATUS = '>BBB'
+MSG_BODY_ENABLE_LEN = 1
+MSG_BODY_STATUS = '>BBBB'
+MSG_BODY_STATUS_LEN = 4
 MSG_BODY_XMETER = '>BBHH'
+MSG_BODY_XMETER_LEN = 6
 MSG_BODY_STEPS  = '>BBHHBBHH'
+MSG_BODY_STEPS_LEN = 12
 MSG_BODY_PARAM  = '>BBBHH'
+MSG_BODY_PARAM_LEN = 7
 MSG_BODY_PRESET = '>BBBHH'
+MSG_BODY_PRESET_LEN = 7
+
+CONTROL_MSG_CODE_NONE                = 0
+CONTROL_MSG_CODE_HEATBEAT            = 1
+CONTROL_MSG_CODE_REMOTE_OVERRIDE     = 2
+CONTROL_MSG_CODE_START_STOP_FAN      = 3
+CONTROL_MSG_CODE_START_STOP_SWITCH   = 4
+CONTROL_MSG_CODE_GET_XMETER_STATUS   = 5
+CONTROL_MSG_CODE_GET_ADC_CURRENT     = 6
+CONTROL_MSG_CODE_GET_ADC_VOLTAGE_IN  = 7
+CONTROL_MSG_CODE_GET_ADC_VOLTAGE_OUT = 8
+CONTROL_MSG_CODE_GET_ADC_TEMP        = 9
+CONTROL_MSG_CODE_GET_POWER_OUT       = 10
+CONTROL_MSG_CODE_GET_POWER_DISS      = 11
+CONTROL_MSG_CODE_GET_DAC_VOLTAGE     = 12
+CONTROL_MSG_CODE_SET_DAC_VOLTAGE     = 13
+CONTROL_MSG_CODE_GET_DAC_CURRENT     = 14
+CONTROL_MSG_CODE_SET_DAC_CURRENT     = 15
+CONTROL_MSG_CODE_GET_STEPS_VOLTAGE   = 16
+CONTROL_MSG_CODE_GET_STEPS_CURRENT   = 17
+CONTROL_MSG_CODE_GET_STEPS_TEMP      = 18
+CONTROL_MSG_CODE_GET_STEPS_POWER     = 19
+CONTROL_MSG_CODE_GET_PARAM_TEMP_HI   = 20
+CONTROL_MSG_CODE_SET_PARAM_TEMP_HI   = 21
+CONTROL_MSG_CODE_GET_PARAM_TEMP_LO   = 22
+CONTROL_MSG_CODE_SET_PARAM_TEMP_LO   = 23
+CONTROL_MSG_CODE_GET_PARAM_OVER_HEAT = 24
+CONTROL_MSG_CODE_SET_PARAM_OVER_HEAT = 25
+CONTROL_MSG_CODE_GET_PARAM_MAX_POWER_DISS  = 26
+CONTROL_MSG_CODE_SET_PARAM_MAX_POWER_DISS  = 27
+CONTROL_MSG_CODE_GET_PARAM_BEEP      = 28
+CONTROL_MSG_CODE_SET_PARAM_BEEP      = 29
+CONTROL_MSG_CODE_GET_PRESET_CURRENT  = 30
+CONTROL_MSG_CODE_SET_PRESET_CURRENT  = 31
+CONTROL_MSG_CODE_GET_PRESET_VOLTAGE  = 32
+CONTROL_MSG_CODE_SET_PRESET_VOLTAGE  = 33
+CONTROL_MSG_CODE_CNT                 = 34
+####CONSTANTS END####
 
 def verify_msg_crc(msg_array):
-	crc = 0
-	for i in range(len(msg_array)):
-		crc += msg_array[i]
-	return crc == 0
-	
+    crc = 0
+    for i in range(len(msg_array)):
+        crc += msg_array[i]
+    return (crc & 0xFF) == 0
+    
 def gen_msg_crc(msg_array):
-	crc = 0
-	for i in range(len(msg_array)):
-		crc += msg_array[i]
-	crc = ~crc + 1
-	msg_array[5] = crc
+    crc = 0
+    for i in range(len(msg_array)):
+        crc += msg_array[i]
+    crc = ~crc + 1
+    msg_array[5] = (crc & 0xFF)
 
 def pack_msg(msg_header, msg_body):
-	msg_array = bytearray()
-	msg_magic, msg_code, msg_status, msg_channel, msg_crc, msg_body_len =  struct.unpack(MSG_HEADER, msg_header)
-	if msg_body_len != 0 and msg_body_len != len(msg_body):
-		print('pack_msg: msg_body_len mis-match')
-		return None
-	
-	msg_header = struct.pack(MSG_HEADER, msg_magic, msg_code, msg_status, msg_channel, msg_crc, msg_body_len)
-	msg_array.append(msg_header)
+    msg_array = bytearray()
+    msg_magic, msg_code, msg_status, msg_channel, msg_crc, msg_body_len =  struct.unpack(MSG_HEADER, msg_header)
+    if msg_body_len != 0 and msg_body_len != len(msg_body):
+        print('pack_msg: msg_body_len mis-match')
+        return None
+    
+    msg_array.extend(msg_header)
 
-	if msg_body_len:
-		msg_array.append(msg_body)
-		
-	if len(msg_array) > MSG_LEN:
-		print('pack_msg: msg too long')
-		return None
-		
-	if msg_body_len:
-		gen_msg_crc(msg_array)	
-	
-	pad_len = MSG_LEN - len(msg_array)
-	for i in range(pad_len):
-		msg_array.append(0)
-	return bytes(msg_array)
+    if msg_body_len:
+        msg_array.extend(msg_body)
+        
+    if len(msg_array) > MSG_LEN:
+        print('pack_msg: msg too long')
+        return None
+    
+    gen_msg_crc(msg_array)    
+    
+    pad_len = MSG_LEN - len(msg_array)
+    msg_array.extend(itertools.repeat(0, pad_len))
+    return bytes(msg_array)
 
 def unpack_msg(msg_binary):
-	msg_header = None
-	msg_body   = None
-	msg_array = bytearray()
-	if len(msg_binary) < MSG_HEADER_LEN:
-		print('unpack_msg: msg short than header')
-		return (None, None)
-	msg_header = msg_binary[0:MSG_HEADER_LEN]
-	msg_magic, msg_code, msg_status, msg_channel, msg_crc, msg_body_len =  struct.unpack(MSG_HEADER, msg_header)
-	if len(msg_binary) < MSG_HEADER_LEN + msg_body_len
-		print('unpack_msg: msg short than MSG_HEADER_LEN + msg_body_len')
-		return (None, None)
-	if msg_body_len:
-		msg_body = msg_binary[MSG_HEADER_LEN:MSG_HEADER_LEN + msg_body_len]
-	msg_array.append(msg_header)
-	if msg_body:
-		msg_array.append(msg_body)
-	if not verify_msg_crc(msg_array):
-		print('unpack_msg: msg crc not ok')
-		return (None, None)
-	return (msg_header, msg_body)
+    msg_header = None
+    msg_body   = None
+    msg_array = bytearray()
+    if len(msg_binary) < MSG_HEADER_LEN:
+        print('unpack_msg: msg short than header %d < %d' % (len(msg_binary), MSG_HEADER_LEN))
+        return (None, None)
+    msg_header = msg_binary[0:MSG_HEADER_LEN]
+    msg_magic, msg_code, msg_status, msg_channel, msg_crc, msg_body_len =  struct.unpack(MSG_HEADER, msg_header)
+    if len(msg_binary) < MSG_HEADER_LEN + msg_body_len :
+        print('unpack_msg: msg short than MSG_HEADER_LEN + msg_body_len')
+        return (None, None)
+    if msg_body_len:
+        msg_body = msg_binary[MSG_HEADER_LEN:MSG_HEADER_LEN + msg_body_len]
+    msg_array.extend(msg_header)
+    if msg_body:
+        msg_array.extend(msg_body)
+    if not verify_msg_crc(msg_array):
+        print('unpack_msg: msg crc not ok')
+        return (None, None)
+    return (msg_header, msg_body)
 
 def dump_msg_header(msg_header):
-	msg_magic, msg_code, msg_status, msg_channel, msg_crc, msg_body_len =  struct.unpack(MSG_HEADER, msg_header)
-	print('msg_magic     %04x'   % msg_magic)
-	print('msg_code      %02x'   % msg_code)	
-	print('msg_status    %02x'   % msg_status)
-	print('msg_channel   %02x'   % msg_channel)
-	print('msg_crc       %02x'   % msg_crc)
-	print('msg_body_len  %02x'   % msg_body_len)
+    msg_magic, msg_code, msg_status, msg_channel, msg_crc, msg_body_len =  struct.unpack(MSG_HEADER, msg_header)
+    print('msg_magic     %04x'   % msg_magic)
+    print('msg_code      %02x'   % msg_code)    
+    print('msg_status    %02x'   % msg_status)
+    print('msg_channel   %02x'   % msg_channel)
+    print('msg_crc       %02x'   % msg_crc)
+    print('msg_body_len  %02x'   % msg_body_len)
 
 def dump_enable(msg_body):
-	enable = struct.unpack(MSG_BODY_ENABLE, msg_body)
-	print('msg_body_enable: %d' % enable)
-	
+    enable = struct.unpack(MSG_BODY_ENABLE, msg_body)
+    print('msg_body_enable: %d' % enable)
+    
 def do_heartbeat(serial, args):
-	cmd_header = struct.pack(MSG_HEADER, 0x1234, 1, 0, 0, 0, 0)
-	cmd_msg = pack_msg(cmd_header, None)
-	if cmd_msg:
-		serial.write(cmd_msg)
-		res_msg = serial.read(MSG_LEN)
-		res_header, res_body = unpack_msg(res_msg)
-		if res_header:
-			dump_msg_header(res_header)
-		
+    if len(args) != 1:
+        print('heartbeat [channel no]')
+        return
+    cmd_header = struct.pack(MSG_HEADER, 0x1234, CONTROL_MSG_CODE_HEATBEAT, 0, int(args[0]), 0, 0)
+    cmd_msg = pack_msg(cmd_header, None)
+    if cmd_msg:
+        serial.write(cmd_msg)
+        res_msg = serial.read(MSG_LEN)
+        res_header, res_body = unpack_msg(res_msg)
+        if res_header:
+            dump_msg_header(res_header)
+
+def do_on_off(serial, cmd_str, cmd_code, args):
+    if len(args) != 2:
+        print('%s [channel no] [on|off]' % cmd_str)
+        return
+    cmd_header = struct.pack(MSG_HEADER, 0x1234, cmd_code, 0, int(args[0]), 0, MSG_BODY_ENABLE_LEN)
+    cmd_body   = struct.pack(MSG_BODY_ENABLE, 1 if args[1] == 'on' else 0)
+    cmd_msg    = pack_msg(cmd_header, cmd_body)
+    if cmd_msg:
+        serial.write(cmd_msg)
+        res_msg = serial.read(MSG_LEN)
+        res_header, res_body = unpack_msg(res_msg)
+        if res_header:
+            dump_msg_header(res_header)        
+        dump_enable(res_body)    
+
+def do_remote_override(serial, args):
+    do_on_off(serial, 'override', CONTROL_MSG_CODE_REMOTE_OVERRIDE, args)
+        
 def do_start_stop_fan(serial, args):
-	cmd_header = struct.pack(MSG_HEADER, 0x1234, 2, 0, 0, 0, 1)
-	cmd_body   = struct.pack(MSG_BODY_ENABLE, args[0] == 'on' ? 1 : 0)
-	cmd_msg = pack_msg(cmd_header, cmd_body)
-	if cmd_msg:
-		serial.write(cmd_msg)
-		res_msg = serial.read(MSG_LEN)
-		res_header, res_body = unpack_msg(res_msg)
-		if res_header:
-			dump_msg_header(res_header)		
-		dump_enable(res_body)
+    do_on_off(serial, 'fan', CONTROL_MSG_CODE_START_STOP_FAN, args)
+    
+def do_start_stop_switch(serial, args):
+    do_on_off(serial, 'switch', CONTROL_MSG_CODE_START_STOP_SWITCH, args)
+    
+def do_get_status(serial, args):
+    if len(args) != 1:
+        print('%s [channel no]' % cmd_str)
+        return
+    cmd_header = struct.pack(MSG_HEADER, 0x1234, CONTROL_MSG_CODE_GET_XMETER_STATUS, 0, int(args[0]), 0, 0)
+    cmd_msg = pack_msg(cmd_header, None)
+    if cmd_msg:
+        serial.write(cmd_msg)
+        res_msg = serial.read(MSG_LEN)
+        res_header, res_body = unpack_msg(res_msg)
+        if res_header:
+            dump_msg_header(res_header)
+        if res_body:
+            override_on, fan_on, switch_on, cc_on = struct.unpack(MSG_BODY_STATUS)
+            print('override_on : %d' % override_on)
+            print('fan_on : %d' % fan_on)
+            print('switch_on : %d' % switch_on)
+            print('cc_on : %d' % cc_on)
+            
+def dump_xmeter_val(msg_body):            
+    (b_neg, b_res, h_integer, h_decimal) = struct.unpack(MSG_BODY_XMETER, msg_body)
+    print('%d/%s%d.%d' % (b_res, '-' if b_neg else '+', h_integer, h_decimal))
+    
+def do_get_xmeter_value(serial, cmd_str, cmd_code, args):
+    if len(args) != 1:
+        print('%s [channel no]' % cmd_str)
+        return
+    cmd_header = struct.pack(MSG_HEADER, 0x1234, cmd_code, 0, int(args[0]), 0, 0)
+    cmd_msg = pack_msg(cmd_header, None)
+    if cmd_msg:
+        serial.write(cmd_msg)
+        res_msg = serial.read(MSG_LEN)
+        res_header, res_body = unpack_msg(res_msg)
+        if res_header:
+            dump_msg_header(res_header)
+        if res_body:
+            dump_xmeter_val(res_body)
+
+# res/<->integer.decimal
+def parse_xmeter_value(val_str):
+	b_res        = 0
+	h_integer    = 0
+	h_decimal    = 0
+	b_neg        = 0
+	try:
+		b_res,remain = val_str.split('/')
+		b_res    = int(b_res)
+		h_integer,h_decimal = remain.split('.')
+		h_integer = int(h_integer)
+		h_decimal  = int(h_decimal)
+		if h_integer < 0:
+			h_integer = 0 - h_integer
+			b_neg = 1
+	exception ValueError,TypeError:
+		return None
+    return (b_neg, b_res, h_integer, h_decimal)
+
+def pack_xmeter_value(xmeter_value):
+	return struct.pack(MSG_BODY_XMETER, xmeter_value[0], xmeter_value[1], xmeter_value[2], xmeter_value[3])
+	
+def do_set_xmeter_value(serial, cmd_str, cmd_code, args):
+    if len(args) != 2:
+        print('%s [channel no] [xmeter value]' % cmd_str)
+        return
+    xmeter_value = parse_xmeter_value(args[1])
+    if not xmeter_value :
+        print('invalid xmeter value' % args[1])
+        return
+    cmd_header = struct.pack(MSG_HEADER, 0x1234, cmd_code, 0, int(args[0]), 0, MSG_BODY_XMETER_LEN)
+    cmd_body   = pack_xmeter_value(xmeter_value)
+    cmd_msg    = pack_msg(cmd_header, cmd_body)
+    if cmd_msg:
+        serial.write(cmd_msg)
+        res_msg = serial.read(MSG_LEN)
+        res_header, res_body = unpack_msg(res_msg)
+        if res_header:
+            dump_msg_header(res_header)
+        if res_body:
+            dump_xmeter_val(res_body)
+
+def do_get_adc_current(serial, args):
+    do_get_xmeter_value(serial, 'get_adc_current', CONTROL_MSG_CODE_GET_ADC_CURRENT, args)
+
+def do_get_adc_voltage_in(serial, args):
+    do_get_xmeter_value(serial, 'get_adc_voltage_in', CONTROL_MSG_CODE_GET_ADC_VOLTAGE_IN, args)
+
+def do_get_adc_voltage_out(serial, args):
+    do_get_xmeter_value(serial, 'get_adc_voltage_out', CONTROL_MSG_CODE_GET_ADC_VOLTAGE_OUT, args)
+
+def do_get_adc_temp(serial, args):
+    do_get_xmeter_value(serial, 'get_adc_temp', CONTROL_MSG_CODE_GET_ADC_TEMP, args)
+
+def do_get_power_out(serial, args):
+    do_get_xmeter_value(serial, 'get_power_out', CONTROL_MSG_CODE_GET_POWER_OUT, args)
+
+def do_get_power_diss(serial, args):
+    do_get_xmeter_value(serial, 'get_power_diss', CONTROL_MSG_CODE_GET_POWER_DISS, args)    
+    
+def do_get_dac_voltage(serial, args):
+    do_get_xmeter_value(serial, 'get_dac_voltage', CONTROL_MSG_CODE_GET_DAC_VOLTAGE, args)
+    
+def do_set_dac_voltage(serial, args):
+    do_set_xmeter_value(serial, 'set_dac_voltage', CONTROL_MSG_CODE_SET_DAC_VOLTAGE, args)
+    
+def do_get_dac_current(serial, args):
+    do_get_xmeter_value(serial, 'get_dac_current', CONTROL_MSG_CODE_GET_DAC_CURRENT, args)
+    
+def do_set_dac_current(serial, args):
+    do_set_xmeter_value(serial, 'set_dac_current', CONTROL_MSG_CODE_SET_DAC_CURRENT, args)    
+
+
+def dump_steps(res_body):
+    (b_neg_c, b_res_c, h_integer_c, h_decimal_c, b_neg_f, b_res_f, h_integer_f, h_decimal_f) = 
+		struct.unpack(MSG_BODY_STEPS, msg_body)
+    print('coarse: %d/%s%d.%d' % (b_res_c, '-' if b_neg_c else '+', h_integer_c, h_decimal_c))
+	print('fine:   %d/%s%d.%d' % (b_res_f, '-' if b_neg_f else '+', h_integer_f, h_decimal_f))
+
+def do_get_steps(serial, cmd_str, cmd_code, args):
+    if len(args) != 1:
+        print('%s [channel no]' % cmd_str)
+        return
+    cmd_header = struct.pack(MSG_HEADER, 0x1234, cmd_code, 0, int(args[0]), 0, 0)
+    cmd_msg    = pack_msg(cmd_header, None)
+    if cmd_msg:
+        serial.write(cmd_msg)
+        res_msg = serial.read(MSG_LEN)
+        res_header, res_body = unpack_msg(res_msg)
+        if res_header:
+            dump_msg_header(res_header)
+        if res_body:
+            dump_steps(res_body)
+
+def pack_steps(coarse, fine):
+	return struct.pack(MSG_BODY_STEPS, 
+		coarse[0], coarse[1], coarse[2], coarse[3],
+		fine[0], fine[1], fine[2], fine[3])
+	
+def do_set_steps(serial, cmd_str, cmd_code, args):
+    if len(args) != 3:
+        print('%s [channel no] [coarse] [fine]' % cmd_str)
+        return
+    xmeter_value_coarse = parse_xmeter_value(args[1])
+    xmeter_value_fine   = parse_xmeter_value(args[2])
+    if not xmeter_value_coarse:
+        print('invalid xmeter value' % args[1])
+        return
+    if not xmeter_value_fine:
+        print('invalid xmeter value' % args[2])
+        return		
+    cmd_header = struct.pack(MSG_HEADER, 0x1234, cmd_code, 0, int(args[0]), 0, MSG_BODY_STEPS_LEN)
+    cmd_body   = pack_steps(xmeter_value_coarse, xmeter_value_fine)
+	cmd_msg    = pack_msg(cmd_header, cmd_body)
+    if cmd_msg:
+        serial.write(cmd_msg)
+        res_msg = serial.read(MSG_LEN)
+        res_header, res_body = unpack_msg(res_msg)
+        if res_header:
+            dump_msg_header(res_header)
+        if res_body:
+            dump_steps(res_body)			
+			
+def do_get_steps_voltage(serial, args):
+    do_get_steps(serial, 'get_steps_voltage', CONTROL_MSG_CODE_GET_STEPS_VOLTAGE, args)    
+    
+def do_get_steps_voltage(serial, args):
+    do_get_steps(serial, 'get_steps_current', CONTROL_MSG_CODE_GET_STEPS_CURRENT, args)    
+    
+def do_get_steps_voltage(serial, args):
+    do_get_steps(serial, 'get_steps_temp', CONTROL_MSG_CODE_GET_STEPS_TEMP, args)
+    
+def do_get_steps_power(serial, args):
+    do_get_steps(serial, 'get_steps_power', CONTROL_MSG_CODE_GET_STEPS_POWER, args)    
+    
+
+def dump_param(res_body):
+	pass
+
+def do_get_param_xmeter_value(serial, cmd_str, cmd_code, args):
+    if len(args) != 1:
+        print('%s [channel no]' % cmd_str)
+        return
+    cmd_header = struct.pack(MSG_HEADER, 0x1234, cmd_code, 0, int(args[0]), 0, 0)
+    cmd_msg    = pack_msg(cmd_header, None)
+    if cmd_msg:
+        serial.write(cmd_msg)
+        res_msg = serial.read(MSG_LEN)
+        res_header, res_body = unpack_msg(res_msg)
+        if res_header:
+            dump_msg_header(res_header)
+        if res_body:
+            dump_param(res_body)
+
+def pack_param_xmeter_value(xmeter_value):
+	pass
+
+def do_set_param_xmeter_value(serial, cmd_str, cmd_code, args):
+    if len(args) != 2:
+        print('%s [channel no] [xmeter value]' % cmd_str)
+        return
+    xmeter_value = parse_xmeter_value(args[1])
+    if not xmeter_value :
+        print('invalid xmeter value' % args[1])
+        return
+    cmd_header = struct.pack(MSG_HEADER, 0x1234, cmd_code, 0, int(args[0]), 0, MSG_BODY_PARAM_LEN)
+    cmd_body   = pack_param_xmeter_value(xmeter_value)
+    cmd_msg    = pack_msg(cmd_header, cmd_body)
+    if cmd_msg:
+        serial.write(cmd_msg)
+        res_msg = serial.read(MSG_LEN)
+        res_header, res_body = unpack_msg(res_msg)
+        if res_header:
+            dump_msg_header(res_header)
+        if res_body:
+            dump_param(res_body)
+ 
+def do_get_param_temp_hi(serial, args):
+    do_get_param_xmeter_value(serial, 'get_param_temp_hi', CONTROL_MSG_CODE_GET_PARAM_TEMP_HI, args) 
+	
+def do_set_param_temp_hi(serial, args):
+    do_set_param_xmeter_value(serial, 'set_param_temp_hi', CONTROL_MSG_CODE_SET_PARAM_TEMP_HI, args)     
+
+def do_get_param_temp_lo(serial, args):
+    do_get_param_xmeter_value(serial, 'get_param_temp_lo', CONTROL_MSG_CODE_GET_PARAM_TEMP_LO, args) 
+	
+def do_set_param_temp_lo(serial, args):
+    do_set_param_xmeter_value(serial, 'set_param_temp_lo', CONTROL_MSG_CODE_SET_PARAM_TEMP_LO, args)   
+	
+	
+def do_get_param_over_heat(serial, args):
+    do_get_param_xmeter_value(serial, 'get_param_over_heat', CONTROL_MSG_CODE_GET_PARAM_OVER_HEAT, args) 
+	
+def do_set_param_over_heat(serial, args):
+    do_set_param_xmeter_value(serial, 'set_param_over_heat', CONTROL_MSG_CODE_SET_PARAM_OVER_HEAT, args)     
+
+def do_get_param_max_pd(serial, args):
+    do_get_param_xmeter_value(serial, 'get_param_max_pd', CONTROL_MSG_CODE_GET_PARAM_MAX_POWER_DISS, args) 
+	
+def do_set_param_max_pd(serial, args):
+    do_set_param_xmeter_value(serial, 'set_param_max_pd', CONTROL_MSG_CODE_SET_PARAM_MAX_POWER_DISS, args) 
+	
+def do_get_param_beep(serial, args):
+    pass
+	
+def do_set_param_beep(serial, args):
+    pass
+	
+	
+def dump_preset(res_body):
+	pass
+
+def do_get_preset(serial, cmd_str, cmd_code, args):
+    if len(args) != 1:
+        print('%s [channel no]' % cmd_str)
+        return
+    cmd_header = struct.pack(MSG_HEADER, 0x1234, cmd_code, 0, int(args[0]), 0, 0)
+    cmd_msg    = pack_msg(cmd_header, None)
+    if cmd_msg:
+        serial.write(cmd_msg)
+        res_msg = serial.read(MSG_LEN)
+        res_header, res_body = unpack_msg(res_msg)
+        if res_header:
+            dump_msg_header(res_header)
+        if res_body:
+            dump_preset(res_body)
+
+def pack_preset(index, xmeter_value):
+	pass
+
+def do_set_param_xmeter_value(serial, cmd_str, cmd_code, args):
+    if len(args) != 3:
+        print('%s [channel no] [index] [xmeter value]' % cmd_str)
+        return
+    index = int(args[1])
+	xmeter_value = parse_xmeter_value(args[2])
+    if not xmeter_value :
+        print('invalid xmeter value' % args[2])
+        return
+    cmd_header = struct.pack(MSG_HEADER, 0x1234, cmd_code, 0, int(args[0]), 0, MSG_BODY_PRESET_LEN)
+    cmd_body   = pack_preset(index, xmeter_value)
+    cmd_msg    = pack_msg(cmd_header, cmd_body)
+    if cmd_msg:
+        serial.write(cmd_msg)
+        res_msg = serial.read(MSG_LEN)
+        res_header, res_body = unpack_msg(res_msg)
+        if res_header:
+            dump_msg_header(res_header)
+        if res_body:
+            dump_preset(res_body)
+
+def do_get_preset_current(serial, args):
+	do_get_preset(serial, 'get_preset_current', CONTROL_MSG_CODE_GET_PRESET_CURRENT, args) 
+	
+def do_set_preset_current(serial, args):
+	do_set_preset(serial, 'set_preset_current', CONTROL_MSG_CODE_SET_PRESET_CURRENT, args)
+	
+def do_get_preset_voltage(serial, args):
+	do_get_preset(serial, 'get_preset_voltage', CONTROL_MSG_CODE_GET_PRESET_VOLTAGE, args) 
+	
+def do_set_preset_voltage(serial, args):
+	do_set_preset(serial, 'set_preset_voltage', CONTROL_MSG_CODE_SET_PRESET_VOLTAGE, args) 	
 #--------------------------------------------------------------------
 tests = {
-	'heartbeat': do_heartbeat,
-	'fan' : do_start_stop_fan
+    'heartbeat': do_heartbeat,
+    'override': do_remote_override,
+    'fan' : do_start_stop_fan,
+    'switch': do_start_stop_switch
+    'status' : do_get_status,
+    'get_adc_current' : do_get_adc_current,
+    'get_adc_voltage_in' : do_get_adc_voltage_in,
+    'get_adc_voltage_out' : do_get_adc_voltage_out,    
+    'get_adc_temp' : do_get_adc_temp,
+    'get_power_out' : do_get_power_out,
+    'get_power_diss' : do_get_power_diss,
+    'get_dac_voltage' : do_get_dac_voltage,
+    'set_dac_voltage' : do_set_dac_voltage,    
+    'get_dac_voltage' : do_get_dac_current,
+    'set_dac_voltage' : do_set_dac_current,    
+    'get_steps_voltage' : do_get_steps_voltage,
+    'get_steps_current' : do_get_steps_current,
+    'get_steps_temp' : do_get_steps_temp,
+    'get_steps_power' : do_get_steps_power,
+    'get_param_temp_hi' : do_get_param_temp_hi,    
+    'set_param_temp_hi' : do_set_param_temp_hi,    
+    'get_param_temp_lo' : do_get_param_temp_lo,    
+    'set_param_temp_lo' : do_set_param_temp_lo,    
+    'get_param_over_heat' : do_get_param_over_heat,    
+    'set_param_over_heat' : do_set_param_over_heat,
+    'get_param_max_pd' : do_get_param_max_pd,    
+    'set_param_max_pd' : do_set_param_max_pd,
+    'get_param_beep' : do_get_param_beep,    
+    'set_param_beep' : do_set_param_beep,
+	'get_preset_current' : do_get_preset_current,
+	'set_preset_current' : do_set_preset_current,	
+	'get_preset_voltage' : do_get_preset_voltage,
+	'set_preset_voltage' : do_set_preset_voltage,	
 }
 
 if len(sys.argv) < 3:
-	print("test.py [COM1] [cmd] <args>")
-	sys.exit(1)
+    print("test.py [COMx] [cmd] <args>")
+    sys.exit(1)
 
 serialname = sys.argv[1]
 testname   = sys.argv[2]
 
 if testname in tests.keys():
-	serialport = serial.Serial(
-    port=serialname, baudrate=9600, bytesize=8, timeout=2, stopbits=serial.STOPBITS_ONE)
-	tests[testname](serialname, sys.argv[2:-1])
-	serialname.close()
+    serialport = serial.Serial(
+        port=serialname, baudrate=115200, bytesize=8, timeout=10, stopbits=serial.STOPBITS_ONE)
+    tests[testname](serialport, sys.argv[3:])
+    serialport.close()
 else:
-	print("no cmd name %s" % testname);
-	sys.exit(1)
+    print("no cmd name %s" % testname);
+    sys.exit(1)
 

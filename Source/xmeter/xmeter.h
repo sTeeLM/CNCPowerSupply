@@ -143,10 +143,15 @@ void xmeter_set_temp_overheat(const xmeter_value_t * val);
 void xmeter_write_rom_temp_overheat(void);
 
 /* inc dec xmeter_value */
-void xmeter_inc_value(xmeter_value_t * val, bit coarse);
-void xmeter_dec_value(xmeter_value_t * val, bit coarse);  
+void xmeter_inc_value(xmeter_value_t * val, const xmeter_value_t * step);
+void xmeter_dec_value(xmeter_value_t * val, const xmeter_value_t * step); 
 void xmeter_assign_value(const xmeter_value_t * src, xmeter_value_t * dst);
-  
+
+void xmeter_inc_voltage_value(xmeter_value_t * voltage, bit coarse);
+void xmeter_dec_voltage_value(xmeter_value_t * voltage, bit coarse);
+void xmeter_inc_current_value(xmeter_value_t * voltage, bit coarse);
+void xmeter_dec_current_value(xmeter_value_t * voltage, bit coarse);
+
 /* save calibrate config */	
 void xmeter_write_rom_adc_voltage_in_kb(double k, double b);
 void xmeter_write_rom_adc_voltage_out_kb(double k, double b);

@@ -117,12 +117,12 @@ def unpack_msg(msg_binary):
 
 def dump_msg_header(msg_header):
     msg_magic, msg_code, msg_status, msg_channel, msg_crc, msg_body_len =  struct.unpack(MSG_HEADER, msg_header)
-    print('msg_magic     %04x'   % msg_magic)
-    print('msg_code      %02x'   % msg_code)    
-    print('msg_status    %02x'   % msg_status)
-    print('msg_channel   %02x'   % msg_channel)
-    print('msg_crc       %02x'   % msg_crc)
-    print('msg_body_len  %02x'   % msg_body_len)
+    print('msg_magic     0x%04X'   % msg_magic)
+    print('msg_code      0x%02X'   % msg_code)    
+    print('msg_status    0x%02X'   % msg_status)
+    print('msg_channel   0x%02X'   % msg_channel)
+    print('msg_crc       0x%02X'   % msg_crc)
+    print('msg_body_len  0x%02X'   % msg_body_len)
 
 def dump_enable(msg_body):
     enable = struct.unpack(MSG_BODY_ENABLE, msg_body)
@@ -167,7 +167,7 @@ def do_start_stop_switch(serial, args):
     
 def do_get_status(serial, args):
     if len(args) != 1:
-        print('%s [channel no]' % cmd_str)
+        print('status [channel no]')
         return
     cmd_header = struct.pack(MSG_HEADER, 0x1234, CONTROL_MSG_CODE_GET_XMETER_STATUS, 0, int(args[0]), 0, 0)
     cmd_msg = pack_msg(cmd_header, None)
@@ -178,7 +178,7 @@ def do_get_status(serial, args):
         if res_header:
             dump_msg_header(res_header)
         if res_body:
-            override_on, fan_on, switch_on, cc_on = struct.unpack(MSG_BODY_STATUS)
+            override_on, fan_on, switch_on, cc_on = struct.unpack(MSG_BODY_STATUS, res_body)
             print('override_on : %d' % override_on)
             print('fan_on : %d' % fan_on)
             print('switch_on : %d' % switch_on)
@@ -186,7 +186,7 @@ def do_get_status(serial, args):
             
 def dump_xmeter_val(msg_body):            
     (b_neg, b_res, h_integer, h_decimal) = struct.unpack(MSG_BODY_XMETER, msg_body)
-    print('%d/%s%d.%d' % (b_res, '-' if b_neg else '+', h_integer, h_decimal))
+    print('%d/%s%d.%03d' % (b_res, '-' if b_neg else '+', h_integer, h_decimal))
     
 def do_get_xmeter_value(serial, cmd_str, cmd_code, args):
     if len(args) != 1:
@@ -205,26 +205,27 @@ def do_get_xmeter_value(serial, cmd_str, cmd_code, args):
 
 # res/<->integer.decimal
 def parse_xmeter_value(val_str):
-	b_res        = 0
-	h_integer    = 0
-	h_decimal    = 0
-	b_neg        = 0
-	try:
-		b_res,remain = val_str.split('/')
-		b_res    = int(b_res)
-		h_integer,h_decimal = remain.split('.')
-		h_integer = int(h_integer)
-		h_decimal  = int(h_decimal)
-		if h_integer < 0:
-			h_integer = 0 - h_integer
-			b_neg = 1
-	exception ValueError,TypeError:
-		return None
+    b_res        = 0
+    h_integer    = 0
+    h_decimal    = 0
+    b_neg        = 0
+    try:
+        b_res,remain = val_str.split('/')
+        b_res    = int(b_res)
+        f_value  = float(remain)
+        h_integer = int(f_value)
+        h_decimal  = int((f_value - int(f_value)) * 1000)
+        if h_integer < 0:
+            h_integer = 0 - h_integer
+            h_decimal = 0 - h_decimal
+            b_neg = 1
+    except (ValueError, TypeError):
+        return None
     return (b_neg, b_res, h_integer, h_decimal)
 
 def pack_xmeter_value(xmeter_value):
-	return struct.pack(MSG_BODY_XMETER, xmeter_value[0], xmeter_value[1], xmeter_value[2], xmeter_value[3])
-	
+    return struct.pack(MSG_BODY_XMETER, xmeter_value[0], xmeter_value[1], xmeter_value[2], xmeter_value[3])
+    
 def do_set_xmeter_value(serial, cmd_str, cmd_code, args):
     if len(args) != 2:
         print('%s [channel no] [xmeter value]' % cmd_str)
@@ -277,10 +278,10 @@ def do_set_dac_current(serial, args):
 
 
 def dump_steps(res_body):
-    (b_neg_c, b_res_c, h_integer_c, h_decimal_c, b_neg_f, b_res_f, h_integer_f, h_decimal_f) = 
-		struct.unpack(MSG_BODY_STEPS, msg_body)
-    print('coarse: %d/%s%d.%d' % (b_res_c, '-' if b_neg_c else '+', h_integer_c, h_decimal_c))
-	print('fine:   %d/%s%d.%d' % (b_res_f, '-' if b_neg_f else '+', h_integer_f, h_decimal_f))
+    (b_neg_c, b_res_c, h_integer_c, h_decimal_c, b_neg_f, b_res_f, h_integer_f, h_decimal_f) = \
+        struct.unpack(MSG_BODY_STEPS, res_body)
+    print('coarse: %d/%s%d.%03d' % (b_res_c, '-' if b_neg_c else '+', h_integer_c, h_decimal_c))
+    print('fine:   %d/%s%d.%03d' % (b_res_f, '-' if b_neg_f else '+', h_integer_f, h_decimal_f))
 
 def do_get_steps(serial, cmd_str, cmd_code, args):
     if len(args) != 1:
@@ -298,10 +299,10 @@ def do_get_steps(serial, cmd_str, cmd_code, args):
             dump_steps(res_body)
 
 def pack_steps(coarse, fine):
-	return struct.pack(MSG_BODY_STEPS, 
-		coarse[0], coarse[1], coarse[2], coarse[3],
-		fine[0], fine[1], fine[2], fine[3])
-	
+    return struct.pack(MSG_BODY_STEPS, 
+        coarse[0], coarse[1], coarse[2], coarse[3],
+        fine[0], fine[1], fine[2], fine[3])
+    
 def do_set_steps(serial, cmd_str, cmd_code, args):
     if len(args) != 3:
         print('%s [channel no] [coarse] [fine]' % cmd_str)
@@ -313,10 +314,10 @@ def do_set_steps(serial, cmd_str, cmd_code, args):
         return
     if not xmeter_value_fine:
         print('invalid xmeter value' % args[2])
-        return		
+        return        
     cmd_header = struct.pack(MSG_HEADER, 0x1234, cmd_code, 0, int(args[0]), 0, MSG_BODY_STEPS_LEN)
     cmd_body   = pack_steps(xmeter_value_coarse, xmeter_value_fine)
-	cmd_msg    = pack_msg(cmd_header, cmd_body)
+    cmd_msg    = pack_msg(cmd_header, cmd_body)
     if cmd_msg:
         serial.write(cmd_msg)
         res_msg = serial.read(MSG_LEN)
@@ -324,23 +325,24 @@ def do_set_steps(serial, cmd_str, cmd_code, args):
         if res_header:
             dump_msg_header(res_header)
         if res_body:
-            dump_steps(res_body)			
-			
+            dump_steps(res_body)            
+            
 def do_get_steps_voltage(serial, args):
     do_get_steps(serial, 'get_steps_voltage', CONTROL_MSG_CODE_GET_STEPS_VOLTAGE, args)    
     
-def do_get_steps_voltage(serial, args):
+def do_get_steps_current(serial, args):
     do_get_steps(serial, 'get_steps_current', CONTROL_MSG_CODE_GET_STEPS_CURRENT, args)    
     
-def do_get_steps_voltage(serial, args):
+def do_get_steps_temp(serial, args):
     do_get_steps(serial, 'get_steps_temp', CONTROL_MSG_CODE_GET_STEPS_TEMP, args)
     
 def do_get_steps_power(serial, args):
     do_get_steps(serial, 'get_steps_power', CONTROL_MSG_CODE_GET_STEPS_POWER, args)    
-    
 
 def dump_param(res_body):
-	pass
+    (uint8_val, b_neg, b_res, h_integer, h_decimal) = struct.unpack(MSG_BODY_PARAM, res_body)
+    print('uint8_val: %x' % uint8_val)
+    print('xmeter_value: %d/%s%d.%03d' % (b_res, '-' if b_neg else '+', h_integer, h_decimal))
 
 def do_get_param_xmeter_value(serial, cmd_str, cmd_code, args):
     if len(args) != 1:
@@ -357,8 +359,10 @@ def do_get_param_xmeter_value(serial, cmd_str, cmd_code, args):
         if res_body:
             dump_param(res_body)
 
-def pack_param_xmeter_value(xmeter_value):
-	pass
+def pack_param(uint8_val, xmeter_value):
+    if not xmeter_value:
+        xmeter_value = struct.pack(MSG_BODY_XMETER, 0, 0, 0, 0)
+    return struct.pack(MSG_BODY_PRESET, uint8_val, *struct.unpack(MSG_BODY_XMETER, xmeter_value))
 
 def do_set_param_xmeter_value(serial, cmd_str, cmd_code, args):
     if len(args) != 2:
@@ -369,7 +373,7 @@ def do_set_param_xmeter_value(serial, cmd_str, cmd_code, args):
         print('invalid xmeter value' % args[1])
         return
     cmd_header = struct.pack(MSG_HEADER, 0x1234, cmd_code, 0, int(args[0]), 0, MSG_BODY_PARAM_LEN)
-    cmd_body   = pack_param_xmeter_value(xmeter_value)
+    cmd_body   = pack_param(0, xmeter_value)
     cmd_msg    = pack_msg(cmd_header, cmd_body)
     if cmd_msg:
         serial.write(cmd_msg)
@@ -382,45 +386,67 @@ def do_set_param_xmeter_value(serial, cmd_str, cmd_code, args):
  
 def do_get_param_temp_hi(serial, args):
     do_get_param_xmeter_value(serial, 'get_param_temp_hi', CONTROL_MSG_CODE_GET_PARAM_TEMP_HI, args) 
-	
+    
 def do_set_param_temp_hi(serial, args):
     do_set_param_xmeter_value(serial, 'set_param_temp_hi', CONTROL_MSG_CODE_SET_PARAM_TEMP_HI, args)     
 
 def do_get_param_temp_lo(serial, args):
     do_get_param_xmeter_value(serial, 'get_param_temp_lo', CONTROL_MSG_CODE_GET_PARAM_TEMP_LO, args) 
-	
+    
 def do_set_param_temp_lo(serial, args):
     do_set_param_xmeter_value(serial, 'set_param_temp_lo', CONTROL_MSG_CODE_SET_PARAM_TEMP_LO, args)   
-	
-	
+    
+    
 def do_get_param_over_heat(serial, args):
     do_get_param_xmeter_value(serial, 'get_param_over_heat', CONTROL_MSG_CODE_GET_PARAM_OVER_HEAT, args) 
-	
+    
 def do_set_param_over_heat(serial, args):
     do_set_param_xmeter_value(serial, 'set_param_over_heat', CONTROL_MSG_CODE_SET_PARAM_OVER_HEAT, args)     
 
 def do_get_param_max_pd(serial, args):
     do_get_param_xmeter_value(serial, 'get_param_max_pd', CONTROL_MSG_CODE_GET_PARAM_MAX_POWER_DISS, args) 
-	
+    
 def do_set_param_max_pd(serial, args):
     do_set_param_xmeter_value(serial, 'set_param_max_pd', CONTROL_MSG_CODE_SET_PARAM_MAX_POWER_DISS, args) 
-	
+    
 def do_get_param_beep(serial, args):
-    pass
-	
+    do_get_param_xmeter_value(serial, 'set_param_max_pd', CONTROL_MSG_CODE_SET_PARAM_BEEP, args)
+    
 def do_set_param_beep(serial, args):
-    pass
-	
-	
+    if len(args) != 1:
+        print('set_param_beep [channel no] [on|off]')
+        return
+    cmd_header = struct.pack(MSG_HEADER, 0x1234, CONTROL_MSG_CODE_HEATBEAT, 0, int(args[0]), 0, MSG_BODY_PARAM_LEN)
+    cmd_msg = pack_msg(cmd_header, None)
+    cmd_body   = pack_param(MSG_BODY_PARAM, 1 if args[1] == 'on' else 0, None)
+    if cmd_msg:
+        serial.write(cmd_msg)
+        res_msg = serial.read(MSG_LEN)
+        res_header, res_body = unpack_msg(res_msg)
+        if res_header:
+            dump_msg_header(res_header)
+        if res_body:
+            dump_enable(res_body)
+    
+    
 def dump_preset(res_body):
-	pass
+    (index, b_neg, b_res, h_integer, h_decimal) = struct.unpack(MSG_BODY_PRESET, res_body)
+    print('index: %d' % index)
+    print('xmeter_val: %d/%s%d.%03d' % (b_res, '-' if b_neg else '+', h_integer, h_decimal))
+
+def pack_preset(index, xmeter_value):
+    if not xmeter_value:
+        xmeter_value = struct.pack(MSG_BODY_XMETER, 0, 0, 0, 0)
+    return struct.pack(MSG_BODY_PRESET, index, *struct.unpack(MSG_BODY_XMETER, xmeter_value))
 
 def do_get_preset(serial, cmd_str, cmd_code, args):
-    if len(args) != 1:
-        print('%s [channel no]' % cmd_str)
+    if len(args) != 2:
+        print('%s [channel no] [index]' % cmd_str)
         return
-    cmd_header = struct.pack(MSG_HEADER, 0x1234, cmd_code, 0, int(args[0]), 0, 0)
-    cmd_msg    = pack_msg(cmd_header, None)
+    index = int(args[1])
+    cmd_header = struct.pack(MSG_HEADER, 0x1234, cmd_code, 0, int(args[0]), 0, MSG_BODY_PRESET_LEN)
+    cmd_body   = pack_preset(index, None)
+    cmd_msg    = pack_msg(cmd_header, cmd_body)
     if cmd_msg:
         serial.write(cmd_msg)
         res_msg = serial.read(MSG_LEN)
@@ -430,15 +456,12 @@ def do_get_preset(serial, cmd_str, cmd_code, args):
         if res_body:
             dump_preset(res_body)
 
-def pack_preset(index, xmeter_value):
-	pass
-
-def do_set_param_xmeter_value(serial, cmd_str, cmd_code, args):
+def do_set_preset(serial, cmd_str, cmd_code, args):
     if len(args) != 3:
         print('%s [channel no] [index] [xmeter value]' % cmd_str)
         return
     index = int(args[1])
-	xmeter_value = parse_xmeter_value(args[2])
+    xmeter_value = parse_xmeter_value(args[2])
     if not xmeter_value :
         print('invalid xmeter value' % args[2])
         return
@@ -455,22 +478,22 @@ def do_set_param_xmeter_value(serial, cmd_str, cmd_code, args):
             dump_preset(res_body)
 
 def do_get_preset_current(serial, args):
-	do_get_preset(serial, 'get_preset_current', CONTROL_MSG_CODE_GET_PRESET_CURRENT, args) 
-	
+    do_get_preset(serial, 'get_preset_current', CONTROL_MSG_CODE_GET_PRESET_CURRENT, args) 
+    
 def do_set_preset_current(serial, args):
-	do_set_preset(serial, 'set_preset_current', CONTROL_MSG_CODE_SET_PRESET_CURRENT, args)
-	
+    do_set_preset(serial, 'set_preset_current', CONTROL_MSG_CODE_SET_PRESET_CURRENT, args)
+    
 def do_get_preset_voltage(serial, args):
-	do_get_preset(serial, 'get_preset_voltage', CONTROL_MSG_CODE_GET_PRESET_VOLTAGE, args) 
-	
+    do_get_preset(serial, 'get_preset_voltage', CONTROL_MSG_CODE_GET_PRESET_VOLTAGE, args) 
+    
 def do_set_preset_voltage(serial, args):
-	do_set_preset(serial, 'set_preset_voltage', CONTROL_MSG_CODE_SET_PRESET_VOLTAGE, args) 	
+    do_set_preset(serial, 'set_preset_voltage', CONTROL_MSG_CODE_SET_PRESET_VOLTAGE, args)     
 #--------------------------------------------------------------------
 tests = {
     'heartbeat': do_heartbeat,
     'override': do_remote_override,
     'fan' : do_start_stop_fan,
-    'switch': do_start_stop_switch
+    'switch': do_start_stop_switch,
     'status' : do_get_status,
     'get_adc_current' : do_get_adc_current,
     'get_adc_voltage_in' : do_get_adc_voltage_in,
@@ -480,8 +503,8 @@ tests = {
     'get_power_diss' : do_get_power_diss,
     'get_dac_voltage' : do_get_dac_voltage,
     'set_dac_voltage' : do_set_dac_voltage,    
-    'get_dac_voltage' : do_get_dac_current,
-    'set_dac_voltage' : do_set_dac_current,    
+    'get_dac_current' : do_get_dac_current,
+    'set_dac_current' : do_set_dac_current,    
     'get_steps_voltage' : do_get_steps_voltage,
     'get_steps_current' : do_get_steps_current,
     'get_steps_temp' : do_get_steps_temp,
@@ -490,16 +513,16 @@ tests = {
     'set_param_temp_hi' : do_set_param_temp_hi,    
     'get_param_temp_lo' : do_get_param_temp_lo,    
     'set_param_temp_lo' : do_set_param_temp_lo,    
-    'get_param_over_heat' : do_get_param_over_heat,    
-    'set_param_over_heat' : do_set_param_over_heat,
+    'get_param_overheat' : do_get_param_over_heat,    
+    'set_param_overheat' : do_set_param_over_heat,
     'get_param_max_pd' : do_get_param_max_pd,    
     'set_param_max_pd' : do_set_param_max_pd,
     'get_param_beep' : do_get_param_beep,    
     'set_param_beep' : do_set_param_beep,
-	'get_preset_current' : do_get_preset_current,
-	'set_preset_current' : do_set_preset_current,	
-	'get_preset_voltage' : do_get_preset_voltage,
-	'set_preset_voltage' : do_set_preset_voltage,	
+    'get_preset_current' : do_get_preset_current,
+    'set_preset_current' : do_set_preset_current,    
+    'get_preset_voltage' : do_get_preset_voltage,
+    'set_preset_voltage' : do_set_preset_voltage,    
 }
 
 if len(sys.argv) < 3:

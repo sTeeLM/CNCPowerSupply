@@ -328,13 +328,13 @@ void do_calibrate_voltage_zero_in(unsigned char to_func, unsigned char to_state,
   }
   
   if (ev == EV_KEY_MOD_C) {
-    xmeter_inc_value(&sm_calibrate_adc_vi_val[0], 1);
+    xmeter_inc_voltage_value(&sm_calibrate_adc_vi_val[0], 1);
   } else if (ev == EV_KEY_MOD_CC) {
-    xmeter_dec_value(&sm_calibrate_adc_vi_val[0], 1);
+    xmeter_dec_voltage_value(&sm_calibrate_adc_vi_val[0], 1);
   } else if (ev == EV_KEY_SET_C) {
-    xmeter_inc_value(&sm_calibrate_adc_vi_val[0], 0);
+    xmeter_inc_voltage_value(&sm_calibrate_adc_vi_val[0], 0);
   } else if (ev == EV_KEY_SET_CC) {
-    xmeter_dec_value(&sm_calibrate_adc_vi_val[0], 0);
+    xmeter_dec_voltage_value(&sm_calibrate_adc_vi_val[0], 0);
   }
   xmeter_read_adc();
   sm_calibrate_fill_phase1(SM_CALIBRATE_VOLTAGE_ZERO_IN);  
@@ -376,13 +376,13 @@ void do_calibrate_voltage_max_in(unsigned char to_func, unsigned char to_state, 
   }
   
   if (ev == EV_KEY_MOD_C) {
-    xmeter_inc_value(&sm_calibrate_adc_vi_val[1], 1);
+    xmeter_inc_voltage_value(&sm_calibrate_adc_vi_val[1], 1);
   } else if (ev == EV_KEY_MOD_CC) {
-    xmeter_dec_value(&sm_calibrate_adc_vi_val[1], 1);
+    xmeter_dec_voltage_value(&sm_calibrate_adc_vi_val[1], 1);
   } else if (ev == EV_KEY_SET_C) {
-    xmeter_inc_value(&sm_calibrate_adc_vi_val[1], 0);
+    xmeter_inc_voltage_value(&sm_calibrate_adc_vi_val[1], 0);
   } else if (ev == EV_KEY_SET_CC) {
-    xmeter_dec_value(&sm_calibrate_adc_vi_val[1], 0);
+    xmeter_dec_voltage_value(&sm_calibrate_adc_vi_val[1], 0);
   }
   xmeter_read_adc();
   sm_calibrate_fill_phase1(SM_CALIBRATE_VOLTAGE_MAX_IN);

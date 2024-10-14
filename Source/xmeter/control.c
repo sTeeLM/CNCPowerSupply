@@ -273,6 +273,8 @@ bool control_do_get_param_temp_hi(void)
 {
   memcpy(&control_res, &control_cmd, sizeof(control_msg_t));
   
+  memset(&control_res.msg_body, 0, sizeof(control_msg_body_t));
+  
   xmeter_assign_value(&xmeter_temp_hi, &control_res.msg_body.param.xmeter_val);
   
   control_finish_msg(sizeof(control_msg_body_param_t));
@@ -294,6 +296,8 @@ bool control_do_set_param_temp_hi(void)
 bool control_do_get_param_temp_lo(void)
 {
   memcpy(&control_res, &control_cmd, sizeof(control_msg_t));
+  
+  memset(&control_res.msg_body, 0, sizeof(control_msg_body_t));
   
   xmeter_assign_value(&xmeter_temp_lo, &control_res.msg_body.param.xmeter_val);
   
@@ -317,6 +321,8 @@ bool control_do_get_param_over_heat(void)
 {
   memcpy(&control_res, &control_cmd, sizeof(control_msg_t));
   
+  memset(&control_res.msg_body, 0, sizeof(control_msg_body_t));
+  
   xmeter_assign_value(&xmeter_temp_overheat, &control_res.msg_body.param.xmeter_val);
   
   control_finish_msg(sizeof(control_msg_body_param_t));
@@ -339,6 +345,8 @@ bool control_do_get_param_max_power_diss(void)
 {
   memcpy(&control_res, &control_cmd, sizeof(control_msg_t));
   
+  memset(&control_res.msg_body, 0, sizeof(control_msg_body_t));
+  
   xmeter_assign_value(&xmeter_max_power_diss, &control_res.msg_body.param.xmeter_val);
   
   control_finish_msg(sizeof(control_msg_body_param_t));
@@ -360,6 +368,8 @@ bool control_do_set_param_max_power_diss(void)
 bool control_do_get_param_beep(void)
 {
   memcpy(&control_res, &control_cmd, sizeof(control_msg_t));
+  
+  memset(&control_res.msg_body, 0, sizeof(control_msg_body_t));
   
   control_res.msg_body.param.uint8_val = beeper_get_beep_enable();
   

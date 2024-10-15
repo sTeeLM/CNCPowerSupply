@@ -214,6 +214,15 @@ void lcd_set_string(uint8_t row, uint8_t col,  const char * str)
   
 }
 
+void lcd_set_integer(uint8_t row, uint8_t col, uint8_t len, uint32_t val)
+{
+  while(len) {
+    lcd_set_char(row, col + len - 1, (val % 10) + 0x30);
+    len --;
+    val = (val / 10);
+  }
+}
+
 /* convert float number to  5 len string, 4 digit and 1 point
 0~  9.999 :               0.000       9.999
 10~ 99.99 :              10.00       99.99

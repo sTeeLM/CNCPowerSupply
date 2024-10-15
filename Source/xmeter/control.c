@@ -12,13 +12,14 @@
 
 #include <string.h>
 
-#define CONTROL_MAX_IDLE_SEC 10 // second
+#define CONTROL_MAX_IDLE_SEC 50 // second
 #define CONTROL_MAX_WAIT_MS  200 // ms
 
 static control_msg_t control_cmd;
 static control_msg_t control_res;
 
-static uint32_t last_msg_sec;
+static uint32_t control_last_msg_sec;
+static uint32_t control_msg_cnt;
 static bit control_is_enter_bit;
 static bit control_remote_override;
 
@@ -269,6 +270,46 @@ bool control_do_get_steps_power(void)
   return true;
 }
 
+bool control_do_get_limits_current(void)
+{
+  memcpy(&control_res, &control_cmd, sizeof(control_msg_t));
+  
+  xmeter_get_current_limits(&control_res.msg_body.limits.min, &control_res.msg_body.limits.max);
+  
+  control_finish_msg(sizeof(control_msg_body_steps_t));
+  return true;
+}
+
+bool control_do_get_limits_voltage_out(void)
+{
+  memcpy(&control_res, &control_cmd, sizeof(control_msg_t));
+  
+  xmeter_get_voltage_out_limits(&control_res.msg_body.limits.min, &control_res.msg_body.limits.max);
+  
+  control_finish_msg(sizeof(control_msg_body_steps_t));
+  return true;
+}
+
+bool control_do_get_limits_temp(void)
+{
+  memcpy(&control_res, &control_cmd, sizeof(control_msg_t));
+  
+  xmeter_get_temp_limits(&control_res.msg_body.limits.min, &control_res.msg_body.limits.max);
+  
+  control_finish_msg(sizeof(control_msg_body_steps_t));
+  return true;
+}
+
+bool control_do_get_limits_power_diss(void)
+{
+  memcpy(&control_res, &control_cmd, sizeof(control_msg_t));
+  
+  xmeter_get_power_diss_limits(&control_res.msg_body.limits.min, &control_res.msg_body.limits.max);
+  
+  control_finish_msg(sizeof(control_msg_body_steps_t));
+  return true;
+}
+
 bool control_do_get_param_temp_hi(void)
 {
   memcpy(&control_res, &control_cmd, sizeof(control_msg_t));
@@ -285,7 +326,7 @@ bool control_do_set_param_temp_hi(void)
 {
   memcpy(&control_res, &control_cmd, sizeof(control_msg_t));
   
-  xmeter_set_temp_hi(&control_res.msg_body.xmeter.xmeter_val);
+  xmeter_set_temp_hi(&control_res.msg_body.param.xmeter_val);
   xmeter_assign_value(&xmeter_temp_hi, &control_res.msg_body.param.xmeter_val);
   xmeter_write_rom_temp_hi();
   
@@ -309,7 +350,7 @@ bool control_do_set_param_temp_lo(void)
 {
   memcpy(&control_res, &control_cmd, sizeof(control_msg_t));
   
-  xmeter_set_temp_lo(&control_res.msg_body.xmeter.xmeter_val);
+  xmeter_set_temp_lo(&control_res.msg_body.param.xmeter_val);
   xmeter_assign_value(&xmeter_temp_lo, &control_res.msg_body.param.xmeter_val);
   xmeter_write_rom_temp_lo();
   
@@ -333,7 +374,7 @@ bool control_do_set_param_over_heat(void)
 {
   memcpy(&control_res, &control_cmd, sizeof(control_msg_t));
   
-  xmeter_set_temp_overheat(&control_res.msg_body.xmeter.xmeter_val);
+  xmeter_set_temp_overheat(&control_res.msg_body.param.xmeter_val);
   xmeter_assign_value(&xmeter_temp_overheat, &control_res.msg_body.param.xmeter_val);
   xmeter_write_rom_temp_overheat();
   
@@ -357,7 +398,7 @@ bool control_do_set_param_max_power_diss(void)
 {
   memcpy(&control_res, &control_cmd, sizeof(control_msg_t));
   
-  xmeter_set_max_power_diss(&control_res.msg_body.xmeter.xmeter_val);
+  xmeter_set_max_power_diss(&control_res.msg_body.param.xmeter_val);
   xmeter_assign_value(&xmeter_max_power_diss, &control_res.msg_body.param.xmeter_val);
   xmeter_write_rom_max_power_diss();
   
@@ -467,14 +508,18 @@ static control_fun_t code control_funs[CONTROL_MSG_CODE_CNT] =
   control_do_get_adc_temp, 
   control_do_get_power_out,
   control_do_get_power_diss,
+  control_do_get_dac_current,
+  control_do_set_dac_current,  
   control_do_get_dac_voltage,
   control_do_set_dac_voltage,
-  control_do_get_dac_current,
-  control_do_set_dac_current,
+  control_do_get_steps_current,  
   control_do_get_steps_voltage,
-  control_do_get_steps_current,
   control_do_get_steps_temp,
   control_do_get_steps_power,
+  control_do_get_limits_current,
+  control_do_get_limits_voltage_out,
+  control_do_get_limits_temp,
+  control_do_get_limits_power_diss,
   control_do_get_param_temp_hi,
   control_do_set_param_temp_hi,
   control_do_get_param_temp_lo,
@@ -511,9 +556,12 @@ static void control_enter(void)
     xmeter_fan_off();
     lcd_clear();
     lcd_set_string(0, 0, " REMOTE CONTROL ");
+    lcd_set_string(1, 0, "Msg:xxxx Idle:XX");
     lcd_refresh();
     control_is_enter_bit = 1;
     control_remote_override = 0;
+    control_last_msg_sec = clock_get_now_sec();
+    control_msg_cnt = 0;
   }
 }
 
@@ -545,6 +593,9 @@ static void control_run_cmd(void)
   } else {
     fun = control_funs[control_cmd.msg_header.msg_code];
     fun();
+    if(control_cmd.msg_header.msg_code != CONTROL_MSG_CODE_HEATBEAT) {
+      control_msg_cnt ++;
+    }
   }
 }
 
@@ -582,20 +633,28 @@ static void control_do_basic_operation(void)
     }  
   }  
 }
+static void control_update_lcd(uint32_t msg_cnt, uint32_t idle_sec)
+{
+  lcd_set_integer(1, 4, 4, msg_cnt);
+  lcd_set_integer(1, 14, 2, idle_sec);
+  lcd_refresh();
+}
 
 void control_run(void)
 {
   uint16_t len;
+  uint32_t diff_sec;
   while(1) {
     len = sizeof(control_msg_t);
     if(com_recv_buffer((uint8_t *)&control_cmd, &len, CONTROL_MAX_WAIT_MS)) {
-      last_msg_sec = clock_get_now_sec();
       control_enter();
       control_run_cmd();
       control_send_response();
+      control_last_msg_sec = clock_get_now_sec();
     } else {
       if(control_is_enter()) {
-        if(clock_diff_now_sec(last_msg_sec) > CONTROL_MAX_IDLE_SEC) {
+        diff_sec = clock_diff_now_sec(control_last_msg_sec);
+        if(diff_sec > CONTROL_MAX_IDLE_SEC) {
           control_leave();
           break;
         }
@@ -604,6 +663,7 @@ void control_run(void)
         break;
       }
     }
+    control_update_lcd(control_msg_cnt, diff_sec);
   }
 }
 

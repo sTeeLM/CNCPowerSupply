@@ -165,6 +165,12 @@ void xmeter_get_current_steps(xmeter_value_t * coarse, xmeter_value_t * fine);
 void xmeter_get_temp_steps(xmeter_value_t * coarse, xmeter_value_t * fine);
 void xmeter_get_power_steps(xmeter_value_t * coarse, xmeter_value_t * fine);
 
+/* 最大最小值 */
+void xmeter_get_current_limits(xmeter_value_t * min, xmeter_value_t * max);
+void xmeter_get_voltage_out_limits(xmeter_value_t * min, xmeter_value_t * max);
+void xmeter_get_temp_limits(xmeter_value_t * min, xmeter_value_t * max);
+void xmeter_get_power_diss_limits(xmeter_value_t * min, xmeter_value_t * max);
+
 /* 解线性方程，获得斜率k，偏移b */  
 bit xmeter_cal(uint16_t x1, uint16_t x2, double y1, double y2, double * k, double * b);  
 

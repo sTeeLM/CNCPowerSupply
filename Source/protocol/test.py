@@ -16,6 +16,8 @@ MSG_BODY_XMETER = '>BBHH'
 MSG_BODY_XMETER_LEN = 6
 MSG_BODY_STEPS  = '>BBHHBBHH'
 MSG_BODY_STEPS_LEN = 12
+MSG_BODY_LIMITS  = '>BBHHBBHH'
+MSG_BODY_LIMITS_LEN = 12
 MSG_BODY_PARAM  = '>BBBHH'
 MSG_BODY_PARAM_LEN = 7
 MSG_BODY_PRESET = '>BBBHH'
@@ -33,29 +35,33 @@ CONTROL_MSG_CODE_GET_ADC_VOLTAGE_OUT = 8
 CONTROL_MSG_CODE_GET_ADC_TEMP        = 9
 CONTROL_MSG_CODE_GET_POWER_OUT       = 10
 CONTROL_MSG_CODE_GET_POWER_DISS      = 11
-CONTROL_MSG_CODE_GET_DAC_VOLTAGE     = 12
-CONTROL_MSG_CODE_SET_DAC_VOLTAGE     = 13
-CONTROL_MSG_CODE_GET_DAC_CURRENT     = 14
-CONTROL_MSG_CODE_SET_DAC_CURRENT     = 15
+CONTROL_MSG_CODE_GET_DAC_CURRENT     = 12
+CONTROL_MSG_CODE_SET_DAC_CURRENT     = 13
+CONTROL_MSG_CODE_GET_DAC_VOLTAGE     = 14
+CONTROL_MSG_CODE_SET_DAC_VOLTAGE     = 15
 CONTROL_MSG_CODE_GET_STEPS_VOLTAGE   = 16
 CONTROL_MSG_CODE_GET_STEPS_CURRENT   = 17
 CONTROL_MSG_CODE_GET_STEPS_TEMP      = 18
 CONTROL_MSG_CODE_GET_STEPS_POWER     = 19
-CONTROL_MSG_CODE_GET_PARAM_TEMP_HI   = 20
-CONTROL_MSG_CODE_SET_PARAM_TEMP_HI   = 21
-CONTROL_MSG_CODE_GET_PARAM_TEMP_LO   = 22
-CONTROL_MSG_CODE_SET_PARAM_TEMP_LO   = 23
-CONTROL_MSG_CODE_GET_PARAM_OVER_HEAT = 24
-CONTROL_MSG_CODE_SET_PARAM_OVER_HEAT = 25
-CONTROL_MSG_CODE_GET_PARAM_MAX_POWER_DISS  = 26
-CONTROL_MSG_CODE_SET_PARAM_MAX_POWER_DISS  = 27
-CONTROL_MSG_CODE_GET_PARAM_BEEP      = 28
-CONTROL_MSG_CODE_SET_PARAM_BEEP      = 29
-CONTROL_MSG_CODE_GET_PRESET_CURRENT  = 30
-CONTROL_MSG_CODE_SET_PRESET_CURRENT  = 31
-CONTROL_MSG_CODE_GET_PRESET_VOLTAGE  = 32
-CONTROL_MSG_CODE_SET_PRESET_VOLTAGE  = 33
-CONTROL_MSG_CODE_CNT                 = 34
+CONTROL_MSG_CODE_GET_LIMITS_CURRENT       = 20
+CONTROL_MSG_CODE_GET_LIMITS_VOLTAGE_OUT   = 21
+CONTROL_MSG_CODE_GET_LIMITS_TEMP          = 22
+CONTROL_MSG_CODE_GET_LIMITS_POWER_DISS    = 23
+CONTROL_MSG_CODE_GET_PARAM_TEMP_HI   = 24
+CONTROL_MSG_CODE_SET_PARAM_TEMP_HI   = 25
+CONTROL_MSG_CODE_GET_PARAM_TEMP_LO   = 26
+CONTROL_MSG_CODE_SET_PARAM_TEMP_LO   = 27
+CONTROL_MSG_CODE_GET_PARAM_OVER_HEAT = 28
+CONTROL_MSG_CODE_SET_PARAM_OVER_HEAT = 29
+CONTROL_MSG_CODE_GET_PARAM_MAX_POWER_DISS  = 30
+CONTROL_MSG_CODE_SET_PARAM_MAX_POWER_DISS  = 31
+CONTROL_MSG_CODE_GET_PARAM_BEEP      = 32
+CONTROL_MSG_CODE_SET_PARAM_BEEP      = 33
+CONTROL_MSG_CODE_GET_PRESET_CURRENT  = 34
+CONTROL_MSG_CODE_SET_PRESET_CURRENT  = 35
+CONTROL_MSG_CODE_GET_PRESET_VOLTAGE  = 36
+CONTROL_MSG_CODE_SET_PRESET_VOLTAGE  = 37
+CONTROL_MSG_CODE_CNT                 = 38
 ####CONSTANTS END####
 
 def verify_msg_crc(msg_array):
@@ -298,34 +304,34 @@ def do_get_steps(serial, cmd_str, cmd_code, args):
         if res_body:
             dump_steps(res_body)
 
-def pack_steps(coarse, fine):
-    return struct.pack(MSG_BODY_STEPS, 
-        coarse[0], coarse[1], coarse[2], coarse[3],
-        fine[0], fine[1], fine[2], fine[3])
-    
-def do_set_steps(serial, cmd_str, cmd_code, args):
-    if len(args) != 3:
-        print('%s [channel no] [coarse] [fine]' % cmd_str)
-        return
-    xmeter_value_coarse = parse_xmeter_value(args[1])
-    xmeter_value_fine   = parse_xmeter_value(args[2])
-    if not xmeter_value_coarse:
-        print('invalid xmeter value' % args[1])
-        return
-    if not xmeter_value_fine:
-        print('invalid xmeter value' % args[2])
-        return        
-    cmd_header = struct.pack(MSG_HEADER, 0x1234, cmd_code, 0, int(args[0]), 0, MSG_BODY_STEPS_LEN)
-    cmd_body   = pack_steps(xmeter_value_coarse, xmeter_value_fine)
-    cmd_msg    = pack_msg(cmd_header, cmd_body)
-    if cmd_msg:
-        serial.write(cmd_msg)
-        res_msg = serial.read(MSG_LEN)
-        res_header, res_body = unpack_msg(res_msg)
-        if res_header:
-            dump_msg_header(res_header)
-        if res_body:
-            dump_steps(res_body)            
+#def pack_steps(coarse, fine):
+#    return struct.pack(MSG_BODY_STEPS, 
+#        coarse[0], coarse[1], coarse[2], coarse[3],
+#        fine[0], fine[1], fine[2], fine[3])
+#    
+#def do_set_steps(serial, cmd_str, cmd_code, args):
+#    if len(args) != 3:
+#        print('%s [channel no] [coarse] [fine]' % cmd_str)
+#        return
+#    xmeter_value_coarse = parse_xmeter_value(args[1])
+#    xmeter_value_fine   = parse_xmeter_value(args[2])
+#    if not xmeter_value_coarse:
+#        print('invalid xmeter value' % args[1])
+#        return
+#    if not xmeter_value_fine:
+#        print('invalid xmeter value' % args[2])
+#        return        
+#    cmd_header = struct.pack(MSG_HEADER, 0x1234, cmd_code, 0, int(args[0]), 0, MSG_BODY_STEPS_LEN)
+#    cmd_body   = pack_steps(xmeter_value_coarse, xmeter_value_fine)
+#    cmd_msg    = pack_msg(cmd_header, cmd_body)
+#    if cmd_msg:
+#        serial.write(cmd_msg)
+#        res_msg = serial.read(MSG_LEN)
+#        res_header, res_body = unpack_msg(res_msg)
+#        if res_header:
+#            dump_msg_header(res_header)
+#        if res_body:
+#            dump_steps(res_body)            
             
 def do_get_steps_voltage(serial, args):
     do_get_steps(serial, 'get_steps_voltage', CONTROL_MSG_CODE_GET_STEPS_VOLTAGE, args)    
@@ -338,6 +344,41 @@ def do_get_steps_temp(serial, args):
     
 def do_get_steps_power(serial, args):
     do_get_steps(serial, 'get_steps_power', CONTROL_MSG_CODE_GET_STEPS_POWER, args)    
+
+
+def dump_limits(res_body):
+    (b_neg_c, b_res_c, h_integer_c, h_decimal_c, b_neg_f, b_res_f, h_integer_f, h_decimal_f) = \
+        struct.unpack(MSG_BODY_STEPS, res_body)
+    print('min: %d/%s%d.%03d' % (b_res_c, '-' if b_neg_c else '+', h_integer_c, h_decimal_c))
+    print('max: %d/%s%d.%03d' % (b_res_f, '-' if b_neg_f else '+', h_integer_f, h_decimal_f))
+
+def do_get_limits(serial, cmd_str, cmd_code, args):
+    if len(args) != 1:
+        print('%s [channel no]' % cmd_str)
+        return
+    cmd_header = struct.pack(MSG_HEADER, 0x1234, cmd_code, 0, int(args[0]), 0, 0)
+    cmd_msg    = pack_msg(cmd_header, None)
+    if cmd_msg:
+        serial.write(cmd_msg)
+        res_msg = serial.read(MSG_LEN)
+        res_header, res_body = unpack_msg(res_msg)
+        if res_header:
+            dump_msg_header(res_header)
+        if res_body:
+            dump_limits(res_body)
+
+def do_get_limits_current(serial, args):
+    do_get_limits(serial, 'get_limits_current', CONTROL_MSG_CODE_GET_LIMITS_CURRENT, args) 
+    
+def do_get_limits_voltage_out(serial, args):
+    do_get_limits(serial, 'get_limits_voltage_outt', CONTROL_MSG_CODE_GET_LIMITS_VOLTAGE_OUT, args) 
+    
+def do_get_limits_temp(serial, args):
+    do_get_limits(serial, 'get_limits_temp', CONTROL_MSG_CODE_GET_LIMITS_TEMP, args) 
+    
+def do_get_limits_power_diss(serial, args):
+    do_get_limits(serial, 'get_limits_power_diss', CONTROL_MSG_CODE_GET_LIMITS_POWER_DISS, args) 
+
 
 def dump_param(res_body):
     (uint8_val, b_neg, b_res, h_integer, h_decimal) = struct.unpack(MSG_BODY_PARAM, res_body)
@@ -361,8 +402,8 @@ def do_get_param_xmeter_value(serial, cmd_str, cmd_code, args):
 
 def pack_param(uint8_val, xmeter_value):
     if not xmeter_value:
-        xmeter_value = struct.pack(MSG_BODY_XMETER, 0, 0, 0, 0)
-    return struct.pack(MSG_BODY_PRESET, uint8_val, *struct.unpack(MSG_BODY_XMETER, xmeter_value))
+        xmeter_value =  (0, 0, 0, 0)
+    return struct.pack(MSG_BODY_PRESET, uint8_val, *xmeter_value)
 
 def do_set_param_xmeter_value(serial, cmd_str, cmd_code, args):
     if len(args) != 2:
@@ -436,8 +477,8 @@ def dump_preset(res_body):
 
 def pack_preset(index, xmeter_value):
     if not xmeter_value:
-        xmeter_value = struct.pack(MSG_BODY_XMETER, 0, 0, 0, 0)
-    return struct.pack(MSG_BODY_PRESET, index, *struct.unpack(MSG_BODY_XMETER, xmeter_value))
+        xmeter_value = (0, 0, 0, 0)
+    return struct.pack(MSG_BODY_PRESET, index, xmeter_value[0], xmeter_value[1], xmeter_value[2], xmeter_value[3])
 
 def do_get_preset(serial, cmd_str, cmd_code, args):
     if len(args) != 2:
@@ -509,6 +550,10 @@ tests = {
     'get_steps_current' : do_get_steps_current,
     'get_steps_temp' : do_get_steps_temp,
     'get_steps_power' : do_get_steps_power,
+    'get_limits_current' : do_get_limits_current,
+    'get_limits_voltage_out' : do_get_limits_voltage_out,
+    'get_limits_temp' : do_get_limits_temp,
+    'get_limits_power_diss' : do_get_limits_power_diss,
     'get_param_temp_hi' : do_get_param_temp_hi,    
     'set_param_temp_hi' : do_set_param_temp_hi,    
     'get_param_temp_lo' : do_get_param_temp_lo,    

@@ -27,6 +27,15 @@
 static uint16_t xmeter_dac_internal_bit_v;
 static uint16_t xmeter_dac_internal_bit_c;
 
+#define XMETER_RES_ZERO     0
+#define XMETER_RES_ONE      1
+#define XMETER_RES_TWO      2
+#define XMETER_RES_THREE    3
+
+#define XMETER_RES_VOLTAGE  XMETER_RES_THREE
+#define XMETER_RES_CURRENT  XMETER_RES_THREE
+#define XMETER_RES_TEMP     XMETER_RES_TWO
+#define XMETER_RES_POWER    XMETER_RES_THREE
 
 #define XMETER_ADC_MAX_WAIT_CNT 255
 
@@ -72,8 +81,8 @@ static double xmeter_dac_current_b;
 static double xmeter_dac_voltage_k;
 static double xmeter_dac_voltage_b;
 
-static const xmeter_value_t code xmeter_dac_max_voltage = {0, 3, 30, 0}; /* 30V */
-static const xmeter_value_t code xmeter_dac_max_current = {0, 3, 5, 0}; /* 5A */
+static const xmeter_value_t code xmeter_dac_max_voltage = {0, XMETER_RES_VOLTAGE, 30, 0}; /* 30V */
+static const xmeter_value_t code xmeter_dac_max_current = {0, XMETER_RES_CURRENT, 5, 0}; /* 5A */
 
 xmeter_value_t xmeter_temp_hi;
 xmeter_value_t xmeter_temp_lo;
@@ -81,20 +90,20 @@ xmeter_value_t xmeter_temp_overheat;
 
 xmeter_value_t xmeter_max_power_diss;
 
-static const xmeter_value_t code xmeter_max_temp_hi = {0, 2, 150, 0} /* 150 C */;
-static const xmeter_value_t code xmeter_min_temp_lo = {0, 2, 0, 0};  /* 0 C */
-static const xmeter_value_t code xmeter_max_power_diss_max = {0, 3, 80, 0};  /* 80W */
-static const xmeter_value_t code xmeter_max_power_diss_min = {0, 3, 40, 0};  /* 40W */
-static const xmeter_value_t code xmeter_zero2 = {0, 2, 0, 0};
-static const xmeter_value_t code xmeter_zero3 = {0, 3, 0, 0};
+static const xmeter_value_t code xmeter_max_temp_hi = {0, XMETER_RES_TEMP, 150, 0} /* 150 C */;
+static const xmeter_value_t code xmeter_min_temp_lo = {0, XMETER_RES_TEMP, 0, 0};  /* 0 C */
+static const xmeter_value_t code xmeter_max_power_diss_max = {0, XMETER_RES_POWER, 80, 0};  /* 80W */
+static const xmeter_value_t code xmeter_max_power_diss_min = {0, XMETER_RES_POWER, 40, 0};  /* 40W */
+static const xmeter_value_t code xmeter_zero2 = {0, XMETER_RES_TWO, 0, 0};
+static const xmeter_value_t code xmeter_zero3 = {0, XMETER_RES_THREE, 0, 0};
 
-static const xmeter_value_t code xmeter_step_fine_voltage = {0, 3, 0, 1};
-static const xmeter_value_t code xmeter_step_coarse_voltage = {0, 3, 0, 100};
-static const xmeter_value_t code xmeter_step_fine_current = {0, 3, 0, 1};
-static const xmeter_value_t code xmeter_step_coarse_current = {0, 3, 0, 100};
-static const xmeter_value_t code xmeter_step_temp = {0, 3, 0, 500};
-static const xmeter_value_t code xmeter_step_temp_gap = {0, 3, 0, 500}; /* gap between lo and high */
-static const xmeter_value_t code xmeter_step_power = {0, 3, 0, 500};
+static const xmeter_value_t code xmeter_step_fine_voltage = {0, XMETER_RES_VOLTAGE, 0, 1};
+static const xmeter_value_t code xmeter_step_coarse_voltage = {0, XMETER_RES_VOLTAGE, 0, 100};
+static const xmeter_value_t code xmeter_step_fine_current = {0, XMETER_RES_CURRENT, 0, 1};
+static const xmeter_value_t code xmeter_step_coarse_current = {0, XMETER_RES_CURRENT, 0, 100};
+static const xmeter_value_t code xmeter_step_temp = {0, XMETER_RES_TEMP, 0, 500};
+static const xmeter_value_t code xmeter_step_temp_gap = {0, XMETER_RES_TEMP, 0, 500}; /* gap between lo and high */
+static const xmeter_value_t code xmeter_step_power = {0, XMETER_RES_POWER, 0, 500};
 
 
 #define XMETER_PRESET_CNT 4
@@ -527,91 +536,91 @@ void xmeter_rom_factory_reset(void)
   
   /* preset current 100mA */
   val[0].neg = 0;
-  val[0].res = 3;  
+  val[0].res = XMETER_RES_CURRENT;  
   val[0].integer = 0;
   val[0].decimal = 100;
 
   /* 1 A */
   val[1].neg = 0;
-  val[1].res = 3;  
+  val[1].res = XMETER_RES_CURRENT;  
   val[1].integer = 1;
   val[1].decimal = 0;
   
   /* 1.5 A */
   val[2].neg = 0;
-  val[2].res = 3;  
+  val[2].res = XMETER_RES_CURRENT;  
   val[2].integer = 1;
   val[2].decimal = 500;
 
   /* 2.0 A */
   val[3].neg = 0;
-  val[3].res = 3;  
+  val[3].res = XMETER_RES_CURRENT;  
   val[3].integer = 2;
   val[3].decimal = 0;
   rom_write_struct(ROM_XMETER_DAC_PRESET_CURRENT, val, sizeof(val));
   
   /* preset voltage 3.3V */
   val[0].neg = 0;
-  val[0].res = 3;  
+  val[0].res = XMETER_RES_VOLTAGE;  
   val[0].integer = 3;
   val[0].decimal = 300;
 
   /* 5.0V */
   val[1].neg = 0;
-  val[1].res = 3;  
+  val[1].res = XMETER_RES_VOLTAGE;  
   val[1].integer = 5;
   val[1].decimal = 0;
   
   /* 9.0 V */
   val[2].neg = 0;
-  val[2].res = 3;  
+  val[2].res = XMETER_RES_VOLTAGE;  
   val[2].integer = 9;
   val[2].decimal = 0;
 
   /* 12.0 V */
   val[3].neg = 0;
-  val[3].res = 3;  
+  val[3].res = XMETER_RES_VOLTAGE;  
   val[3].integer = 12;
   val[3].decimal = 0;
   rom_write_struct(ROM_XMETER_DAC_PRESET_VOLTAGE, val, sizeof(val));
   
   /* last dac current 1A and voltage 5V*/
   val[0].neg = 0;
-  val[0].res = 3;  
+  val[0].res = XMETER_RES_CURRENT;  
   val[0].integer = 1;
   val[0].decimal = 0;
   rom_write_struct(ROM_XMETER_DAC_LAST_CURRENT, val, sizeof(xmeter_value_t));
   
   val[0].neg = 0;
-  val[0].res = 3;  
+  val[0].res = XMETER_RES_VOLTAGE;  
   val[0].integer = 5;
   val[0].decimal = 0;
   rom_write_struct(ROM_XMETER_DAC_LAST_VOLTAGE, val, sizeof(xmeter_value_t));  
 
   /* temp high is 80 C */
   val[0].neg = 0;
-  val[0].res = 2;  
+  val[0].res = XMETER_RES_TEMP;  
   val[0].integer = 60;
   val[0].decimal = 0;
   rom_write_struct(ROM_XMETER_TEMP_HI, val, sizeof(xmeter_value_t));  
   
   /* temp low is 40 C */
   val[0].neg = 0;
-  val[0].res = 2;  
+  val[0].res = XMETER_RES_TEMP;  
   val[0].integer = 40;
   val[0].decimal = 0;
   rom_write_struct(ROM_XMETER_TEMP_LO, val, sizeof(xmeter_value_t));  
 
   /* temp overheat is 80 C */
   val[0].neg = 0;
-  val[0].res = 2;  
+  val[0].res = XMETER_RES_TEMP;  
   val[0].integer = 80;
   val[0].decimal = 0;
   rom_write_struct(ROM_XMETER_TEMP_OVERHEAT, val, sizeof(xmeter_value_t));  
   
   /* max diss power is 70 W */
   val[0].neg = 0;
-  val[0].res = 3;  
+  val[0].res = XMETER_RES_POWER;  
   val[0].integer = 80;
   val[0].decimal = 0;
   rom_write_struct(ROM_XMETER_MAX_POWER_DISS, val, sizeof(xmeter_value_t));    
@@ -961,7 +970,7 @@ static void xmeter_read_adc_current(void)
     val, 
     &xmeter_adc_current, 
     xmeter_adc_current_k, 
-    xmeter_adc_current_b, 3, 1);
+    xmeter_adc_current_b, XMETER_RES_CURRENT, 1);
 }
 
 uint16_t xmeter_get_adc_bits_voltage_out(void)
@@ -1004,7 +1013,7 @@ static void xmeter_read_adc_voltage_out(void)
     val, 
     &xmeter_adc_voltage_out, 
     xmeter_adc_voltage_out_k, 
-    xmeter_adc_voltage_out_b, 3, 1); 
+    xmeter_adc_voltage_out_b, XMETER_RES_VOLTAGE, 1); 
 }
 
 uint16_t xmeter_get_adc_bits_voltage_in(void)
@@ -1047,7 +1056,7 @@ static void xmeter_read_adc_voltage_in(void)
     val, 
     &xmeter_adc_voltage_in, 
     xmeter_adc_voltage_in_k, 
-    xmeter_adc_voltage_in_b, 3, 1);   
+    xmeter_adc_voltage_in_b, XMETER_RES_VOLTAGE, 1);   
   
   //CDBG(("adc vin bits and float: %x %f\n", val, xmeter_adc_voltage_in_f));
   //xmeter_dump_value("adc vin", &xmeter_adc_voltage_in, 1);
@@ -1082,7 +1091,7 @@ bit xmeter_read_adc_temp(void)
   
   xmeter_adc_temp_f = xmeter_adc_lookup_temp(val);
   
-  xmeter_float2val(xmeter_adc_temp_f, &xmeter_adc_temp, 2);
+  xmeter_float2val(xmeter_adc_temp_f, &xmeter_adc_temp, XMETER_RES_TEMP);
 
   //CDBG(("adc temp bits and float: %x %f\n", val, xmeter_adc_temp_f));
   //xmeter_dump_value("adc temp", &xmeter_adc_temp, 1);
@@ -1105,7 +1114,7 @@ void xmeter_calculate_power_out(
   current_f = xmeter_val2float(current);
   voltage_f = xmeter_val2float(voltage);
   power_f   = current_f * voltage_f;
-  xmeter_float2val(power_f, power_out, 3);
+  xmeter_float2val(power_f, power_out, XMETER_RES_POWER);
 }
 
 static int8_t xmeter_compare_value(const xmeter_value_t * val0, const xmeter_value_t * val1)
@@ -1150,12 +1159,12 @@ void xmeter_read_adc(void)
   xmeter_read_adc_voltage_in();
   xmeter_read_adc_temp();
   xmeter_power_out_f = xmeter_adc_current_f * xmeter_adc_voltage_out_f;
-  xmeter_float2val(xmeter_power_out_f, &xmeter_power_out, 3);
+  xmeter_float2val(xmeter_power_out_f, &xmeter_power_out, XMETER_RES_POWER);
   //CDBG(("adc po float %f x %f = %f\n", xmeter_adc_current_f, xmeter_adc_voltage_out_f, xmeter_power_out_f));
   //xmeter_dump_value("adc po", &xmeter_power_out, 1);
     
   xmeter_power_diss_f = xmeter_adc_current_f * (xmeter_adc_voltage_in_f - xmeter_adc_voltage_out_f);
-  xmeter_float2val(xmeter_power_diss_f, &xmeter_power_diss, 3); 
+  xmeter_float2val(xmeter_power_diss_f, &xmeter_power_diss, XMETER_RES_POWER); 
   //CDBG(("adc pd float %f x %f = %f\n", xmeter_power_diss_f, xmeter_power_diss_f, xmeter_power_diss_f));
   //xmeter_dump_value("adc pd", &xmeter_power_diss, 1);
     
@@ -1962,7 +1971,7 @@ void xmeter_read_dac_voltage(void)
   uint16_t bits = xmeter_get_dac_bits_v();
   
   xmeter_bits2value(bits, &xmeter_dac_voltage, 
-    xmeter_dac_voltage_k, xmeter_dac_voltage_b, 3, 0);
+    xmeter_dac_voltage_k, xmeter_dac_voltage_b, XMETER_RES_VOLTAGE, 0);
 }
 
 void xmeter_read_dac_current(void)
@@ -1971,7 +1980,7 @@ void xmeter_read_dac_current(void)
   uint16_t bits = xmeter_get_dac_bits_c();
   
   xmeter_bits2value(bits, &xmeter_dac_current, 
-    xmeter_dac_current_k, xmeter_dac_current_b, 3, 0);
+    xmeter_dac_current_k, xmeter_dac_current_b, XMETER_RES_CURRENT, 0);
 }
 
 /* make xmeter_dac_** work! */
@@ -2028,4 +2037,28 @@ void xmeter_get_power_steps(xmeter_value_t * coarse, xmeter_value_t * fine)
 {
   xmeter_assign_value(&xmeter_step_power, coarse);
   xmeter_assign_value(&xmeter_step_power, fine);
+}
+
+void xmeter_get_current_limits(xmeter_value_t * min, xmeter_value_t * max)
+{
+  xmeter_assign_value(&xmeter_zero3, min);
+  xmeter_assign_value(&xmeter_dac_max_current, max);
+}
+
+void xmeter_get_voltage_out_limits(xmeter_value_t * min, xmeter_value_t * max)
+{
+  xmeter_assign_value(&xmeter_zero3, min);
+  xmeter_assign_value(&xmeter_dac_max_voltage, max);
+}
+
+void xmeter_get_temp_limits(xmeter_value_t * min, xmeter_value_t * max)
+{
+  xmeter_assign_value(&xmeter_min_temp_lo, min);
+  xmeter_assign_value(&xmeter_max_temp_hi, max);
+}
+
+void xmeter_get_power_diss_limits(xmeter_value_t * min, xmeter_value_t * max)
+{
+  xmeter_assign_value(&xmeter_max_power_diss_min, min);
+  xmeter_assign_value(&xmeter_max_power_diss_max, max);
 }

@@ -31,6 +31,8 @@ void lcd_set_digit(uint8_t row, uint8_t col, uint16_t integer, uint16_t decimal)
 
 void lcd_set_hex(uint8_t row, uint8_t col, uint16_t hex);
 
+void lcd_set_integer(uint8_t row, uint8_t col, uint8_t len, uint32_t val);
+
 bit lcd_set_scroll(uint8_t row, bit enable);
 bit lcd_set_blink(uint8_t row, uint8_t col, bit blink);
 void lcd_set_blink_range(uint8_t row, uint8_t from, uint8_t to, bit blink);

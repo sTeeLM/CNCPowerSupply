@@ -188,6 +188,7 @@ void com_send_buffer(uint8_t * buffer, uint16_t len)
   uint8_t i = 0;
   
   while(len --) {
-    putchar(buffer[i++]);
+    while (sendfull);
+    putbuf(buffer[i++]);
   }
 }

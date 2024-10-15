@@ -42,14 +42,18 @@ typedef enum _control_msg_code_t{
   CONTROL_MSG_CODE_GET_ADC_TEMP,
   CONTROL_MSG_CODE_GET_POWER_OUT,
   CONTROL_MSG_CODE_GET_POWER_DISS,
-  CONTROL_MSG_CODE_GET_DAC_VOLTAGE,  
-  CONTROL_MSG_CODE_SET_DAC_VOLTAGE,
   CONTROL_MSG_CODE_GET_DAC_CURRENT,
   CONTROL_MSG_CODE_SET_DAC_CURRENT,
+  CONTROL_MSG_CODE_GET_DAC_VOLTAGE,  
+  CONTROL_MSG_CODE_SET_DAC_VOLTAGE,
+  CONTROL_MSG_CODE_GET_STEPS_CURRENT,  
   CONTROL_MSG_CODE_GET_STEPS_VOLTAGE,
-  CONTROL_MSG_CODE_GET_STEPS_CURRENT,
   CONTROL_MSG_CODE_GET_STEPS_TEMP,
-  CONTROL_MSG_CODE_GET_STEPS_POWER,  
+  CONTROL_MSG_CODE_GET_STEPS_POWER, 
+  CONTROL_MSG_CODE_GET_LIMITS_CURRENT,
+  CONTROL_MSG_CODE_GET_LIMITS_VOLTAGE_OUT,
+  CONTROL_MSG_CODE_GET_LIMITS_TEMP,
+  CONTROL_MSG_CODE_GET_LIMITS_POWER_DISS,  
   CONTROL_MSG_CODE_GET_PARAM_TEMP_HI,
   CONTROL_MSG_CODE_SET_PARAM_TEMP_HI,
   CONTROL_MSG_CODE_GET_PARAM_TEMP_LO,
@@ -66,6 +70,7 @@ typedef enum _control_msg_code_t{
   CONTROL_MSG_CODE_SET_PRESET_VOLTAGE, 
   CONTROL_MSG_CODE_CNT
 } control_msg_code_t;
+
 
 /* 
   CONTROL_MSG_CODE_REMOTE_OVERRIDE
@@ -85,7 +90,7 @@ typedef struct _control_msg_body_status_t
   uint8_t override_on;
   uint8_t fan_on;
   uint8_t switch_on;
-  uint8_t cc_on; 
+  uint8_t cc_on;
 } PROTO_PACKED control_msg_body_status_t;
 /* 
   CONTROL_MSG_GET_ADC_XX 
@@ -106,6 +111,14 @@ typedef struct _control_msg_body_steps_t
   xmeter_value_t fine;  
 } PROTO_PACKED control_msg_body_steps_t;
 
+/*
+  CONTROL_MSG_CODE_GET_LIMITS_XX
+*/
+typedef struct _control_msg_body_limits_t
+{
+  xmeter_value_t min;
+  xmeter_value_t max;  
+} PROTO_PACKED control_msg_body_limits_t;
 /* 
   CONTROL_MSG_GET_PARAM_XX
   CONTROL_MSG_SET_PARAM_XX
@@ -133,6 +146,7 @@ typedef union _control_msg_body
   control_msg_body_status_t    status;
   control_msg_body_xmeter_t    xmeter;
   control_msg_body_steps_t     steps;
+  control_msg_body_limits_t    limits;
   control_msg_body_param_t     param;
   control_msg_body_preset_t    preset;
 } PROTO_PACKED control_msg_body_t;

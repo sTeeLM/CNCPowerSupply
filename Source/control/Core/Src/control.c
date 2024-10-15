@@ -6,7 +6,7 @@
 
 #include <string.h>
 
-#define CONTROL_MSG_WAIT_TIMEOUT_MS 500 //ms
+#define CONTROL_MSG_WAIT_TIMEOUT_MS 1000 //ms
 
 void control_dump_msg(const char * fmt, const control_msg_t * msg)
 {

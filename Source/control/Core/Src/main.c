@@ -90,6 +90,7 @@ int main(void)
   while (1)
   {
     while(CDC_Com_Open) {
+      HAL_GPIO_WritePin(DATA_TRANS_GPIO_Port, DATA_TRANS_Pin, GPIO_PIN_RESET);
       if(CDC_Rx_Len) {
         if(control_parse_cmd(&control_cmd, UserRxBufferFS, CDC_Rx_Len)) {
           control_relay_cmd(&control_cmd, &control_res);
@@ -102,6 +103,7 @@ int main(void)
       }
       delay_ms(500);
     }
+    HAL_GPIO_WritePin(DATA_TRANS_GPIO_Port, DATA_TRANS_Pin, GPIO_PIN_SET);
     delay_ms(1000);
   }
 

@@ -4,3 +4,5 @@ Version=1.0
 ProjectPath=PowerPlane\PowerPlane.PrjPcb
 [Project2]
 ProjectPath=XMeter\XMeter.PrjPcb
+[Project3]
+ProjectPath=Control\Control.PrjPcb

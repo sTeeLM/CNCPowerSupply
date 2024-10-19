@@ -538,7 +538,7 @@ static control_fun_t code control_funs[CONTROL_MSG_CODE_CNT] =
 
 void control_initilize(void)
 {
-	CDBG("control_initilize, sizeof(control_msg_t) is %bu\n", sizeof(control_msg_t));
+  CDBG("control_initilize, sizeof(control_msg_t) is %bu\n", sizeof(control_msg_t));
   control_is_enter_bit = 0;
   control_remote_override = 0;
 }

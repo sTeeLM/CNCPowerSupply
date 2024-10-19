@@ -22,7 +22,7 @@ typedef struct xmeter_value {
   uint8_t  res;             /* 精度， x精确到小数后x位，0 <= x <= 3*/
   uint16_t integer;
   uint16_t decimal;
-} PROTO_PACKED xmeter_value_t ; 
+} PROTO_PACKED xmeter_value_t; 
 
 /* 
 max 127

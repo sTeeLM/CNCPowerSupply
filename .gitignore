@@ -54,5 +54,6 @@
 *.SchLib.Zip
 *.PcbDoc.Zip
 *.SchDoc.Zip
+*.PcbLib.Zip
 *.PrjPcb.Zip
 .DS_Store

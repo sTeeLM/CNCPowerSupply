@@ -6,3 +6,5 @@ ProjectPath=PowerPlane\PowerPlane.PrjPcb
 ProjectPath=XMeter\XMeter.PrjPcb
 [Project3]
 ProjectPath=Control\Control.PrjPcb
+[Project4]
+ProjectPath=HeatSink\HeatSink.PrjPcb

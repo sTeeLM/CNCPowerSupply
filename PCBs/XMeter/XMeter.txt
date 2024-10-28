@@ -1,10 +1,10 @@
 Board Information Report
 Filename     : D:\Lab\CNCPowerSupply\PCBs\XMeter\XMeter.PcbDoc
-Date         : 2024/10/26
-Time         : 22:37:12
+Date         : 2024/10/28
+Time         : 12:32:26
 Time Elapsed : 00:00:00
 
 General
     Board Size, 138mmx50mm
-    Components on board, 53
+    Components on board, 59
 count : 2

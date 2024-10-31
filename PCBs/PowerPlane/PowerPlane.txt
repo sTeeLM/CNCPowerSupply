@@ -1,0 +1,10 @@
+Board Information Report
+Filename     : D:\Lab\CNCPowerSupply\PCBs\PowerPlane\PowerPlane.PcbDoc
+Date         : 2024/10/30
+Time         : 21:40:11
+Time Elapsed : 00:00:00
+
+General
+    Board Size, 140mmx96mm
+    Components on board, 134
+count : 2

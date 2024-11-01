@@ -1,0 +1,10 @@
+Board Information Report
+Filename     : D:\Lab\CNCPowerSupply\PCBs\HeatSink\HeatSink.PcbDoc
+Date         : 2024/11/1
+Time         : 19:05:56
+Time Elapsed : 00:00:00
+
+General
+    Board Size, 150mmx96mm
+    Components on board, 0
+count : 2

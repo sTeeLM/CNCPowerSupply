@@ -1,35 +1,15 @@
 Protel Design System Design Rule Check
 PCB File : D:\Lab\CNCPowerSupply\PCBs\PowerPlane\PowerPlane.PcbDoc
 Date     : 2024/11/1
-Time     : 18:08:34
+Time     : 21:38:09
 
 Processing Rule : Clearance Constraint (Gap=0.1mm) (WithinRoom('RoomDefinition_1')or WithinRoom('RoomDefinition_2')),(WithinRoom('RoomDefinition_1')or WithinRoom('RoomDefinition_2'))
 Rule Violations :0
 
-Processing Rule : Clearance Constraint (Gap=0.25mm) (WithinRoom('RoomDefinition_3') or WithinRoom('RoomDefinition_4') or WithinRoom('RoomDefinition_5') or  WithinRoom('RoomDefinition_6') or  WithinRoom('RoomDefinition_7') or  WithinRoom('RoomDefinition_8') or  WithinRoom('RoomDefinition_9') or  WithinRoom('RoomDefinition_10')or
-WithinRoom('RoomDefinition_11')or
-WithinRoom('RoomDefinition_12')or
-WithinRoom('RoomDefinition_13')),(WithinRoom('RoomDefinition_3') or WithinRoom('RoomDefinition_4') or WithinRoom('RoomDefinition_5') or  WithinRoom('RoomDefinition_6') or  WithinRoom('RoomDefinition_7') or  WithinRoom('RoomDefinition_8') or  WithinRoom('RoomDefinition_9') or  WithinRoom('RoomDefinition_10')or
-WithinRoom('RoomDefinition_11')or
-WithinRoom('RoomDefinition_12')or
-WithinRoom('RoomDefinition_13'))
+Processing Rule : Clearance Constraint (Gap=0.25mm) (WithinRoom('RoomDefinition_3') or WithinRoom('RoomDefinition_4') or WithinRoom('RoomDefinition_5') or  WithinRoom('RoomDefinition_6') or  WithinRoom('RoomDefinition_7') or  WithinRoom('RoomDefinition_8') or  WithinRoom('RoomDefinition_9') or  WithinRoom('RoomDefinition_10')or WithinRoom('RoomDefinition_11')or WithinRoom('RoomDefinition_12')or WithinRoom('RoomDefinition_13')),(WithinRoom('RoomDefinition_3') or WithinRoom('RoomDefinition_4') or WithinRoom('RoomDefinition_5') or  WithinRoom('RoomDefinition_6') or  WithinRoom('RoomDefinition_7') or  WithinRoom('RoomDefinition_8') or  WithinRoom('RoomDefinition_9') or  WithinRoom('RoomDefinition_10')or WithinRoom('RoomDefinition_11')or WithinRoom('RoomDefinition_12')or WithinRoom('RoomDefinition_13'))
 Rule Violations :0
 
-Processing Rule : Clearance Constraint (Gap=0.254mm) (not (
-WithinRoom('RoomDefinition_1') or 
-WithinRoom('RoomDefinition_2') or 
-WithinRoom('RoomDefinition_3') or WithinRoom('RoomDefinition_4') or WithinRoom('RoomDefinition_5') or  WithinRoom('RoomDefinition_6') or  WithinRoom('RoomDefinition_7') or  WithinRoom('RoomDefinition_8') or  WithinRoom('RoomDefinition_9') or  WithinRoom('RoomDefinition_10') or
-WithinRoom('RoomDefinition_11') or
-WithinRoom('RoomDefinition_12') or
-WithinRoom('RoomDefinition_13')  
-)),(not (
-WithinRoom('RoomDefinition_1') or 
-WithinRoom('RoomDefinition_2') or 
-WithinRoom('RoomDefinition_3') or WithinRoom('RoomDefinition_4') or WithinRoom('RoomDefinition_5') or  WithinRoom('RoomDefinition_6') or  WithinRoom('RoomDefinition_7') or  WithinRoom('RoomDefinition_8') or  WithinRoom('RoomDefinition_9') or  WithinRoom('RoomDefinition_10') or
-WithinRoom('RoomDefinition_11') or
-WithinRoom('RoomDefinition_12') or
-WithinRoom('RoomDefinition_13')  
-))
+Processing Rule : Clearance Constraint (Gap=0.254mm) (not ( WithinRoom('RoomDefinition_1') or  WithinRoom('RoomDefinition_2') or  WithinRoom('RoomDefinition_3') or WithinRoom('RoomDefinition_4') or WithinRoom('RoomDefinition_5') or  WithinRoom('RoomDefinition_6') or  WithinRoom('RoomDefinition_7') or  WithinRoom('RoomDefinition_8') or  WithinRoom('RoomDefinition_9') or  WithinRoom('RoomDefinition_10') or WithinRoom('RoomDefinition_11') or WithinRoom('RoomDefinition_12') or WithinRoom('RoomDefinition_13')   )),(not ( WithinRoom('RoomDefinition_1') or  WithinRoom('RoomDefinition_2') or  WithinRoom('RoomDefinition_3') or WithinRoom('RoomDefinition_4') or WithinRoom('RoomDefinition_5') or  WithinRoom('RoomDefinition_6') or  WithinRoom('RoomDefinition_7') or  WithinRoom('RoomDefinition_8') or  WithinRoom('RoomDefinition_9') or  WithinRoom('RoomDefinition_10') or WithinRoom('RoomDefinition_11') or WithinRoom('RoomDefinition_12') or WithinRoom('RoomDefinition_13')   ))
 Rule Violations :0
 
 Processing Rule : Short-Circuit Constraint (Allowed=No) (All),(All)

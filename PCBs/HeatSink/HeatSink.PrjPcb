@@ -100,6 +100,27 @@ DItemRevisionGUID=
 GenerateClassCluster=0
 DocumentUniqueId=UTRQTGXJ
 
+[Document4]
+DocumentPath=HeatSink.PcbDoc
+AnnotationEnabled=1
+AnnotateStartValue=1
+AnnotationIndexControlEnabled=0
+AnnotateSuffix=
+AnnotateScope=All
+AnnotateOrder=-1
+DoLibraryUpdate=1
+DoDatabaseUpdate=1
+ClassGenCCAutoEnabled=1
+ClassGenCCAutoRoomEnabled=0
+ClassGenNCAutoScope=None
+DItemRevisionGUID=
+GenerateClassCluster=0
+DocumentUniqueId=OJUGLICD
+
+[GeneratedDocument1]
+DocumentPath=Project Outputs for HeatSink\Design Rule Check - HeatSink.html
+DItemRevisionGUID=
+
 [Configuration1]
 Name=Sources
 ParameterCount=0

@@ -1,44 +1,34 @@
 Protel Design System Design Rule Check
 PCB File : D:\Lab\CNCPowerSupply\PCBs\PowerPlane\PowerPlane.PcbDoc
-Date     : 2024/10/31
-Time     : 14:27:55
+Date     : 2024/11/1
+Time     : 18:08:34
 
-Processing Rule : Clearance Constraint (Gap=0.25mm) (WithinRoom('RoomDefinition_3') or WithinRoom('RoomDefinition_4') or
-WithinRoom('RoomDefinition_5') or 
-WithinRoom('RoomDefinition_6') or 
-WithinRoom('RoomDefinition_7') or 
-WithinRoom('RoomDefinition_8') or 
-WithinRoom('RoomDefinition_9') or 
-WithinRoom('RoomDefinition_10')),(WithinRoom('RoomDefinition_3') or WithinRoom('RoomDefinition_4') or
-WithinRoom('RoomDefinition_5') or 
-WithinRoom('RoomDefinition_6') or 
-WithinRoom('RoomDefinition_7') or 
-WithinRoom('RoomDefinition_8') or 
-WithinRoom('RoomDefinition_9') or 
-WithinRoom('RoomDefinition_10'))
+Processing Rule : Clearance Constraint (Gap=0.1mm) (WithinRoom('RoomDefinition_1')or WithinRoom('RoomDefinition_2')),(WithinRoom('RoomDefinition_1')or WithinRoom('RoomDefinition_2'))
 Rule Violations :0
 
-Processing Rule : Clearance Constraint (Gap=0.2mm) (WithinRoom('RoomDefinition_1')or WithinRoom('RoomDefinition_2')),(WithinRoom('RoomDefinition_1')or WithinRoom('RoomDefinition_2'))
+Processing Rule : Clearance Constraint (Gap=0.25mm) (WithinRoom('RoomDefinition_3') or WithinRoom('RoomDefinition_4') or WithinRoom('RoomDefinition_5') or  WithinRoom('RoomDefinition_6') or  WithinRoom('RoomDefinition_7') or  WithinRoom('RoomDefinition_8') or  WithinRoom('RoomDefinition_9') or  WithinRoom('RoomDefinition_10')or
+WithinRoom('RoomDefinition_11')or
+WithinRoom('RoomDefinition_12')or
+WithinRoom('RoomDefinition_13')),(WithinRoom('RoomDefinition_3') or WithinRoom('RoomDefinition_4') or WithinRoom('RoomDefinition_5') or  WithinRoom('RoomDefinition_6') or  WithinRoom('RoomDefinition_7') or  WithinRoom('RoomDefinition_8') or  WithinRoom('RoomDefinition_9') or  WithinRoom('RoomDefinition_10')or
+WithinRoom('RoomDefinition_11')or
+WithinRoom('RoomDefinition_12')or
+WithinRoom('RoomDefinition_13'))
 Rule Violations :0
 
-Processing Rule : Clearance Constraint (Gap=0.381mm) (not (
-WithinRoom('RoomDefinition_1')or WithinRoom('RoomDefinition_2')or
-WithinRoom('RoomDefinition_3') or WithinRoom('RoomDefinition_4') or
-WithinRoom('RoomDefinition_5') or 
-WithinRoom('RoomDefinition_6') or 
-WithinRoom('RoomDefinition_7') or 
-WithinRoom('RoomDefinition_8') or 
-WithinRoom('RoomDefinition_9') or 
-WithinRoom('RoomDefinition_10')
+Processing Rule : Clearance Constraint (Gap=0.254mm) (not (
+WithinRoom('RoomDefinition_1') or 
+WithinRoom('RoomDefinition_2') or 
+WithinRoom('RoomDefinition_3') or WithinRoom('RoomDefinition_4') or WithinRoom('RoomDefinition_5') or  WithinRoom('RoomDefinition_6') or  WithinRoom('RoomDefinition_7') or  WithinRoom('RoomDefinition_8') or  WithinRoom('RoomDefinition_9') or  WithinRoom('RoomDefinition_10') or
+WithinRoom('RoomDefinition_11') or
+WithinRoom('RoomDefinition_12') or
+WithinRoom('RoomDefinition_13')  
 )),(not (
-WithinRoom('RoomDefinition_1')or WithinRoom('RoomDefinition_2')or
-WithinRoom('RoomDefinition_3') or WithinRoom('RoomDefinition_4') or
-WithinRoom('RoomDefinition_5') or 
-WithinRoom('RoomDefinition_6') or 
-WithinRoom('RoomDefinition_7') or 
-WithinRoom('RoomDefinition_8') or 
-WithinRoom('RoomDefinition_9') or 
-WithinRoom('RoomDefinition_10')
+WithinRoom('RoomDefinition_1') or 
+WithinRoom('RoomDefinition_2') or 
+WithinRoom('RoomDefinition_3') or WithinRoom('RoomDefinition_4') or WithinRoom('RoomDefinition_5') or  WithinRoom('RoomDefinition_6') or  WithinRoom('RoomDefinition_7') or  WithinRoom('RoomDefinition_8') or  WithinRoom('RoomDefinition_9') or  WithinRoom('RoomDefinition_10') or
+WithinRoom('RoomDefinition_11') or
+WithinRoom('RoomDefinition_12') or
+WithinRoom('RoomDefinition_13')  
 ))
 Rule Violations :0
 
@@ -51,7 +41,7 @@ Rule Violations :0
 Processing Rule : Modified Polygon (Allow modified: No), (Allow shelved: No)
 Rule Violations :0
 
-Processing Rule : Width Constraint (Min=0.254mm) (Max=3mm) (Preferred=0.381mm) (All)
+Processing Rule : Width Constraint (Min=0.254mm) (Max=3mm) (Preferred=0.508mm) (All)
 Rule Violations :0
 
 Processing Rule : Routing Topology Rule(Topology=Shortest) (All)
@@ -66,64 +56,32 @@ Rule Violations :0
 Processing Rule : Power Plane Connect Rule(Relief Connect )(Expansion=0.508mm) (Conductor Width=0.254mm) (Air Gap=0.254mm) (Entries=4) (All)
 Rule Violations :0
 
-Processing Rule : Hole Size Constraint (Min=0.025mm) (Max=2.54mm) (All)
+Processing Rule : Hole Size Constraint (Min=0.025mm) (Max=3mm) (All)
 Rule Violations :0
 
 Processing Rule : Hole To Hole Clearance (Gap=0.254mm) (All),(All)
 Rule Violations :0
 
-Processing Rule : Minimum Solder Mask Sliver (Gap=0.254mm) (not (WithinRoom('RoomDefinition_3') or WithinRoom('RoomDefinition_4') or
-WithinRoom('RoomDefinition_5') or 
-WithinRoom('RoomDefinition_6') or 
-WithinRoom('RoomDefinition_7') or 
-WithinRoom('RoomDefinition_8') or 
-WithinRoom('RoomDefinition_9') or 
-WithinRoom('RoomDefinition_10'))),(not (WithinRoom('RoomDefinition_3') or WithinRoom('RoomDefinition_4') or
-WithinRoom('RoomDefinition_5') or 
-WithinRoom('RoomDefinition_6') or 
-WithinRoom('RoomDefinition_7') or 
-WithinRoom('RoomDefinition_8') or 
-WithinRoom('RoomDefinition_9') or 
-WithinRoom('RoomDefinition_10')))
+Processing Rule : Minimum Solder Mask Sliver (Gap=0.06mm) (HasFootprint('TO-226-AA')),(HasFootprint('TO-226-AA'))
 Rule Violations :0
 
-Processing Rule : Minimum Solder Mask Sliver (Gap=0.06mm) (WithinRoom('RoomDefinition_3') or WithinRoom('RoomDefinition_4') or
-WithinRoom('RoomDefinition_5') or 
-WithinRoom('RoomDefinition_6') or 
-WithinRoom('RoomDefinition_7') or 
-WithinRoom('RoomDefinition_8') or 
-WithinRoom('RoomDefinition_9') or 
-WithinRoom('RoomDefinition_10')),(WithinRoom('RoomDefinition_3') or WithinRoom('RoomDefinition_4') or
-WithinRoom('RoomDefinition_5') or 
-WithinRoom('RoomDefinition_6') or 
-WithinRoom('RoomDefinition_7') or 
-WithinRoom('RoomDefinition_8') or 
-WithinRoom('RoomDefinition_9') or 
-WithinRoom('RoomDefinition_10'))
+Processing Rule : Minimum Solder Mask Sliver (Gap=0.06mm) (HasFootprint('SOT26A-6L')),(HasFootprint('SOT26A-6L'))
+Rule Violations :0
+
+Processing Rule : Minimum Solder Mask Sliver (Gap=0.06mm) (HasFootprint('TO-92A')),(HasFootprint('TO-92A'))
+Rule Violations :0
+
+Processing Rule : Minimum Solder Mask Sliver (Gap=0.254mm) (All),(All)
+Rule Violations :0
+
+Processing Rule : Silk To Solder Mask (Clearance=0.06mm) (HasFootprint('TO-92A')),(HasFootprint('TO-92A'))
+Rule Violations :0
+
+Processing Rule : Silk To Solder Mask (Clearance=0.06mm) (HasFootprint('TO-226-AA')),(HasFootprint('TO-226-AA'))
 Rule Violations :0
 
 Processing Rule : Silk To Solder Mask (Clearance=0.254mm) (IsPad),(All)
-   Violation between Silk To Solder Mask Clearance Constraint: (Collision < 0.254mm) Between Pad D11-1(119.888mm,51.01mm) on Multi-Layer And Text "D5" (119.281mm,50.956mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0mm]
-   Violation between Silk To Solder Mask Clearance Constraint: (0.156mm < 0.254mm) Between Pad D12-2(56.388mm,68.326mm) on Multi-Layer And Text "Q8" (57.099mm,68.58mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.156mm]
-   Violation between Silk To Solder Mask Clearance Constraint: (Collision < 0.254mm) Between Pad Q3-0(102.235mm,74.803mm) on Multi-Layer And Text "Q3" (102.822mm,72.176mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0mm]
-   Violation between Silk To Solder Mask Clearance Constraint: (0.073mm < 0.254mm) Between Pad Q3-0(102.235mm,74.803mm) on Multi-Layer And Track (103.362mm,69.778mm)(103.362mm,74.478mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.073mm]
-   Violation between Silk To Solder Mask Clearance Constraint: (0.073mm < 0.254mm) Between Pad Q3-0(102.235mm,74.803mm) on Multi-Layer And Track (103.362mm,74.478mm)(114.062mm,74.478mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.073mm]
-   Violation between Silk To Solder Mask Clearance Constraint: (0.079mm < 0.254mm) Between Pad Q3-0(115.189mm,75.057mm) on Multi-Layer And Track (100.838mm,76.2mm)(116.586mm,76.2mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.079mm]
-   Violation between Silk To Solder Mask Clearance Constraint: (0.167mm < 0.254mm) Between Pad Q3-0(115.189mm,75.057mm) on Multi-Layer And Track (103.362mm,74.478mm)(114.062mm,74.478mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.167mm]
-   Violation between Silk To Solder Mask Clearance Constraint: (0.167mm < 0.254mm) Between Pad Q3-0(115.189mm,75.057mm) on Multi-Layer And Track (114.062mm,69.778mm)(114.062mm,74.478mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.167mm]
-   Violation between Silk To Solder Mask Clearance Constraint: (Collision < 0.254mm) Between Pad R14-2(86.868mm,49.53mm) on Multi-Layer And Text "R15" (87.476mm,49.175mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0mm]
-   Violation between Silk To Solder Mask Clearance Constraint: (0.237mm < 0.254mm) Between Pad R34-1(77.597mm,65.913mm) on Multi-Layer And Track (78.684mm,65.389mm)(78.684mm,76.089mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.237mm]
-   Violation between Silk To Solder Mask Clearance Constraint: (0.079mm < 0.254mm) Between Pad U22-0(18.034mm,62.738mm) on Multi-Layer And Track (16.637mm,61.595mm)(32.385mm,61.595mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.079mm]
-   Violation between Silk To Solder Mask Clearance Constraint: (0.167mm < 0.254mm) Between Pad U22-0(18.034mm,62.738mm) on Multi-Layer And Track (19.161mm,63.317mm)(19.161mm,68.017mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.167mm]
-   Violation between Silk To Solder Mask Clearance Constraint: (0.167mm < 0.254mm) Between Pad U22-0(18.034mm,62.738mm) on Multi-Layer And Track (19.161mm,63.317mm)(29.861mm,63.317mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.167mm]
-   Violation between Silk To Solder Mask Clearance Constraint: (0.073mm < 0.254mm) Between Pad U22-0(30.988mm,62.992mm) on Multi-Layer And Track (19.161mm,63.317mm)(29.861mm,63.317mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.073mm]
-   Violation between Silk To Solder Mask Clearance Constraint: (0.073mm < 0.254mm) Between Pad U22-0(30.988mm,62.992mm) on Multi-Layer And Track (29.861mm,63.317mm)(29.861mm,68.017mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.073mm]
-   Violation between Silk To Solder Mask Clearance Constraint: (0.073mm < 0.254mm) Between Pad U23-0(18.034mm,47.498mm) on Multi-Layer And Track (19.161mm,42.473mm)(19.161mm,47.173mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.073mm]
-   Violation between Silk To Solder Mask Clearance Constraint: (0.073mm < 0.254mm) Between Pad U23-0(18.034mm,47.498mm) on Multi-Layer And Track (19.161mm,47.173mm)(29.861mm,47.173mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.073mm]
-   Violation between Silk To Solder Mask Clearance Constraint: (0.079mm < 0.254mm) Between Pad U23-0(30.988mm,47.752mm) on Multi-Layer And Track (16.637mm,48.895mm)(32.385mm,48.895mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.079mm]
-   Violation between Silk To Solder Mask Clearance Constraint: (0.167mm < 0.254mm) Between Pad U23-0(30.988mm,47.752mm) on Multi-Layer And Track (19.161mm,47.173mm)(29.861mm,47.173mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.167mm]
-   Violation between Silk To Solder Mask Clearance Constraint: (0.167mm < 0.254mm) Between Pad U23-0(30.988mm,47.752mm) on Multi-Layer And Track (29.861mm,42.473mm)(29.861mm,47.173mm) on Top Overlay [Top Overlay] to [Top Solder] clearance [0.167mm]
-Rule Violations :20
+Rule Violations :0
 
 Processing Rule : Silk to Silk (Clearance=0.254mm) (All),(All)
 Rule Violations :0
@@ -131,37 +89,46 @@ Rule Violations :0
 Processing Rule : Net Antennae (Tolerance=0mm) (All)
 Rule Violations :0
 
-Processing Rule : RoomDefinition_6 (Bounding Region = (83.566mm, 67.564mm, 88.265mm, 74.041mm) (False)
-Rule Violations :0
-
-Processing Rule : RoomDefinition_7 (Bounding Region = (93.345mm, 69.596mm, 98.044mm, 76.073mm) (False)
+Processing Rule : RoomDefinition_9 (Bounding Region = (100.711mm, 61.341mm, 107.188mm, 66.04mm) (False)
 Rule Violations :0
 
 Processing Rule : RoomDefinition_10 (Bounding Region = (42.926mm, 8.636mm, 47.625mm, 15.113mm) (False)
 Rule Violations :0
 
-Processing Rule : RoomDefinition_9 (Bounding Region = (100.711mm, 61.341mm, 107.188mm, 66.04mm) (False)
+Processing Rule : RoomDefinition_13 (Bounding Region = (92.329mm, 12.065mm, 106.807mm, 23.749mm) (False)
 Rule Violations :0
 
-Processing Rule : RoomDefinition_5 (Bounding Region = (57.023mm, 62.103mm, 61.722mm, 68.58mm) (False)
+Processing Rule : RoomDefinition_6 (Bounding Region = (82.804mm, 67.564mm, 87.503mm, 74.041mm) (False)
 Rule Violations :0
 
-Processing Rule : RoomDefinition_3 (Bounding Region = (37.084mm, 40.64mm, 41.783mm, 47.117mm) (False)
+Processing Rule : RoomDefinition_11 (Bounding Region = (130.048mm, 31.369mm, 138.43mm, 38.989mm) (False)
+Rule Violations :0
+
+Processing Rule : RoomDefinition_12 (Bounding Region = (59.309mm, 12.065mm, 73.787mm, 23.749mm) (False)
+Rule Violations :0
+
+Processing Rule : RoomDefinition_7 (Bounding Region = (93.345mm, 69.596mm, 98.044mm, 76.073mm) (False)
+Rule Violations :0
+
+Processing Rule : RoomDefinition_2 (Bounding Region = (111.506mm, 12.319mm, 122.174mm, 25.146mm) (False)
 Rule Violations :0
 
 Processing Rule : RoomDefinition_1 (Bounding Region = (76.962mm, 6.858mm, 87.63mm, 19.685mm) (False)
 Rule Violations :0
 
-Processing Rule : RoomDefinition_4 (Bounding Region = (70.612mm, 57.15mm, 75.311mm, 63.627mm) (False)
+Processing Rule : RoomDefinition_3 (Bounding Region = (37.084mm, 40.64mm, 41.783mm, 47.117mm) (False)
 Rule Violations :0
 
-Processing Rule : RoomDefinition_2 (Bounding Region = (111.506mm, 12.319mm, 122.174mm, 25.146mm) (False)
+Processing Rule : RoomDefinition_5 (Bounding Region = (57.023mm, 62.103mm, 61.722mm, 68.58mm) (False)
+Rule Violations :0
+
+Processing Rule : RoomDefinition_4 (Bounding Region = (70.612mm, 57.15mm, 75.311mm, 63.627mm) (False)
 Rule Violations :0
 
 Processing Rule : Height Constraint (Min=0mm) (Max=50.4mm) (Prefered=12.7mm) (All)
 Rule Violations :0
 
 
-Violations Detected : 20
+Violations Detected : 0
 Waived Violations : 0
-Time Elapsed        : 00:00:02
+Time Elapsed        : 00:00:01

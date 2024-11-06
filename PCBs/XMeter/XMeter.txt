@@ -1,7 +1,7 @@
 Board Information Report
 Filename     : D:\Lab\CNCPowerSupply\PCBs\XMeter\XMeter.PcbDoc
-Date         : 2024/10/28
-Time         : 12:32:26
+Date         : 2024/11/5
+Time         : 11:30:20
 Time Elapsed : 00:00:00
 
 General

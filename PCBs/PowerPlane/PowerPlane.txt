@@ -1,7 +1,7 @@
 Board Information Report
 Filename     : D:\Lab\CNCPowerSupply\PCBs\PowerPlane\PowerPlane.PcbDoc
-Date         : 2024/10/30
-Time         : 21:40:11
+Date         : 2024/11/5
+Time         : 11:29:39
 Time Elapsed : 00:00:00
 
 General

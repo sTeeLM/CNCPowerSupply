@@ -1,7 +1,7 @@
 Protel Design System Design Rule Check
 PCB File : D:\Lab\CNCPowerSupply\PCBs\PowerPlane\PowerPlane.PcbDoc
-Date     : 2024/11/6
-Time     : 18:23:31
+Date     : 2024/11/10
+Time     : 19:45:23
 
 Processing Rule : Clearance Constraint (Gap=0.1mm) (WithinRoom('RoomDefinition_1')or WithinRoom('RoomDefinition_2')),(WithinRoom('RoomDefinition_1')or WithinRoom('RoomDefinition_2'))
 Rule Violations :0
@@ -75,16 +75,16 @@ Rule Violations :0
 Processing Rule : RoomDefinition_10 (Bounding Region = (42.926mm, 8.636mm, 47.625mm, 15.113mm) (False)
 Rule Violations :0
 
-Processing Rule : RoomDefinition_13 (Bounding Region = (92.329mm, 12.065mm, 106.807mm, 23.749mm) (False)
-Rule Violations :0
-
 Processing Rule : RoomDefinition_6 (Bounding Region = (82.804mm, 67.564mm, 87.503mm, 74.041mm) (False)
 Rule Violations :0
 
-Processing Rule : RoomDefinition_11 (Bounding Region = (130.048mm, 31.369mm, 138.43mm, 38.989mm) (False)
+Processing Rule : RoomDefinition_11 (Bounding Region = (130.048mm, 32.258mm, 138.43mm, 39.878mm) (False)
 Rule Violations :0
 
 Processing Rule : RoomDefinition_12 (Bounding Region = (59.309mm, 12.065mm, 73.787mm, 23.749mm) (False)
+Rule Violations :0
+
+Processing Rule : RoomDefinition_13 (Bounding Region = (92.329mm, 12.065mm, 106.807mm, 23.749mm) (False)
 Rule Violations :0
 
 Processing Rule : RoomDefinition_7 (Bounding Region = (93.345mm, 69.596mm, 98.044mm, 76.073mm) (False)
@@ -111,4 +111,4 @@ Rule Violations :0
 
 Violations Detected : 0
 Waived Violations : 0
-Time Elapsed        : 00:00:02
+Time Elapsed        : 00:00:01

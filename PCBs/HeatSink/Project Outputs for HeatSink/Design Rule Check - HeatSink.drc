@@ -1,7 +1,7 @@
 Protel Design System Design Rule Check
 PCB File : D:\Lab\CNCPowerSupply\PCBs\HeatSink\HeatSink.PcbDoc
-Date     : 2024/11/1
-Time     : 21:03:02
+Date     : 2024/11/10
+Time     : 19:26:51
 
 Processing Rule : Clearance Constraint (Gap=1mm) (All),(All)
 Rule Violations :0
@@ -48,4 +48,4 @@ Rule Violations :0
 
 Violations Detected : 0
 Waived Violations : 0
-Time Elapsed        : 00:00:01
+Time Elapsed        : 00:00:02

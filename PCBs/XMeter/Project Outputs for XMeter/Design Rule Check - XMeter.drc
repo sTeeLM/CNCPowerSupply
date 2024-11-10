@@ -1,7 +1,7 @@
 Protel Design System Design Rule Check
 PCB File : D:\Lab\CNCPowerSupply\PCBs\XMeter\XMeter.PcbDoc
-Date     : 2024/11/4
-Time     : 20:17:00
+Date     : 2024/11/10
+Time     : 13:06:46
 
 Processing Rule : Clearance Constraint (Gap=0.254mm) (InNamedPolygon('NONET_L01_P000')),(All)
 Rule Violations :0

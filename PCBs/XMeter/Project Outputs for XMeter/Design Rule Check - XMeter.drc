@@ -1,18 +1,30 @@
 Protel Design System Design Rule Check
 PCB File : D:\Lab\CNCPowerSupply\PCBs\XMeter\XMeter.PcbDoc
-Date     : 2024/11/10
-Time     : 13:06:46
+Date     : 2024/11/13
+Time     : 13:40:48
 
-Processing Rule : Clearance Constraint (Gap=0.254mm) (InNamedPolygon('NONET_L01_P000')),(All)
+Processing Rule : Clearance Constraint (Gap=0.508mm) (Not
+(
+WithinRoom('RoomDefinition1') or
+WithinRoom('RoomDefinition2') or
+WithinRoom('RoomDefinition3') or
+WithinRoom('RoomDefinition4')
+)),(Not
+(
+WithinRoom('RoomDefinition1') or
+WithinRoom('RoomDefinition2') or
+WithinRoom('RoomDefinition3') or
+WithinRoom('RoomDefinition4')
+))
 Rule Violations :0
 
-Processing Rule : Clearance Constraint (Gap=0.254mm) (Not WithinRoom('RoomDefinition1')),(Not WithinRoom('RoomDefinition1'))
-Rule Violations :0
-
-Processing Rule : Clearance Constraint (Gap=0.01mm) (WithinRoom('RoomDefinition1')),(WithinRoom('RoomDefinition1'))
-Rule Violations :0
-
-Processing Rule : Clearance Constraint (Gap=0.254mm) (InNamedPolygon('NONET_L01_P001')),(All)
+Processing Rule : Clearance Constraint (Gap=0.2mm) (WithinRoom('RoomDefinition1') or
+WithinRoom('RoomDefinition2') or
+WithinRoom('RoomDefinition3') or
+WithinRoom('RoomDefinition4')),(WithinRoom('RoomDefinition1') or
+WithinRoom('RoomDefinition2') or
+WithinRoom('RoomDefinition3') or
+WithinRoom('RoomDefinition4'))
 Rule Violations :0
 
 Processing Rule : Short-Circuit Constraint (Allowed=No) (All),(All)
@@ -42,13 +54,16 @@ Rule Violations :0
 Processing Rule : Hole To Hole Clearance (Gap=0.254mm) (All),(All)
 Rule Violations :0
 
+Processing Rule : Minimum Solder Mask Sliver (Gap=0.09mm) (HasFootprint('SOT26A-6L')),(HasFootprint('SOT26A-6L'))
+Rule Violations :0
+
 Processing Rule : Minimum Solder Mask Sliver (Gap=0.046mm) (HasFootprint('TSSOP50P490-10AL')),(HasFootprint('TSSOP50P490-10AL'))
 Rule Violations :0
 
-Processing Rule : Minimum Solder Mask Sliver (Gap=0.19mm) (HasFootprint('SG3030CM')),(HasFootprint('SG3030CM'))
+Processing Rule : Minimum Solder Mask Sliver (Gap=0.254mm) (All),(All)
 Rule Violations :0
 
-Processing Rule : Minimum Solder Mask Sliver (Gap=0.254mm) (All),(All)
+Processing Rule : Minimum Solder Mask Sliver (Gap=0.19mm) (HasFootprint('SG3030CM')),(HasFootprint('SG3030CM'))
 Rule Violations :0
 
 Processing Rule : Silk To Solder Mask (Clearance=0.007mm) (IsPad),(All)
@@ -60,7 +75,16 @@ Rule Violations :0
 Processing Rule : Net Antennae (Tolerance=0mm) (All)
 Rule Violations :0
 
-Processing Rule : RoomDefinition1 (Bounding Region = (96.266mm, 92.456mm, 100.076mm, 99.568mm) (False)
+Processing Rule : RoomDefinition2 (Bounding Region = (183.515mm, 97.189mm, 190.627mm, 101.169mm) (False)
+Rule Violations :0
+
+Processing Rule : RoomDefinition1 (Bounding Region = (183.515mm, 106.841mm, 190.627mm, 110.821mm) (False)
+Rule Violations :0
+
+Processing Rule : RoomDefinition4 (Bounding Region = (86.741mm, 108.331mm, 91.186mm, 113.411mm) (False)
+Rule Violations :0
+
+Processing Rule : RoomDefinition3 (Bounding Region = (94.403mm, 98.806mm, 98.933mm, 106.553mm) (False)
 Rule Violations :0
 
 Processing Rule : Height Constraint (Min=0mm) (Max=25.4mm) (Prefered=12.7mm) (All)
@@ -69,4 +93,4 @@ Rule Violations :0
 
 Violations Detected : 0
 Waived Violations : 0
-Time Elapsed        : 00:00:02
+Time Elapsed        : 00:00:01

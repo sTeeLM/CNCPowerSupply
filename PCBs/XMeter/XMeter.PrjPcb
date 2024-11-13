@@ -50,23 +50,6 @@ PrefsVaultGUID=
 PrefsRevisionGUID=
 
 [Document1]
-DocumentPath=XMeter.SchDoc
-AnnotationEnabled=1
-AnnotateStartValue=1
-AnnotationIndexControlEnabled=0
-AnnotateSuffix=
-AnnotateScope=All
-AnnotateOrder=0
-DoLibraryUpdate=1
-DoDatabaseUpdate=1
-ClassGenCCAutoEnabled=1
-ClassGenCCAutoRoomEnabled=0
-ClassGenNCAutoScope=None
-DItemRevisionGUID=
-GenerateClassCluster=0
-DocumentUniqueId=PQQDRNGU
-
-[Document2]
 DocumentPath=..\Libs\CNCPowerSupply.PcbLib
 AnnotationEnabled=1
 AnnotateStartValue=1
@@ -83,7 +66,7 @@ DItemRevisionGUID=
 GenerateClassCluster=0
 DocumentUniqueId=HPEONWLT
 
-[Document3]
+[Document2]
 DocumentPath=..\Libs\CNCPowerSupply.SchLib
 AnnotationEnabled=1
 AnnotateStartValue=1
@@ -100,7 +83,7 @@ DItemRevisionGUID=
 GenerateClassCluster=0
 DocumentUniqueId=UTRQTGXJ
 
-[Document4]
+[Document3]
 DocumentPath=XMeter.BomDoc
 AnnotationEnabled=1
 AnnotateStartValue=1
@@ -117,7 +100,7 @@ DItemRevisionGUID=
 GenerateClassCluster=0
 DocumentUniqueId=
 
-[Document5]
+[Document4]
 DocumentPath=XMeter.PcbDoc
 AnnotationEnabled=1
 AnnotateStartValue=1
@@ -133,6 +116,23 @@ ClassGenNCAutoScope=None
 DItemRevisionGUID=
 GenerateClassCluster=0
 DocumentUniqueId=VYBEKURL
+
+[Document5]
+DocumentPath=XMeter.SchDoc
+AnnotationEnabled=1
+AnnotateStartValue=1
+AnnotationIndexControlEnabled=0
+AnnotateSuffix=
+AnnotateScope=All
+AnnotateOrder=0
+DoLibraryUpdate=1
+DoDatabaseUpdate=1
+ClassGenCCAutoEnabled=1
+ClassGenCCAutoRoomEnabled=0
+ClassGenNCAutoScope=None
+DItemRevisionGUID=
+GenerateClassCluster=0
+DocumentUniqueId=IPOGJSKV
 
 [GeneratedDocument1]
 DocumentPath=Project Outputs for XMeter\Design Rule Check - XMeter.html

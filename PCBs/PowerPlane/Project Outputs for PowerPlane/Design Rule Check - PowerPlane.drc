@@ -1,15 +1,12 @@
 Protel Design System Design Rule Check
 PCB File : D:\Lab\CNCPowerSupply\PCBs\PowerPlane\PowerPlane.PcbDoc
-Date     : 2024/11/10
-Time     : 19:45:23
+Date     : 2024/11/14
+Time     : 23:20:39
 
-Processing Rule : Clearance Constraint (Gap=0.1mm) (WithinRoom('RoomDefinition_1')or WithinRoom('RoomDefinition_2')),(WithinRoom('RoomDefinition_1')or WithinRoom('RoomDefinition_2'))
+Processing Rule : Clearance Constraint (Gap=0.508mm) (Not (  WithinRoom('RoomDefinition1') or WithinRoom('RoomDefinition2') or  WithinRoom('RoomDefinition3') or  WithinRoom('RoomDefinition4') or  WithinRoom('RoomDefinition5') or  WithinRoom('RoomDefinition6') )),(Not (  WithinRoom('RoomDefinition1') or WithinRoom('RoomDefinition2') or  WithinRoom('RoomDefinition3') or  WithinRoom('RoomDefinition4') or  WithinRoom('RoomDefinition5') or  WithinRoom('RoomDefinition6') ))
 Rule Violations :0
 
-Processing Rule : Clearance Constraint (Gap=0.25mm) (WithinRoom('RoomDefinition_3') or WithinRoom('RoomDefinition_4') or WithinRoom('RoomDefinition_5') or  WithinRoom('RoomDefinition_6') or  WithinRoom('RoomDefinition_7') or  WithinRoom('RoomDefinition_8') or  WithinRoom('RoomDefinition_9') or  WithinRoom('RoomDefinition_10')or WithinRoom('RoomDefinition_11')or WithinRoom('RoomDefinition_12')or WithinRoom('RoomDefinition_13')),(WithinRoom('RoomDefinition_3') or WithinRoom('RoomDefinition_4') or WithinRoom('RoomDefinition_5') or  WithinRoom('RoomDefinition_6') or  WithinRoom('RoomDefinition_7') or  WithinRoom('RoomDefinition_8') or  WithinRoom('RoomDefinition_9') or  WithinRoom('RoomDefinition_10')or WithinRoom('RoomDefinition_11')or WithinRoom('RoomDefinition_12')or WithinRoom('RoomDefinition_13'))
-Rule Violations :0
-
-Processing Rule : Clearance Constraint (Gap=0.254mm) (not ( WithinRoom('RoomDefinition_1') or  WithinRoom('RoomDefinition_2') or  WithinRoom('RoomDefinition_3') or WithinRoom('RoomDefinition_4') or WithinRoom('RoomDefinition_5') or  WithinRoom('RoomDefinition_6') or  WithinRoom('RoomDefinition_7') or  WithinRoom('RoomDefinition_8') or  WithinRoom('RoomDefinition_9') or  WithinRoom('RoomDefinition_10') or WithinRoom('RoomDefinition_11') or WithinRoom('RoomDefinition_12') or WithinRoom('RoomDefinition_13')   )),(not ( WithinRoom('RoomDefinition_1') or  WithinRoom('RoomDefinition_2') or  WithinRoom('RoomDefinition_3') or WithinRoom('RoomDefinition_4') or WithinRoom('RoomDefinition_5') or  WithinRoom('RoomDefinition_6') or  WithinRoom('RoomDefinition_7') or  WithinRoom('RoomDefinition_8') or  WithinRoom('RoomDefinition_9') or  WithinRoom('RoomDefinition_10') or WithinRoom('RoomDefinition_11') or WithinRoom('RoomDefinition_12') or WithinRoom('RoomDefinition_13')   ))
+Processing Rule : Clearance Constraint (Gap=0.2mm) (WithinRoom('RoomDefinition1') or WithinRoom('RoomDefinition2') or  WithinRoom('RoomDefinition3') or  WithinRoom('RoomDefinition4') or  WithinRoom('RoomDefinition5') or  WithinRoom('RoomDefinition6')),(WithinRoom('RoomDefinition1') or WithinRoom('RoomDefinition2') or  WithinRoom('RoomDefinition3') or  WithinRoom('RoomDefinition4') or  WithinRoom('RoomDefinition5') or  WithinRoom('RoomDefinition6'))
 Rule Violations :0
 
 Processing Rule : Short-Circuit Constraint (Allowed=No) (All),(All)
@@ -21,16 +18,13 @@ Rule Violations :0
 Processing Rule : Modified Polygon (Allow modified: No), (Allow shelved: No)
 Rule Violations :0
 
-Processing Rule : Width Constraint (Min=0.254mm) (Max=3mm) (Preferred=0.508mm) (All)
+Processing Rule : Width Constraint (Min=0.254mm) (Max=3mm) (Preferred=0.508mm) (InNetClass('Power'))
+Rule Violations :0
+
+Processing Rule : Width Constraint (Min=0.254mm) (Max=3mm) (Preferred=0.254mm) (All)
 Rule Violations :0
 
 Processing Rule : Routing Topology Rule(Topology=Shortest) (All)
-Rule Violations :0
-
-Processing Rule : SMD Entry (Side = Allowed) (Corner = Allowed) (Any Angle = Allowed) (Ignore First Corner = Allowed)
-Rule Violations :0
-
-Processing Rule : SMD Entry (Side = Not Allowed) (Corner = Not Allowed) (Any Angle = Not Allowed) (Ignore First Corner = Allowed)
 Rule Violations :0
 
 Processing Rule : Power Plane Connect Rule(Relief Connect )(Expansion=0.508mm) (Conductor Width=0.254mm) (Air Gap=0.254mm) (Entries=4) (All)
@@ -45,9 +39,6 @@ Rule Violations :0
 Processing Rule : Minimum Solder Mask Sliver (Gap=0.06mm) (HasFootprint('TO-226-AA')),(HasFootprint('TO-226-AA'))
 Rule Violations :0
 
-Processing Rule : Minimum Solder Mask Sliver (Gap=0.06mm) (HasFootprint('SOT26A-6L')),(HasFootprint('SOT26A-6L'))
-Rule Violations :0
-
 Processing Rule : Minimum Solder Mask Sliver (Gap=0.06mm) (HasFootprint('TO-92A')),(HasFootprint('TO-92A'))
 Rule Violations :0
 
@@ -57,10 +48,10 @@ Rule Violations :0
 Processing Rule : Silk To Solder Mask (Clearance=0.06mm) (HasFootprint('TO-92A')),(HasFootprint('TO-92A'))
 Rule Violations :0
 
-Processing Rule : Silk To Solder Mask (Clearance=0.06mm) (HasFootprint('TO-226-AA')),(HasFootprint('TO-226-AA'))
+Processing Rule : Silk To Solder Mask (Clearance=0.254mm) (IsPad),(All)
 Rule Violations :0
 
-Processing Rule : Silk To Solder Mask (Clearance=0.254mm) (IsPad),(All)
+Processing Rule : Silk To Solder Mask (Clearance=0.254mm) (HasFootprint('TO-226-AA')),(HasFootprint('TO-226-AA'))
 Rule Violations :0
 
 Processing Rule : Silk to Silk (Clearance=0.254mm) (All),(All)
@@ -69,40 +60,22 @@ Rule Violations :0
 Processing Rule : Net Antennae (Tolerance=0mm) (All)
 Rule Violations :0
 
-Processing Rule : RoomDefinition_9 (Bounding Region = (100.711mm, 61.341mm, 107.188mm, 66.04mm) (False)
+Processing Rule : RoomDefinition5 (Bounding Region = (103.114mm, 19.929mm, 109.738mm, 26.553mm) (False)
 Rule Violations :0
 
-Processing Rule : RoomDefinition_10 (Bounding Region = (42.926mm, 8.636mm, 47.625mm, 15.113mm) (False)
+Processing Rule : RoomDefinition6 (Bounding Region = (107.34mm, 3.702mm, 113.399mm, 9.76mm) (False)
 Rule Violations :0
 
-Processing Rule : RoomDefinition_6 (Bounding Region = (82.804mm, 67.564mm, 87.503mm, 74.041mm) (False)
+Processing Rule : RoomDefinition1 (Bounding Region = (57.095mm, 65.858mm, 66.095mm, 74.858mm) (False)
 Rule Violations :0
 
-Processing Rule : RoomDefinition_11 (Bounding Region = (130.048mm, 32.258mm, 138.43mm, 39.878mm) (False)
+Processing Rule : RoomDefinition2 (Bounding Region = (41.547mm, -0.109mm, 48.623mm, 6.967mm) (False)
 Rule Violations :0
 
-Processing Rule : RoomDefinition_12 (Bounding Region = (59.309mm, 12.065mm, 73.787mm, 23.749mm) (False)
+Processing Rule : RoomDefinition3 (Bounding Region = (73.025mm, 0.254mm, 79.375mm, 6.604mm) (False)
 Rule Violations :0
 
-Processing Rule : RoomDefinition_13 (Bounding Region = (92.329mm, 12.065mm, 106.807mm, 23.749mm) (False)
-Rule Violations :0
-
-Processing Rule : RoomDefinition_7 (Bounding Region = (93.345mm, 69.596mm, 98.044mm, 76.073mm) (False)
-Rule Violations :0
-
-Processing Rule : RoomDefinition_2 (Bounding Region = (111.506mm, 12.319mm, 122.174mm, 25.146mm) (False)
-Rule Violations :0
-
-Processing Rule : RoomDefinition_1 (Bounding Region = (76.962mm, 6.858mm, 87.63mm, 19.685mm) (False)
-Rule Violations :0
-
-Processing Rule : RoomDefinition_3 (Bounding Region = (37.084mm, 40.64mm, 41.783mm, 47.117mm) (False)
-Rule Violations :0
-
-Processing Rule : RoomDefinition_5 (Bounding Region = (57.023mm, 62.103mm, 61.722mm, 68.58mm) (False)
-Rule Violations :0
-
-Processing Rule : RoomDefinition_4 (Bounding Region = (70.612mm, 57.15mm, 75.311mm, 63.627mm) (False)
+Processing Rule : RoomDefinition4 (Bounding Region = (79.629mm, 0.762mm, 86.995mm, 8.128mm) (False)
 Rule Violations :0
 
 Processing Rule : Height Constraint (Min=0mm) (Max=50.4mm) (Prefered=12.7mm) (All)

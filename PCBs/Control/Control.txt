@@ -1,7 +1,7 @@
 Board Information Report
 Filename     : D:\Lab\CNCPowerSupply\PCBs\Control\Control.PcbDoc
-Date         : 2024/11/4
-Time         : 23:51:58
+Date         : 2024/11/15
+Time         : 10:05:57
 Time Elapsed : 00:00:00
 
 General

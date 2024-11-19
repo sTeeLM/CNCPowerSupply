@@ -4,13 +4,14 @@
 #include "stdint.h"
 #include "protocol.h"
 
+extern const xmeter_value_t code xmeter_zero3;
 
 /*
 formated adc reading
 */
 extern xmeter_value_t xmeter_adc_current;   // 输出电流
 extern xmeter_value_t xmeter_adc_voltage_out;   // 输出电压
-extern xmeter_value_t xmeter_adc_voltage_in;   // 输入电压
+extern xmeter_value_t xmeter_adc_voltage_diss;   // 耗散电压
 extern xmeter_value_t xmeter_power_out; // 输出功率
 extern xmeter_value_t xmeter_power_diss; // 耗散功率
 extern xmeter_value_t xmeter_adc_temp;      // 温度
@@ -40,7 +41,7 @@ bit xmeter_fan_status(void);
 bit xmeter_cc_status(void);
 
 /* directlly read adc bits */
-uint16_t xmeter_get_adc_bits_voltage_in(void);
+uint16_t xmeter_get_adc_bits_voltage_diss(void);
 uint16_t xmeter_get_adc_bits_voltage_out(void);
 uint16_t xmeter_get_adc_bits_current(void);
 
@@ -153,7 +154,7 @@ void xmeter_inc_current_value(xmeter_value_t * voltage, bit coarse);
 void xmeter_dec_current_value(xmeter_value_t * voltage, bit coarse);
 
 /* save calibrate config */	
-void xmeter_write_rom_adc_voltage_in_kb(double k, double b);
+void xmeter_write_rom_adc_voltage_diss_kb(double k, double b);
 void xmeter_write_rom_adc_voltage_out_kb(double k, double b);
 void xmeter_write_rom_adc_current_kb(double k, double b);
 void xmeter_write_rom_dac_current_kb(double k, double b);

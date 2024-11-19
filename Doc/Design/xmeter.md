@@ -231,37 +231,19 @@ Ms| 回到Fan，但是不保存设置
 2. 参数标定（手工）
 3. 参数计算（自动）
 阶段1可调节的几个物理电位器:  
-- A. 电压DAC参考电压电位器（控制电压零点）
-- B. 电压反馈分压电位器(控制电压最大值)
-- C. 输出电压测量分压电位器（测量输出电压最大值）
-- D. 输入电压测量分压电位器（测量输入电压最大值）
-- E. 电流DAC参考电压电位器（控制电流最大值）
-- F. 输出电流测两分压电位器（测量输出电流最大值）
-- G. 两个三段电压继电器对应的电位器（控制2个切换输入电压）
+- A. 电压反馈分压电位器(控制电压最大值)
+- B. 两个三段电压继电器对应的电位器（控制2个切换输入电压）
 ### CalPhyVoltage
 **电压物理调整，调整目标**
-- 三段电压继电器正常工作（调节G）
-- 电压DAC在0点对应输出0V，0xFFFF对应输出30V（调节A、B）
-- 输出电压ADC在30V读数07FFF（调节C）
-- 输入电压ADC在最小输入电压读数（需要记录此时的输入电压数值）
-- 输入电压ADC在07FFF对应最大输入电压读数（需要记录此时的输入电压数值）（调节D）
+- 三段电压继电器正常工作（调节B）
+- 电压DAC在0xFFFF对应输出30V（调节A，在0x0000可能输入的是负数，没关系）
+- 用笔记录在输出0V的时候，输入电压万用表读数
 
 |事件|动作|
 |---|---|
 Mc/Mcc| 粗调电压电位器读数（16LSB）
 Sc/Scc| 精调电压电位器读数（1LSB）
-Ss| 切换到CalPhyCurrent
-### CalPhyCurrent
-**电流物理调整，调整目标（注意一定把输出电压设置位5V左右，然后短路输出！）**
-- 最大电流输出5A，电流DAC对应0xFFFF（调节E）
-- 输出电流ADC在5A读数刚好是0x7FFF（调节F）
-
-|事件|动作|
-|---|---|
-Mc/Mcc| 粗调电压电位器读数（16LSB）
-Sc/Scc| 精调电压电位器读数（1LSB）
-Ss| 切换到CalPhyVoltage
-Ms| 切换到CalVoltageZero
+Ss| 切换到CalVoltageZero
 ### CalVoltageZero
 **标定输出电压零点**
 - 调整到电压输出0V，按下Ss
@@ -270,16 +252,7 @@ Ms| 切换到CalVoltageZero
 |---|---|
 Mc/Mcc| 粗调电压电位器读数（16LSB）
 Sc/Scc| 精调电压电位器读数（1LSB）
-Ss| 记录0点，切换到CalPhyVoltageZeroIn
-### CalVoltageZeroIn
-**标定输入电压最小值**
-- 输入对应输出电压零点的输入电压数值，按下Ss
-
-|事件|动作|
-|---|---|
-Mc/Mcc| 粗调输入电压（100mv）
-Sc/Scc| 精调输入电压（1mv）
-Ss| 记录0点，切换到CalPhyVoltageMax
+Ss| 记录输出电压0点时的ADC参数（和*耗散电压ADC参数*），切换到CalVoltageMax
 ### CalVoltageMax
 **标定输出电压最大值**
 - 调整到电压输出30V，按下Ss
@@ -288,36 +261,33 @@ Ss| 记录0点，切换到CalPhyVoltageMax
 |---|---|
 Mc/Mcc| 粗调电压电位器读数（16LSB）
 Sc/Scc| 精调电压电位器读数（1LSB）
-Ss| 记录最大点，切换到CalPhyVoltageMaxIn
-### CalVoltageZeroIn
-**标定输入电压最大值**
-- 输入对应输出电压最大值的输入电压数值，按下Ss
-
-|事件|动作|
-|---|---|
-Mc/Mcc| 粗调输入电压（100mv）
-Sc/Scc| 精调输入电压（1mv）
-Ss| 记录最大点，切换到CalPhyCurrentZero
+Ss| 记录输出电压最大点参数，*电压DAC设置为5V输出档*，切换到CalCurrentZero
 ### CalCurrentZero
-**标定输入、输出电流零点**
-- 调整到电流输出0A，按下Ss
+**标定输出电流零点**
+- 短路输出，调整到电流输出0A，按下Ss
 
 |事件|动作|
 |---|---|
 Mc/Mcc| 粗调电流电位器读数（16LSB）
 Sc/Scc| 精调电流电位器读数（1LSB）
-Ss| 切换到CalPhyCurrentMax
+Ss| 记录输出电流为0时的参数(电流DAC)，切换到CalPhyCurrentMax
 ### CalCurrentMax
-**标定输入、输出电流最大值**
-- 调整到电流输出5A，按下Ss
+**标定输出电流最大值**
+- 短路输出，调整到电流输出5A，按下Ss
 
 |事件|动作|
 |---|---|
 Mc/Mcc| 粗调电流电位器读数（16LSB）
 Sc/Scc| 精调电流电位器读数（1LSB）
-Ss | 记录读数并进入CalBK
+Ss | 记录输出电流为5A时的参数(电流DAC)，切换到InputVoltageDiss
+### InputVoltageDiss
+**输入耗散电压读数**
+- 输入耗散电压读数
+Mc/Mcc| 粗调电压输入（100mV）
+Sc/Scc| 精调电压读数（1mV）
+Ss | 记录输出电压为0时的耗散电压读数参数(从万用表)，切换到CalBK
 ### CalBK
-**自动校准输入电压ADC和电流ADC，以及输出电压ADC**
+**自动校准耗散电压ADC和电流ADC，以及输出电压ADC**
 |事件|动作|
 |---|---|
 1s |依次校准，如果完成, 写入rom

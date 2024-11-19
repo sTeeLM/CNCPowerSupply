@@ -1,33 +1,12 @@
 Protel Design System Design Rule Check
 PCB File : D:\Lab\CNCPowerSupply\PCBs\PowerPlane\PowerPlane.PcbDoc
-Date     : 2024/11/15
-Time     : 21:43:26
+Date     : 2024/11/19
+Time     : 18:40:14
 
-Processing Rule : Clearance Constraint (Gap=0.508mm) (Not ( 
-WithinRoom('RoomDefinition4') or  WithinRoom('RoomDefinition5') or  WithinRoom('RoomDefinition6') or
-WithinRoom('Corner1') or
-WithinRoom('Corner2') or       
-WithinRoom('Corner3') or       
-WithinRoom('Corner4')
-)),(Not ( 
-WithinRoom('RoomDefinition4') or  WithinRoom('RoomDefinition5') or  WithinRoom('RoomDefinition6') or
-WithinRoom('Corner1') or
-WithinRoom('Corner2') or       
-WithinRoom('Corner3') or       
-WithinRoom('Corner4')
-))
+Processing Rule : Clearance Constraint (Gap=0.508mm) (Not (  WithinRoom('RoomDefinition4') or  WithinRoom('RoomDefinition5') or  WithinRoom('RoomDefinition6') or WithinRoom('Corner1') or WithinRoom('Corner2') or        WithinRoom('Corner3') or        WithinRoom('Corner4') )),(Not (  WithinRoom('RoomDefinition4') or  WithinRoom('RoomDefinition5') or  WithinRoom('RoomDefinition6') or WithinRoom('Corner1') or WithinRoom('Corner2') or        WithinRoom('Corner3') or        WithinRoom('Corner4') ))
 Rule Violations :0
 
-Processing Rule : Clearance Constraint (Gap=0.15mm) (WithinRoom('RoomDefinition1') or WithinRoom('RoomDefinition2') or  WithinRoom('RoomDefinition3') or  WithinRoom('RoomDefinition4') or  WithinRoom('RoomDefinition5') or  WithinRoom('RoomDefinition6') or
-WithinRoom('Corner1') or
-WithinRoom('Corner2') or       
-WithinRoom('Corner3') or       
-WithinRoom('Corner4')),(WithinRoom('RoomDefinition1') or WithinRoom('RoomDefinition2') or  WithinRoom('RoomDefinition3') or
-WithinRoom('RoomDefinition4') or  WithinRoom('RoomDefinition5') or  WithinRoom('RoomDefinition6') or
-WithinRoom('Corner1') or
-WithinRoom('Corner2') or       
-WithinRoom('Corner3') or       
-WithinRoom('Corner4'))
+Processing Rule : Clearance Constraint (Gap=0.15mm) (WithinRoom('RoomDefinition1') or WithinRoom('RoomDefinition2') or  WithinRoom('RoomDefinition3') or  WithinRoom('RoomDefinition4') or  WithinRoom('RoomDefinition5') or  WithinRoom('RoomDefinition6') or WithinRoom('Corner1') or WithinRoom('Corner2') or        WithinRoom('Corner3') or        WithinRoom('Corner4')),(WithinRoom('RoomDefinition1') or WithinRoom('RoomDefinition2') or  WithinRoom('RoomDefinition3') or WithinRoom('RoomDefinition4') or  WithinRoom('RoomDefinition5') or  WithinRoom('RoomDefinition6') or WithinRoom('Corner1') or WithinRoom('Corner2') or        WithinRoom('Corner3') or        WithinRoom('Corner4'))
 Rule Violations :0
 
 Processing Rule : Short-Circuit Constraint (Allowed=No) (All),(All)

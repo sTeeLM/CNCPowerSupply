@@ -16,8 +16,8 @@ void debug_onoff(bit enable)
 
 void debug_printf(const char * fmt, ...)
 {
+#ifdef __XMETER_DEBUG__   
   va_list arg_ptr;
-#ifdef __XMETER_DEBUG__ 
   if(debug_is_on) {
     va_start (arg_ptr, fmt); /* format string */
     vprintf (fmt, arg_ptr);

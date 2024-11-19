@@ -47,15 +47,15 @@ static uint16_t xmeter_dac_internal_bit_c;
 */
 #define XMETER_ADC_MUX_CURRENT  (0x4 << 12)  
 #define XMETER_ADC_MUX_VOLTAGE_OUT  (0x5 << 12)
-#define XMETER_ADC_MUX_VOLTAGE_IN   (0x6 << 12)
+#define XMETER_ADC_MUX_VOLTAGE_DISS (0x6 << 12)
 #define XMETER_ADC_MUX_TEMP  (0x7 << 12)
 
-xmeter_value_t xmeter_adc_current;       // 输出电压
-xmeter_value_t xmeter_adc_voltage_out;   // 输出电流
-xmeter_value_t xmeter_power_out;     // 输出功率
-xmeter_value_t xmeter_power_diss;    // 耗散功率
-xmeter_value_t xmeter_adc_temp;          // 温度
-xmeter_value_t xmeter_adc_voltage_in;    // 输入电压
+xmeter_value_t xmeter_adc_current;         // 输出电压
+xmeter_value_t xmeter_adc_voltage_out;     // 输出电流
+xmeter_value_t xmeter_power_out;           // 输出功率
+xmeter_value_t xmeter_power_diss;          // 耗散功率
+xmeter_value_t xmeter_adc_temp;            // 温度
+xmeter_value_t xmeter_adc_voltage_diss;    // 耗散电压
 
 static double xmeter_adc_current_f;
 static double xmeter_adc_current_k;
@@ -65,9 +65,9 @@ static double xmeter_adc_voltage_out_f;
 static double xmeter_adc_voltage_out_k;
 static double xmeter_adc_voltage_out_b;
 
-static double xmeter_adc_voltage_in_f;
-static double xmeter_adc_voltage_in_k;
-static double xmeter_adc_voltage_in_b;
+static double xmeter_adc_voltage_diss_f;
+static double xmeter_adc_voltage_diss_k;
+static double xmeter_adc_voltage_diss_b;
 
 static double xmeter_adc_temp_f;
 static double xmeter_power_out_f;
@@ -95,7 +95,7 @@ static const xmeter_value_t code xmeter_min_temp_lo = {0, XMETER_RES_TEMP, 0, 0}
 static const xmeter_value_t code xmeter_max_power_diss_max = {0, XMETER_RES_POWER, 80, 0};  /* 80W */
 static const xmeter_value_t code xmeter_max_power_diss_min = {0, XMETER_RES_POWER, 40, 0};  /* 40W */
 static const xmeter_value_t code xmeter_zero2 = {0, XMETER_RES_TWO, 0, 0};
-static const xmeter_value_t code xmeter_zero3 = {0, XMETER_RES_THREE, 0, 0};
+const xmeter_value_t code xmeter_zero3 = {0, XMETER_RES_THREE, 0, 0};
 
 static const xmeter_value_t code xmeter_step_fine_voltage = {0, XMETER_RES_VOLTAGE, 0, 1};
 static const xmeter_value_t code xmeter_step_coarse_voltage = {0, XMETER_RES_VOLTAGE, 0, 100};
@@ -128,312 +128,312 @@ struct xmeter_adc_temp_slot
 static const struct xmeter_adc_temp_slot code 
   xmeter_adc_temp_table[] = 
 {
-  {-55.000,0X0085},
-  {-54.000,0X008C},
-  {-53.000,0X0093},
-  {-52.000,0X009B},
-  {-51.000,0X00A4},
-  {-50.000,0X00AD},
-  {-49.000,0X00B7},
-  {-48.000,0X00C2},
-  {-47.000,0X00CD},
-  {-46.000,0X00D9},
-  {-45.000,0X00E7},
-  {-44.000,0X00F5},
-  {-43.000,0X0104},
-  {-42.000,0X0114},
-  {-41.000,0X0125},
-  {-40.000,0X0138},
-  {-39.000,0X014B},
-  {-38.000,0X0160},
-  {-37.000,0X0176},
-  {-36.000,0X018D},
-  {-35.000,0X01A5},
-  {-34.000,0X01C0},
-  {-33.000,0X01DB},
-  {-32.000,0X01F8},
-  {-31.000,0X0217},
-  {-30.000,0X0237},
-  {-29.000,0X0259},
-  {-28.000,0X027D},
-  {-27.000,0X02A3},
-  {-26.000,0X02CA},
-  {-25.000,0X02F4},
-  {-24.000,0X031F},
-  {-23.000,0X034D},
-  {-22.000,0X037D},
-  {-21.000,0X03AF},
-  {-20.000,0X03E3},
-  {-19.000,0X041A},
-  {-18.000,0X0453},
-  {-17.000,0X048E},
-  {-16.000,0X04CC},
-  {-15.000,0X050D},
-  {-14.000,0X0550},
-  {-13.000,0X0596},
-  {-12.000,0X05DE},
-  {-11.000,0X062A},
-  {-10.000,0X0678},
-  {-9.000, 0X06C9},
-  {-8.000, 0X071D},
-  {-7.000, 0X0774},
-  {-6.000, 0X07CE},
-  {-5.000, 0X082C},
-  {-4.000, 0X088C},
-  {-3.000, 0X08F0},
-  {-2.000, 0X0957},
-  {-1.000, 0X09C1},
-  {0.000,  0X0A24},
-  {1.000,  0X0A9F},
-  {2.000,  0X0B13},
-  {3.000,  0X0B8B},
-  {4.000,  0X0C06},
-  {5.000,  0X0C84},
-  {6.000,  0X0D06},
-  {7.000,  0X0D8B},
-  {8.000,  0X0E13},
-  {9.000,  0X0E9F},
-  {10.000, 0X0F2E},
-  {11.000, 0X0FC1},
-  {12.000, 0X1057},
-  {13.000, 0X10F0},
-  {14.000, 0X118C},
-  {15.000, 0X122C},
-  {16.000, 0X12CF},
-  {17.000, 0X1374},
-  {18.000, 0X141D},
-  {19.000, 0X14C9},
-  {20.000, 0X1577},
-  {21.000, 0X1628},
-  {22.000, 0X16DC},
-  {23.000, 0X1792},
-  {24.000, 0X184B},
-  {25.000, 0X1906},
-  {26.000, 0X19C3},
-  {27.000, 0X1A82},
-  {28.000, 0X1B43},
-  {29.000, 0X1C05},
-  {30.000, 0X1CCA},
-  {31.000, 0X1D8F},
-  {32.000, 0X1E56},
-  {33.000, 0X1F1E},
-  {34.000, 0X1FE7},
-  {35.000, 0X20B0},
-  {36.000, 0X217A},
-  {37.000, 0X2245},
-  {38.000, 0X2310},
-  {39.000, 0X23DA},
-  {40.000, 0X24A5},
-  {41.000, 0X2570},
-  {42.000, 0X263A},
-  {43.000, 0X2703},
-  {44.000, 0X27CC},
-  {45.000, 0X2894},
-  {46.000, 0X295A},
-  {47.000, 0X2A20},
-  {48.000, 0X2AE4},
-  {49.000, 0X2BA7},
-  {50.000, 0X2C68},
-  {51.000, 0X2D27},
-  {52.000, 0X2DE4},
-  {53.000, 0X2EA0},
-  {54.000, 0X2F59},
-  {55.000, 0X3010},
-  {56.000, 0X30C4},
-  {57.000, 0X3177},
-  {58.000, 0X3226},
-  {59.000, 0X32D4},
-  {60.000, 0X337E},
-  {61.000, 0X3426},
-  {62.000, 0X34CB},
-  {63.000, 0X356D},
-  {64.000, 0X360D},
-  {65.000, 0X36A9},
-  {66.000, 0X3743},
-  {67.000, 0X37DA},
-  {68.000, 0X386E},
-  {69.000, 0X38FF},
-  {70.000, 0X398C},
-  {71.000, 0X3A17},
-  {72.000, 0X3A9F},
-  {73.000, 0X3B24},
-  {74.000, 0X3BA6},
-  {75.000, 0X3C25},
-  {76.000, 0X3CA1},
-  {77.000, 0X3D1A},
-  {78.000, 0X3D90},
-  {79.000, 0X3E04},
-  {80.000, 0X3E75},
-  {81.000, 0X3EE3},
-  {82.000, 0X3F4E},
-  {83.000, 0X3FB6},
-  {84.000, 0X401C},
-  {85.000, 0X407F},
-  {86.000, 0X40E0},
-  {87.000, 0X413E},
-  {88.000, 0X4199},
-  {89.000, 0X41F3},
-  {90.000, 0X4249},
-  {91.000, 0X429E},
-  {92.000, 0X42F0},
-  {93.000, 0X4340},
-  {94.000, 0X438D},
-  {95.000, 0X43D9},
-  {96.000, 0X4422},
-  {97.000, 0X446A},
-  {98.000, 0X44AF},
-  {99.000, 0X44F2},
-  {100.000,0X452E},
-  {101.000,0X4573},
-  {102.000,0X45B1},
-  {103.000,0X45ED},
-  {104.000,0X4628},
-  {105.000,0X4660},
-  {106.000,0X4697},
-  {107.000,0X46CD},
-  {108.000,0X4701},
-  {109.000,0X4733},
-  {110.000,0X4764},
-  {111.000,0X4793},
-  {112.000,0X47C2},
-  {113.000,0X47EE},
-  {114.000,0X481A},
-  {115.000,0X4844},
-  {116.000,0X486D},
-  {117.000,0X4895},
-  {118.000,0X48BC},
-  {119.000,0X48E1},
-  {120.000,0X4906},
-  {121.000,0X4929},
-  {122.000,0X494C},
-  {123.000,0X496D},
-  {124.000,0X498D},
-  {125.000,0X49AD},
-  {126.000,0X49CB},
-  {127.000,0X49E9},
-  {128.000,0X4A06},
-  {129.000,0X4A22},
-  {130.000,0X4A3D},
-  {131.000,0X4A58},
-  {132.000,0X4A71},
-  {133.000,0X4A8A},
-  {134.000,0X4AA2},
-  {135.000,0X4ABA},
-  {136.000,0X4AD1},
-  {137.000,0X4AE7},
-  {138.000,0X4AFD},
-  {139.000,0X4B11},
-  {140.000,0X4B26},
-  {141.000,0X4B3A},
-  {142.000,0X4B4D},
-  {143.000,0X4B60},
-  {144.000,0X4B72},
-  {145.000,0X4B83},
-  {146.000,0X4B95},
-  {147.000,0X4BA6},
-  {148.000,0X4BB6},
-  {149.000,0X4BC5},
-  {150.000,0X4BD5},
-  {151.000,0X4BE4},
-  {152.000,0X4BF2},
-  {153.000,0X4C00},
-  {154.000,0X4C0E},
-  {155.000,0X4C1C},
-  {156.000,0X4C29},
-  {157.000,0X4C35},
-  {158.000,0X4C42},
-  {159.000,0X4C4D},
-  {160.000,0X4C59},
-  {161.000,0X4C65},
-  {162.000,0X4C70},
-  {163.000,0X4C7B},
-  {164.000,0X4C85},
-  {165.000,0X4C8F},
-  {166.000,0X4C99},
-  {167.000,0X4CA3},
-  {168.000,0X4CAC},
-  {169.000,0X4CB5},
-  {170.000,0X4CBE},
-  {171.000,0X4CC7},
-  {172.000,0X4CD0},
-  {173.000,0X4CD8},
-  {174.000,0X4CE0},
-  {175.000,0X4CE8},
-  {176.000,0X4CEF},
-  {177.000,0X4CF7},
-  {178.000,0X4CFE},
-  {179.000,0X4D05},
-  {180.000,0X4D0C},
-  {181.000,0X4D13},
-  {182.000,0X4D19},
-  {183.000,0X4D20},
-  {184.000,0X4D26},
-  {185.000,0X4D2C},
-  {186.000,0X4D32},
-  {187.000,0X4D38},
-  {188.000,0X4D3D},
-  {189.000,0X4D43},
-  {190.000,0X4D48},
-  {191.000,0X4D4D},
-  {192.000,0X4D53},
-  {193.000,0X4D58},
-  {194.000,0X4D5C},
-  {195.000,0X4D61},
-  {196.000,0X4D66},
-  {197.000,0X4D6A},
-  {198.000,0X4D6F},
-  {199.000,0X4D73},
-  {200.000,0X4D77},
-  {201.000,0X4D7B},
-  {202.000,0X4D7F},
-  {203.000,0X4D83},
-  {204.000,0X4D87},
-  {205.000,0X4D8B},
-  {206.000,0X4D8E},
-  {207.000,0X4D92},
-  {208.000,0X4D95},
-  {209.000,0X4D99},
-  {210.000,0X4D9C},
-  {211.000,0X4D9F},
-  {212.000,0X4DA2},
-  {213.000,0X4DA5},
-  {214.000,0X4DA9},
-  {215.000,0X4DAC},
-  {216.000,0X4DAE},
-  {217.000,0X4DB1},
-  {218.000,0X4DB4},
-  {219.000,0X4DB7},
-  {220.000,0X4DB9},
-  {221.000,0X4DBC},
-  {222.000,0X4DBE},
-  {223.000,0X4DC1},
-  {224.000,0X4DC3},
-  {225.000,0X4DC6},
-  {226.000,0X4DC8},
-  {227.000,0X4DCA},
-  {228.000,0X4DCC},
-  {229.000,0X4DCF},
-  {230.000,0X4DD1},
-  {231.000,0X4DD3},
-  {232.000,0X4DD4},
-  {233.000,0X4DD7},
-  {234.000,0X4DD9},
-  {235.000,0X4DDA},
-  {236.000,0X4DDC},
-  {237.000,0X4DDE},
-  {238.000,0X4DE0},
-  {239.000,0X4DE2},
-  {240.000,0X4DE3},
-  {241.000,0X4DE5},
-  {242.000,0X4DE7},
-  {243.000,0X4DE8},
-  {244.000,0X4DEA},
-  {245.000,0X4DEB},
-  {246.000,0X4DED},
-  {247.000,0X4DEE},
-  {248.000,0X4DEF},
-  {249.000,0X4DF1},
-  {250.000,0X4DF2},
+{-55.000 ,0X4DBF},
+{-54.000 ,0X4DB8},
+{-53.000 ,0X4DB1},
+{-52.000 ,0X4DA9},
+{-51.000 ,0X4DA0},
+{-50.000 ,0X4D97},
+{-49.000 ,0X4D8D},
+{-48.000 ,0X4D82},
+{-47.000 ,0X4D77},
+{-46.000 ,0X4D6A},
+{-45.000 ,0X4D5D},
+{-44.000 ,0X4D4F},
+{-43.000 ,0X4D40},
+{-42.000 ,0X4D30},
+{-41.000 ,0X4D1F},
+{-40.000 ,0X4D0C},
+{-39.000 ,0X4CF9},
+{-38.000 ,0X4CE4},
+{-37.000 ,0X4CCE},
+{-36.000 ,0X4CB7},
+{-35.000 ,0X4C9E},
+{-34.000 ,0X4C84},
+{-33.000 ,0X4C69},
+{-32.000 ,0X4C4C},
+{-31.000 ,0X4C2D},
+{-30.000 ,0X4C0D},
+{-29.000 ,0X4BEB},
+{-28.000 ,0X4BC7},
+{-27.000 ,0X4BA1},
+{-26.000 ,0X4B7A},
+{-25.000 ,0X4B50},
+{-24.000 ,0X4B24},
+{-23.000 ,0X4AF7},
+{-22.000 ,0X4AC7},
+{-21.000 ,0X4A95},
+{-20.000 ,0X4A61},
+{-19.000 ,0X4A2A},
+{-18.000 ,0X49F1},
+{-17.000 ,0X49B6},
+{-16.000 ,0X4978},
+{-15.000 ,0X4937},
+{-14.000 ,0X48F4},
+{-13.000 ,0X48AE},
+{-12.000 ,0X4866},
+{-11.000 ,0X481A},
+{-10.000 ,0X47CC},
+{-9.000 ,0X477B	},
+{-8.000 ,0X4727	},
+{-7.000 ,0X46D0	},
+{-6.000 ,0X4676	},
+{-5.000 ,0X4618	},
+{-4.000 ,0X45B8	},
+{-3.000 ,0X4554	},
+{-2.000 ,0X44ED	},
+{-1.000 ,0X4483	},
+{0.000 ,0X4420	},
+{1.000 ,0X43A5	},
+{2.000 ,0X4331	},
+{3.000 ,0X42B9	},
+{4.000 ,0X423E	},
+{5.000 ,0X41C0	},
+{6.000 ,0X413E	},
+{7.000 ,0X40B9	},
+{8.000 ,0X4031	},
+{9.000 ,0X3FA5	},
+{10.000 ,0X3F16	},
+{11.000 ,0X3E83	},
+{12.000 ,0X3DED	},
+{13.000 ,0X3D54	},
+{14.000 ,0X3CB7	},
+{15.000 ,0X3C18	},
+{16.000 ,0X3B75	},
+{17.000 ,0X3ACF	},
+{18.000 ,0X3A27	},
+{19.000 ,0X397B	},
+{20.000 ,0X38CD	},
+{21.000 ,0X381C	},
+{22.000 ,0X3768	},
+{23.000 ,0X36B2	},
+{24.000 ,0X35F9	},
+{25.000 ,0X353E	},
+{26.000 ,0X3481	},
+{27.000 ,0X33C2	},
+{28.000 ,0X3301	},
+{29.000 ,0X323E	},
+{30.000 ,0X317A	},
+{31.000 ,0X30B5	},
+{32.000 ,0X2FEE	},
+{33.000 ,0X2F26	},
+{34.000 ,0X2E5D	},
+{35.000 ,0X2D94	},
+{36.000 ,0X2CCA	},
+{37.000 ,0X2BFF	},
+{38.000 ,0X2B34	},
+{39.000 ,0X2A69	},
+{40.000 ,0X299F	},
+{41.000 ,0X28D4	},
+{42.000 ,0X280A	},
+{43.000 ,0X2741	},
+{44.000 ,0X2678	},
+{45.000 ,0X25B0	},
+{46.000 ,0X24E9	},
+{47.000 ,0X2424	},
+{48.000 ,0X2360	},
+{49.000 ,0X229D	},
+{50.000 ,0X21DC	},
+{51.000 ,0X211D	},
+{52.000 ,0X2060	},
+{53.000 ,0X1FA4	},
+{54.000 ,0X1EEB	},
+{55.000 ,0X1E34	},
+{56.000 ,0X1D80	},
+{57.000 ,0X1CCD	},
+{58.000 ,0X1C1D	},
+{59.000 ,0X1B70	},
+{60.000 ,0X1AC6	},
+{61.000 ,0X1A1E	},
+{62.000 ,0X1979	},
+{63.000 ,0X18D7	},
+{64.000 ,0X1837	},
+{65.000 ,0X179A	},
+{66.000 ,0X1701	},
+{67.000 ,0X166A	},
+{68.000 ,0X15D6	},
+{69.000 ,0X1545	},
+{70.000 ,0X14B8	},
+{71.000 ,0X142D	},
+{72.000 ,0X13A5	},
+{73.000 ,0X1320	},
+{74.000 ,0X129E	},
+{75.000 ,0X121F	},
+{76.000 ,0X11A3	},
+{77.000 ,0X112A	},
+{78.000 ,0X10B3	},
+{79.000 ,0X1040	},
+{80.000 ,0X0FCF	},
+{81.000 ,0X0F61	},
+{82.000 ,0X0EF6	},
+{83.000 ,0X0E8E	},
+{84.000 ,0X0E28	},
+{85.000 ,0X0DC5	},
+{86.000 ,0X0D64	},
+{87.000 ,0X0D06	},
+{88.000 ,0X0CAB	},
+{89.000 ,0X0C51	},
+{90.000 ,0X0BFB	},
+{91.000 ,0X0BA6	},
+{92.000 ,0X0B54	},
+{93.000 ,0X0B04	},
+{94.000 ,0X0AB7	},
+{95.000 ,0X0A6B	},
+{96.000 ,0X0A22	},
+{97.000 ,0X09DA	},
+{98.000 ,0X0995	},
+{99.000 ,0X0952	},
+{100.000 ,0X0916},
+{101.000 ,0X08D0},
+{102.000 ,0X0893},
+{103.000 ,0X0857},
+{104.000 ,0X081C},
+{105.000 ,0X07E4},
+{106.000 ,0X07AD},
+{107.000 ,0X0777},
+{108.000 ,0X0743},
+{109.000 ,0X0711},
+{110.000 ,0X06E0},
+{111.000 ,0X06B1},
+{112.000 ,0X0682},
+{113.000 ,0X0656},
+{114.000 ,0X062A},
+{115.000 ,0X0600},
+{116.000 ,0X05D7},
+{117.000 ,0X05AF},
+{118.000 ,0X0588},
+{119.000 ,0X0563},
+{120.000 ,0X053E},
+{121.000 ,0X051B},
+{122.000 ,0X04F8},
+{123.000 ,0X04D7},
+{124.000 ,0X04B7},
+{125.000 ,0X0497},
+{126.000 ,0X0479},
+{127.000 ,0X045B},
+{128.000 ,0X043E},
+{129.000 ,0X0422},
+{130.000 ,0X0407},
+{131.000 ,0X03EC},
+{132.000 ,0X03D3},
+{133.000 ,0X03BA},
+{134.000 ,0X03A2},
+{135.000 ,0X038A},
+{136.000 ,0X0373},
+{137.000 ,0X035D},
+{138.000 ,0X0347},
+{139.000 ,0X0333},
+{140.000 ,0X031E},
+{141.000 ,0X030A},
+{142.000 ,0X02F7},
+{143.000 ,0X02E4},
+{144.000 ,0X02D2},
+{145.000 ,0X02C0},
+{146.000 ,0X02AF},
+{147.000 ,0X029E},
+{148.000 ,0X028E},
+{149.000 ,0X027E},
+{150.000 ,0X026F},
+{151.000 ,0X0260},
+{152.000 ,0X0252},
+{153.000 ,0X0243},
+{154.000 ,0X0236},
+{155.000 ,0X0228},
+{156.000 ,0X021B},
+{157.000 ,0X020F},
+{158.000 ,0X0202},
+{159.000 ,0X01F6},
+{160.000 ,0X01EB},
+{161.000 ,0X01DF},
+{162.000 ,0X01D4},
+{163.000 ,0X01C9},
+{164.000 ,0X01BF},
+{165.000 ,0X01B5},
+{166.000 ,0X01AB},
+{167.000 ,0X01A1},
+{168.000 ,0X0198},
+{169.000 ,0X018F},
+{170.000 ,0X0186},
+{171.000 ,0X017D},
+{172.000 ,0X0174},
+{173.000 ,0X016C},
+{174.000 ,0X0164},
+{175.000 ,0X015C},
+{176.000 ,0X0155},
+{177.000 ,0X014D},
+{178.000 ,0X0146},
+{179.000 ,0X013F},
+{180.000 ,0X0138},
+{181.000 ,0X0131},
+{182.000 ,0X012B},
+{183.000 ,0X0124},
+{184.000 ,0X011E},
+{185.000 ,0X0118},
+{186.000 ,0X0112},
+{187.000 ,0X010C},
+{188.000 ,0X0106},
+{189.000 ,0X0101},
+{190.000 ,0X00FC},
+{191.000 ,0X00F7},
+{192.000 ,0X00F1},
+{193.000 ,0X00EC},
+{194.000 ,0X00E8},
+{195.000 ,0X00E3},
+{196.000 ,0X00DE},
+{197.000 ,0X00DA},
+{198.000 ,0X00D5},
+{199.000 ,0X00D1},
+{200.000 ,0X00CD},
+{201.000 ,0X00C9},
+{202.000 ,0X00C5},
+{203.000 ,0X00C1},
+{204.000 ,0X00BD},
+{205.000 ,0X00B9},
+{206.000 ,0X00B6},
+{207.000 ,0X00B2},
+{208.000 ,0X00AE},
+{209.000 ,0X00AB},
+{210.000 ,0X00A8},
+{211.000 ,0X00A5},
+{212.000 ,0X00A1},
+{213.000 ,0X009F},
+{214.000 ,0X009B},
+{215.000 ,0X0098},
+{216.000 ,0X0096},
+{217.000 ,0X0093},
+{218.000 ,0X0090},
+{219.000 ,0X008D},
+{220.000 ,0X008B},
+{221.000 ,0X0088},
+{222.000 ,0X0086},
+{223.000 ,0X0083},
+{224.000 ,0X0081},
+{225.000 ,0X007E},
+{226.000 ,0X007C},
+{227.000 ,0X007A},
+{228.000 ,0X0077},
+{229.000 ,0X0075},
+{230.000 ,0X0073},
+{231.000 ,0X0071},
+{232.000 ,0X006F},
+{233.000 ,0X006D},
+{234.000 ,0X006B},
+{235.000 ,0X006A},
+{236.000 ,0X0068},
+{237.000 ,0X0066},
+{238.000 ,0X0064},
+{239.000 ,0X0062},
+{240.000 ,0X0061},
+{241.000 ,0X005F},
+{242.000 ,0X005D},
+{243.000 ,0X005C},
+{244.000 ,0X005A},
+{245.000 ,0X0059},
+{246.000 ,0X0057},
+{247.000 ,0X0056},
+{248.000 ,0X0054},
+{249.000 ,0X0053},
+{250.000 ,0X0052}
 };
 
 void xmeter_dump_value(const char * name, xmeter_value_t * pval, uint8_t cnt)
@@ -459,10 +459,10 @@ bit xmeter_cal(uint16_t x1, uint16_t x2, double y1, double y2, double * k, doubl
   return *k != 0.0;
 }
 
-void xmeter_write_rom_adc_voltage_in_kb(double k, double b)
+void xmeter_write_rom_adc_voltage_diss_kb(double k, double b)
 {
-  rom_write32(ROM_XMETER_ADC_VOLTAGE_IN_K, &k);
-  rom_write32(ROM_XMETER_ADC_VOLTAGE_IN_B, &b);
+  rom_write32(ROM_XMETER_ADC_VOLTAGE_DISS_K, &k);
+  rom_write32(ROM_XMETER_ADC_VOLTAGE_DISS_B, &b);
 }
 
 void xmeter_write_rom_adc_voltage_out_kb(double k, double b)
@@ -515,10 +515,10 @@ void xmeter_rom_factory_reset(void)
   
   /* xmeter_adc_voltage_in, fsr is 0~45.0
      0000 -> 0.0
-     7fff -> 4.096 (ADC输入电压)
+     7fff -> 4.096 (ADC耗散电压)
   */  
   xmeter_cal(0x0, 0x7fff, 0.0, 45.0, &k, &b);
-  xmeter_write_rom_adc_voltage_in_kb(k, b);
+  xmeter_write_rom_adc_voltage_diss_kb(k, b);
   
   /* xmeter_dac_current, fsr is 0~5.0
      0000 -> 0.0
@@ -640,12 +640,11 @@ void xmeter_load_config(void)
   rom_read32(ROM_XMETER_ADC_VOLTAGE_OUT_B, &xmeter_adc_voltage_out_b);
   CDBG("ADC_Vob = %f\n", xmeter_adc_voltage_out_b); 
 
-  rom_read32(ROM_XMETER_ADC_VOLTAGE_IN_K, &xmeter_adc_voltage_in_k);
-  CDBG("ADC_Vik = %f\n", xmeter_adc_voltage_in_k); 
+  rom_read32(ROM_XMETER_ADC_VOLTAGE_DISS_K, &xmeter_adc_voltage_diss_k);
+  CDBG("ADC_Vdk = %f\n", xmeter_adc_voltage_diss_k); 
   
-  rom_read32(ROM_XMETER_ADC_VOLTAGE_IN_B, &xmeter_adc_voltage_in_b);
-  CDBG("ADC_Vib = %f\n", xmeter_adc_voltage_in_b); 
-  
+  rom_read32(ROM_XMETER_ADC_VOLTAGE_DISS_B, &xmeter_adc_voltage_diss_b);
+  CDBG("ADC_Vdb = %f\n", xmeter_adc_voltage_diss_b); 
   
   rom_read32(ROM_XMETER_DAC_CURRENT_K, &xmeter_dac_current_k);
   CDBG("DAC_Ck = %f\n", xmeter_dac_current_k);
@@ -1016,7 +1015,7 @@ static void xmeter_read_adc_voltage_out(void)
     xmeter_adc_voltage_out_b, XMETER_RES_VOLTAGE, 1); 
 }
 
-uint16_t xmeter_get_adc_bits_voltage_in(void)
+uint16_t xmeter_get_adc_bits_voltage_diss(void)
 {
   uint16_t config = 0;
   uint16_t val = 0;
@@ -1027,7 +1026,7 @@ uint16_t xmeter_get_adc_bits_voltage_in(void)
   I2C_Gets(XMETER_ADC_I2C_ADDR, XMETER_ADC_I2C_SUBADDR_CONFIG, 2, (uint8_t*)&config);
   
   config &= ~(0x7 << 12);
-  config |= XMETER_ADC_MUX_VOLTAGE_IN;
+  config |= XMETER_ADC_MUX_VOLTAGE_DISS;
   config |= 0x8000; /* OS = 1*/
   
   config &= ~(0x7 << 9); 
@@ -1045,21 +1044,21 @@ uint16_t xmeter_get_adc_bits_voltage_in(void)
   return val;
 }
 
-static void xmeter_read_adc_voltage_in(void)
+static void xmeter_read_adc_voltage_diss(void)
 {
   
   uint16_t val;
   
-  val = xmeter_get_adc_bits_voltage_in();
+  val = xmeter_get_adc_bits_voltage_diss();
   
-  xmeter_adc_voltage_in_f = xmeter_bits2value(
+  xmeter_adc_voltage_diss_f = xmeter_bits2value(
     val, 
-    &xmeter_adc_voltage_in, 
-    xmeter_adc_voltage_in_k, 
-    xmeter_adc_voltage_in_b, XMETER_RES_VOLTAGE, 1);   
+    &xmeter_adc_voltage_diss, 
+    xmeter_adc_voltage_diss_k, 
+    xmeter_adc_voltage_diss_b, XMETER_RES_VOLTAGE, 1);   
   
-  //CDBG(("adc vin bits and float: %x %f\n", val, xmeter_adc_voltage_in_f));
-  //xmeter_dump_value("adc vin", &xmeter_adc_voltage_in, 1);
+  //CDBG(("adc vdis bits and float: %x %f\n", val, xmeter_adc_voltage_diss_f));
+  //xmeter_dump_value("adc vdis", &xmeter_adc_voltage_diss, 1);
 }
 
 bit xmeter_read_adc_temp(void)
@@ -1156,14 +1155,14 @@ void xmeter_read_adc(void)
 {
   xmeter_read_adc_current();
   xmeter_read_adc_voltage_out();
-  xmeter_read_adc_voltage_in();
+  xmeter_read_adc_voltage_diss();
   xmeter_read_adc_temp();
   xmeter_power_out_f = xmeter_adc_current_f * xmeter_adc_voltage_out_f;
   xmeter_float2val(xmeter_power_out_f, &xmeter_power_out, XMETER_RES_POWER);
   //CDBG(("adc po float %f x %f = %f\n", xmeter_adc_current_f, xmeter_adc_voltage_out_f, xmeter_power_out_f));
   //xmeter_dump_value("adc po", &xmeter_power_out, 1);
     
-  xmeter_power_diss_f = xmeter_adc_current_f * (xmeter_adc_voltage_in_f - xmeter_adc_voltage_out_f);
+  xmeter_power_diss_f = xmeter_adc_current_f * xmeter_adc_voltage_diss_f;
   xmeter_float2val(xmeter_power_diss_f, &xmeter_power_diss, XMETER_RES_POWER); 
   //CDBG(("adc pd float %f x %f = %f\n", xmeter_power_diss_f, xmeter_power_diss_f, xmeter_power_diss_f));
   //xmeter_dump_value("adc pd", &xmeter_power_diss, 1);

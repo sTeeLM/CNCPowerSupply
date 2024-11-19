@@ -132,11 +132,11 @@ static bool control_do_get_adc_current(void)
   return true;
 }
 
-static bool control_do_get_adc_voltage_in(void)
+static bool control_do_get_adc_voltage_diss(void)
 {
   memcpy(&control_res, &control_cmd, sizeof(control_msg_t));
   
-  xmeter_assign_value(&xmeter_adc_voltage_in, &control_res.msg_body.xmeter.xmeter_val);
+  xmeter_assign_value(&xmeter_adc_voltage_diss, &control_res.msg_body.xmeter.xmeter_val);
   
   control_finish_msg(sizeof(control_msg_body_xmeter_t));
   return true;
@@ -503,7 +503,7 @@ static control_fun_t code control_funs[CONTROL_MSG_CODE_CNT] =
   control_do_start_stop_switch,
   control_do_get_xmeter_status,
   control_do_get_adc_current,
-  control_do_get_adc_voltage_in, 
+  control_do_get_adc_voltage_diss, 
   control_do_get_adc_voltage_out,
   control_do_get_adc_temp, 
   control_do_get_power_out,

@@ -8,3 +8,5 @@ ProjectPath=XMeter\XMeter.PrjPcb
 ProjectPath=Control\Control.PrjPcb
 [Project4]
 ProjectPath=HeatSink\HeatSink.PrjPcb
+[Project5]
+ProjectPath=EMIRemover\EMIRemover.PrjPcb

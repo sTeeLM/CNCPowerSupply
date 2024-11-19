@@ -69,7 +69,7 @@ static void sm_xmeter_init_aux(uint8_t index)
 {
   lcd_clear();
   if(index == 0) {
-    lcd_set_string(0, 0, "Vi 0.000 V");
+    lcd_set_string(0, 0, "Vd 0.000 V");
     lcd_set_string(1, 0, "Pd 0.000 W");   
   } else {
     lcd_set_string(0, 0, "T +xx.xx C ");
@@ -81,8 +81,8 @@ static void sm_xmeter_init_aux(uint8_t index)
 static void sm_xmeter_fill_aux(uint8_t index)
 {
   if(index == 0) {
-    lcd_set_char(0, 2, xmeter_adc_voltage_in.neg ? '-' : ' ');
-    lcd_set_digit(0, 3, xmeter_adc_voltage_in.integer, xmeter_adc_voltage_in.decimal); 
+    lcd_set_char(0, 2, xmeter_adc_voltage_diss.neg ? '-' : ' ');
+    lcd_set_digit(0, 3, xmeter_adc_voltage_diss.integer, xmeter_adc_voltage_diss.decimal); 
     lcd_set_digit(1, 3, xmeter_power_diss.integer, xmeter_power_diss.decimal);
   } else {
     lcd_set_char(0, 2, xmeter_adc_temp.neg ? '-' : '+');
@@ -173,8 +173,13 @@ void sm_xmeter_fill_set(bit is_c)
 {
   struct xmeter_value power_max_out;
   xmeter_calculate_power_out(&xmeter_dac_current, &xmeter_dac_voltage, &power_max_out);
-  lcd_set_digit(0, 2, xmeter_dac_voltage.integer, xmeter_dac_voltage.decimal);
-  lcd_set_digit(1, 2, xmeter_dac_current.integer, xmeter_dac_current.decimal);  
+  if(xmeter_cc_status()) {
+    lcd_set_digit(0, 2, xmeter_dac_voltage.integer, xmeter_dac_voltage.decimal);
+    lcd_set_digit(1, 2, xmeter_adc_current.integer, xmeter_adc_current.decimal);  
+  } else {
+    lcd_set_digit(0, 2, xmeter_adc_voltage_out.integer, xmeter_adc_voltage_out.decimal);
+    lcd_set_digit(1, 2, xmeter_dac_current.integer, xmeter_dac_current.decimal);  
+  }
   lcd_set_digit(1, 10, power_max_out.integer, power_max_out.decimal);
 }
 
@@ -206,16 +211,14 @@ void do_xmeter_main(uint8_t to_func, uint8_t to_state, enum task_events ev)
       sm_xmeter_init_main();
       sm_xmeter_fill_main();
       
-      if(sm_cur_function == SM_XMETER && (sm_cur_state == SM_XMETER_PICK_V
-        || sm_cur_state == SM_XMETER_SET_V)) {
+      if(sm_cur_function == SM_XMETER && (sm_cur_state == SM_XMETER_PICK_V)) {
           if(ev != EV_TIMEO) {
             xmeter_write_dac_voltage();
             xmeter_write_rom_dac_voltage();
           } else {
             xmeter_read_dac_voltage();
           }
-      } else if(sm_cur_function == SM_XMETER && (sm_cur_state == SM_XMETER_PICK_C
-        || sm_cur_state == SM_XMETER_SET_C)) {
+      } else if(sm_cur_function == SM_XMETER && (sm_cur_state == SM_XMETER_PICK_C)) {
           if(ev != EV_TIMEO) {
             xmeter_write_dac_current();
             xmeter_write_rom_dac_current();
@@ -330,15 +333,21 @@ static void do_xmeter_set(uint8_t to_func, uint8_t to_state, enum task_events ev
   } else if(ev == EV_TEMP_LO) {
     xmeter_fan_off();
   } else if(ev == EV_KEY_MOD_C || ev == EV_KEY_SET_C) {
-    if(!is_c)
+    if(!is_c) {
       xmeter_inc_dac_v(ev == EV_KEY_MOD_C);
-    else
+      xmeter_write_dac_voltage();
+    } else {
       xmeter_inc_dac_c(ev == EV_KEY_MOD_C);
+      xmeter_write_dac_current();
+    }
   } else if(ev == EV_KEY_MOD_CC || ev == EV_KEY_SET_CC) {
-    if(!is_c)
+    if(!is_c) {
       xmeter_dec_dac_v(ev == EV_KEY_MOD_CC);
-    else
+      xmeter_write_dac_voltage();
+    } else {
       xmeter_dec_dac_c(ev == EV_KEY_MOD_CC);
+      xmeter_write_dac_current();
+    }
   }  
 }
 

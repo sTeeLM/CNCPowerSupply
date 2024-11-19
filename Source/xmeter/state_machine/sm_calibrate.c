@@ -74,7 +74,7 @@ static bit sm_calibrate_adc_c()
   return ret;
 }
 
-static bit sm_calibrate_adc_vi()
+static bit sm_calibrate_adc_vd()
 {
   double k, b, f1, f2;
   bit ret = 0;
@@ -437,7 +437,7 @@ void do_calibrate_bk(unsigned char to_func, unsigned char to_state, enum task_ev
         }
         break;
       case SM_CALIBRATE_STEP_ADC_VOLTAGE_DISS:
-        if(sm_calibrate_adc_vi()) {
+        if(sm_calibrate_adc_vd()) {
           sm_calibrate_step = SM_CALIBRATE_STEP_ADC_VOLTAGE_OUT;
         } else {
           sm_calibrate_step = SM_CALIBRATE_STEP_FAIL;

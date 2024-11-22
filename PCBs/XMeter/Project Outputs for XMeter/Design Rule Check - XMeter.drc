@@ -1,7 +1,7 @@
 Protel Design System Design Rule Check
 PCB File : D:\Lab\CNCPowerSupply\PCBs\XMeter\XMeter.PcbDoc
-Date     : 2024/11/15
-Time     : 12:25:21
+Date     : 2024/11/22
+Time     : 20:58:35
 
 Processing Rule : Clearance Constraint (Gap=0.508mm) (Not ( WithinRoom('RoomDefinition1') or WithinRoom('RoomDefinition2') or WithinRoom('RoomDefinition3') or WithinRoom('RoomDefinition4') )),(Not ( WithinRoom('RoomDefinition1') or WithinRoom('RoomDefinition2') or WithinRoom('RoomDefinition3') or WithinRoom('RoomDefinition4') ))
 Rule Violations :0

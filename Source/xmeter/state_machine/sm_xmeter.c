@@ -161,18 +161,13 @@ C xx.xx A xx.xx
 void sm_xmeter_init_set(bit is_c)
 {
   lcd_clear();
-  lcd_set_string(0, 0, "V 0.000 V Pmax W");
+  lcd_set_string(0, 0, "V 0.000 V Po  W");
   lcd_set_string(1, 0, "C 0.000 A 0.000"); 
 }
 
-/* 
-注意，这个函数展示的DAC的数值，而不是ADC的数值，不要弄错！ 
-功率展示的是如果在这个设置下的最大输出功率，不是实际输出功率
-*/
 void sm_xmeter_fill_set(bit is_c)
 {
-  struct xmeter_value power_max_out;
-  xmeter_calculate_power_out(&xmeter_dac_current, &xmeter_dac_voltage, &power_max_out);
+
   if(xmeter_cc_status()) {
     lcd_set_digit(0, 2, xmeter_dac_voltage.integer, xmeter_dac_voltage.decimal);
     lcd_set_digit(1, 2, xmeter_adc_current.integer, xmeter_adc_current.decimal);  
@@ -180,7 +175,7 @@ void sm_xmeter_fill_set(bit is_c)
     lcd_set_digit(0, 2, xmeter_adc_voltage_out.integer, xmeter_adc_voltage_out.decimal);
     lcd_set_digit(1, 2, xmeter_dac_current.integer, xmeter_dac_current.decimal);  
   }
-  lcd_set_digit(1, 10, power_max_out.integer, power_max_out.decimal);
+  lcd_set_digit(1, 10, xmeter_power_out.integer, xmeter_power_out.decimal);
 }
 
 

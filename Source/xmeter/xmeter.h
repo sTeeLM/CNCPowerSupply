@@ -122,12 +122,6 @@ void xmeter_write_rom_temp_lo();
 void xmeter_write_rom_temp_hi();
 
 
-/* for eyes only, will not change xmeter states */
-void xmeter_calculate_power_out(
-  const xmeter_value_t * current, 
-  const xmeter_value_t * voltage,
-  xmeter_value_t * power_out);
-
 /* is temp below temp_lo ? */
 bit xmeter_temp_safe(void);  
   

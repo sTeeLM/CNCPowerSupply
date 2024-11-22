@@ -13,15 +13,15 @@
 /*
 KEY_MOD_A alse connect to IT0(P3.2) as trigger
 */
-sbit KEY_MOD_A = P2 ^ 0;
-sbit KEY_MOD_B = P2 ^ 1;
-sbit KEY_MOD_C = P2 ^ 2;
+sbit KEY_MOD_A = P2 ^ 4;
+sbit KEY_MOD_B = P2 ^ 5;
+sbit KEY_MOD_C = P2 ^ 3;
 /*
 KEY_SET_A also connect to IT1(P3.3) as trigger
 */
-sbit KEY_SET_A = P2 ^ 3;
-sbit KEY_SET_B = P2 ^ 4;
-sbit KEY_SET_C = P2 ^ 5;
+sbit KEY_SET_A = P2 ^ 1;
+sbit KEY_SET_B = P2 ^ 2;
+sbit KEY_SET_C = P2 ^ 0;
 
 
 /* i2c */
@@ -29,7 +29,7 @@ sbit I2C_SCL = P2 ^ 6;
 sbit I2C_SDA = P2 ^ 7; 
 
 /* rom */
-sbit ROM_RESET = P2 ^ 2; // 和Mod共用一个，开机时长按Mod相当于工厂reset
+sbit ROM_RESET = P2 ^ 3; // 和Mod共用一个，开机时长按Mod相当于工厂reset
 
 /* beeper */
 sbit BEEPER_OUT = P4 ^ 0;

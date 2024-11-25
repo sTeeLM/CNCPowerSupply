@@ -1,12 +1,14 @@
 Teardrop Report PowerPlane.PcbDoc
-On 2024/11/15 at 22:27:19
+On 2024/11/25 at 18:49:03
 
 Pads visited                : 342
 
-Vias visited                : 69
+Vias visited                : 71
 
 Pad teardrops failed : 0
 
+Pad C14-1(131.6mm,22.733mm) on Multi-Layer
+Pad C14-2(135.1mm,22.733mm) on Multi-Layer
 Pad R40-1(64.543mm,2.159mm) on Multi-Layer
 Pad R40-2(72.163mm,2.159mm) on Multi-Layer
 Pad R41-1(33.428mm,2.159mm) on Multi-Layer
@@ -94,8 +96,6 @@ Pad Q3-2(104.267mm,57.15mm) on Multi-Layer
 Pad Q3-3(101.727mm,57.15mm) on Multi-Layer
 Pad D11-2(131.191mm,15.24mm) on Multi-Layer
 Pad D11-1(136.239mm,15.24mm) on Multi-Layer
-Pad C14-2(134.6mm,22.733mm) on Multi-Layer
-Pad C14-1(132.1mm,22.733mm) on Multi-Layer
 Pad U15-1(96.901mm,20.828mm) on Multi-Layer
 Pad U15-2(96.901mm,23.368mm) on Multi-Layer
 Pad U6-3(86.36mm,91.44mm) on Multi-Layer
@@ -352,6 +352,8 @@ Pad Q2-1(122.999mm,59.69mm) on Top Layer
 
 Via teardrops failed : 0
 
+Via (138.303mm,88.773mm) from Top Layer to Bottom Layer
+Via (132.334mm,94.488mm) from Top Layer to Bottom Layer
 Via (133.35mm,66.675mm) from Top Layer to Bottom Layer
 Via (132.842mm,69.342mm) from Top Layer to Bottom Layer
 Via (70.485mm,69.469mm) from Top Layer to Bottom Layer

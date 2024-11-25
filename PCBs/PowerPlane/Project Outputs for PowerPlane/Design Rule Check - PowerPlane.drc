@@ -1,7 +1,7 @@
 Protel Design System Design Rule Check
 PCB File : D:\Lab\CNCPowerSupply\PCBs\PowerPlane\PowerPlane.PcbDoc
-Date     : 2024/11/19
-Time     : 18:40:14
+Date     : 2024/11/25
+Time     : 18:55:23
 
 Processing Rule : Clearance Constraint (Gap=0.508mm) (Not (  WithinRoom('RoomDefinition4') or  WithinRoom('RoomDefinition5') or  WithinRoom('RoomDefinition6') or WithinRoom('Corner1') or WithinRoom('Corner2') or        WithinRoom('Corner3') or        WithinRoom('Corner4') )),(Not (  WithinRoom('RoomDefinition4') or  WithinRoom('RoomDefinition5') or  WithinRoom('RoomDefinition6') or WithinRoom('Corner1') or WithinRoom('Corner2') or        WithinRoom('Corner3') or        WithinRoom('Corner4') ))
 Rule Violations :0

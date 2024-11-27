@@ -57,4 +57,5 @@
 *.BomDoc.Zip
 *.PcbLib.Zip
 *.PrjPcb.Zip
+*.OutJob.Zip
 .DS_Store

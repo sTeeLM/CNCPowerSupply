@@ -92,7 +92,7 @@ xmeter_value_t xmeter_max_power_diss;
 
 static const xmeter_value_t code xmeter_max_temp_hi = {0, XMETER_RES_TEMP, 150, 0} /* 150 C */;
 static const xmeter_value_t code xmeter_min_temp_lo = {0, XMETER_RES_TEMP, 0, 0};  /* 0 C */
-static const xmeter_value_t code xmeter_max_power_diss_max = {0, XMETER_RES_POWER, 80, 0};  /* 80W */
+static const xmeter_value_t code xmeter_max_power_diss_max = {0, XMETER_RES_POWER, 120, 0};  /* 80W */
 static const xmeter_value_t code xmeter_max_power_diss_min = {0, XMETER_RES_POWER, 40, 0};  /* 40W */
 static const xmeter_value_t code xmeter_zero2 = {0, XMETER_RES_TWO, 0, 0};
 const xmeter_value_t code xmeter_zero3 = {0, XMETER_RES_THREE, 0, 0};
@@ -113,6 +113,8 @@ static xmeter_value_t xmeter_dac_preset_voltage[XMETER_PRESET_CNT];
 
 static uint8_t xmeter_dac_preset_current_index;
 static uint8_t xmeter_dac_preset_voltage_index;
+
+static bit xmeter_old_cc_status;
 
 struct xmeter_adc_temp_slot
 {
@@ -445,18 +447,61 @@ void xmeter_dump_value(const char * name, xmeter_value_t * pval, uint8_t cnt)
   }
 }
 
-
-bit xmeter_cal(uint16_t x1, uint16_t x2, double y1, double y2, double * k, double * b)
+bit xmeter_cal(uint16_t x1, uint16_t x2, bit is_signed, double y1, double y2, double * k, double * b)
 {
+  int16_t sx1, sx2;
+  
+  if(!is_signed) {
+    if(x2 <= x1)
+      return 0;
+    
+    *k = (y2 - y1) / (x2 - x1);
+    
+    *b = y2 - x2 * (*k);
+    
+    return *k != 0.0;
+  } else {
+    sx1 = (int16_t)x1;
+    sx2 = (int16_t)x2;
+    
+    if(sx2 <= sx1)
+      return 0;
+    
+    *k = (y2 - y1) / (sx2 - sx1);
+    
+    *b = y2 - sx2 * (*k);
+    return *k != 0.0;
+  }
+}
 
-  if(x2 <= x1)
-    return 0;
-  
-  *k = (y2 - y1) / (x2 - x1);
-  
-  *b = y2 - x2 * (*k);
-  
-  return *k != 0.0;
+void xmeter_read_rom_adc_voltage_diss_kb(double * k, double * b)
+{
+  rom_read32(ROM_XMETER_ADC_VOLTAGE_DISS_K, k);
+  rom_read32(ROM_XMETER_ADC_VOLTAGE_DISS_B, b);
+}
+
+void xmeter_read_rom_adc_voltage_out_kb(double * k, double * b)
+{
+  rom_read32(ROM_XMETER_ADC_VOLTAGE_OUT_K, k);
+  rom_read32(ROM_XMETER_ADC_VOLTAGE_OUT_B, b); 
+}
+
+void xmeter_read_rom_adc_current_kb(double * k, double * b)
+{
+  rom_read32(ROM_XMETER_ADC_CURRENT_K, &k);
+  rom_read32(ROM_XMETER_ADC_CURRENT_B, &b);
+}
+
+void xmeter_read_rom_dac_current_kb(double * k, double * b)
+{
+  rom_read32(ROM_XMETER_DAC_CURRENT_K, &k);
+  rom_read32(ROM_XMETER_DAC_CURRENT_B, &b);
+}
+
+void xmeter_read_rom_dac_voltage_kb(double * k, double * b)
+{
+  rom_read32(ROM_XMETER_DAC_VOLTAGE_K, &k);
+  rom_read32(ROM_XMETER_DAC_VOLTAGE_B, &b); 
 }
 
 void xmeter_write_rom_adc_voltage_diss_kb(double k, double b)
@@ -501,37 +546,37 @@ void xmeter_rom_factory_reset(void)
   
   /* xmeter_adc_current, fsr is 0~5.0
      0000 -> 0.0
-     7fff -> 4.096 (ADC输入电压)
+     7fff -> 10.24 (ADC输入电流)
   */
-  xmeter_cal(0x0, 0x7fff, 0.0, 5.0, &k, &b);
+  xmeter_cal(0x0, 0x7fff, 1, 0.0, 10.24, &k, &b);
   xmeter_write_rom_adc_current_kb(k, b);
   
   /* xmeter_adc_voltage_out, fsr is 0~30
      0000 -> 0.0
-     7fff -> 4.096 (ADC输入电压)
+     7fff -> 30 (ADC输入电压)
   */  
-  xmeter_cal(0x0, 0x7fff, 0.0, 30, &k, &b); 
+  xmeter_cal(0x0, 0x7fff, 1, 0.0, 30, &k, &b); 
   xmeter_write_rom_adc_voltage_out_kb(k, b);
   
   /* xmeter_adc_voltage_in, fsr is 0~40
      0000 -> 0.0
-     7fff -> 4.096 (ADC耗散电压)
+     7fff -> 40 (ADC耗散电压)
   */  
-  xmeter_cal(0x0, 0x7fff, 0.0, 40.0, &k, &b);
+  xmeter_cal(0x0, 0x7fff, 1, 0.0, 40.0, &k, &b);
   xmeter_write_rom_adc_voltage_diss_kb(k, b);
   
   /* xmeter_dac_current, fsr is 0~5.0
      0000 -> 0.0
-     ffff -> 2.5 (DAC输出电压)
+     ffff -> 5.0 (DAC输出电压)
   */    
-  xmeter_cal(0x0, 0xffff, 0.0, 5.0, &k, &b);
+  xmeter_cal(0x0, 0xffff, 0, 0.0, 5.0, &k, &b);
   xmeter_write_rom_dac_current_kb(k, b);
   
   /* xmeter_dac_voltage, fsr is 0~30.0
      0000 -> 0.0
-     ffff -> 2.5 (DAC输出电压)
+     ffff -> 30 (DAC输出电压)
   */    
-  xmeter_cal(0x0, 0xffff, 0.0, 30, &k, &b);
+  xmeter_cal(0x0, 0xffff, 0, 0.0, 30, &k, &b);
   xmeter_write_rom_dac_voltage_kb(k, b);
   
   /* preset current 100mA */
@@ -597,10 +642,10 @@ void xmeter_rom_factory_reset(void)
   val[0].decimal = 0;
   rom_write_struct(ROM_XMETER_DAC_LAST_VOLTAGE, val, sizeof(xmeter_value_t));  
 
-  /* temp high is 80 C */
+  /* temp high is 45 C */
   val[0].neg = 0;
   val[0].res = XMETER_RES_TEMP;  
-  val[0].integer = 60;
+  val[0].integer = 45;
   val[0].decimal = 0;
   rom_write_struct(ROM_XMETER_TEMP_HI, val, sizeof(xmeter_value_t));  
   
@@ -618,10 +663,10 @@ void xmeter_rom_factory_reset(void)
   val[0].decimal = 0;
   rom_write_struct(ROM_XMETER_TEMP_OVERHEAT, val, sizeof(xmeter_value_t));  
   
-  /* max diss power is 70 W */
+  /* max diss power is 120 W */
   val[0].neg = 0;
   val[0].res = XMETER_RES_POWER;  
-  val[0].integer = 80;
+  val[0].integer = 120;
   val[0].decimal = 0;
   rom_write_struct(ROM_XMETER_MAX_POWER_DISS, val, sizeof(xmeter_value_t));    
 }
@@ -827,6 +872,10 @@ void xmeter_initialize(void)
   
   XMETER_CONV_RDY = 1;
   
+  XMETER_CC = 1;
+  
+  xmeter_old_cc_status = XMETER_CC;
+  
   xmeter_write_dac_voltage();
   
   xmeter_write_dac_current();
@@ -936,7 +985,7 @@ uint16_t xmeter_get_adc_bits_current(void)
   
   I2C_Init();
   
-  // set channel0 and trigger cont, full scale set to 2.048
+  // set channel0 and trigger cont, full scale set to 4.096
   I2C_Gets(XMETER_ADC_I2C_ADDR, XMETER_ADC_I2C_SUBADDR_CONFIG, 2, (uint8_t*)&config);
   
   config &= ~(0x7 << 12);
@@ -944,7 +993,7 @@ uint16_t xmeter_get_adc_bits_current(void)
   config |= 0x8000; /* OS = 1*/
   
   config &= ~(0x7 << 9); 
-  config |= (0x2 << 9); 
+  config |= (0x1 << 9); 
   
   //CDBG(("xmeter_update_current write %04x\n", config));
   
@@ -962,7 +1011,7 @@ uint16_t xmeter_get_adc_bits_current(void)
 
 }
 
-static void xmeter_read_adc_current(void)
+void xmeter_read_adc_current(void)
 {
   uint16_t val;
   
@@ -1005,7 +1054,7 @@ uint16_t xmeter_get_adc_bits_voltage_out(void)
   return val;
 }
 
-static void xmeter_read_adc_voltage_out(void)
+void xmeter_read_adc_voltage_out(void)
 {
   uint16_t val;
   
@@ -1047,7 +1096,7 @@ uint16_t xmeter_get_adc_bits_voltage_diss(void)
   return val;
 }
 
-static void xmeter_read_adc_voltage_diss(void)
+void xmeter_read_adc_voltage_diss(void)
 {
   
   uint16_t val;
@@ -1064,7 +1113,7 @@ static void xmeter_read_adc_voltage_diss(void)
   //xmeter_dump_value("adc vdis", &xmeter_adc_voltage_diss, 1);
 }
 
-bit xmeter_read_adc_temp(void)
+uint16_t xmeter_get_adc_bits_temp(void)
 {
   uint16_t config = 0;
   uint16_t val = 0;
@@ -1091,14 +1140,39 @@ bit xmeter_read_adc_temp(void)
   
   I2C_Gets(XMETER_ADC_I2C_ADDR, XMETER_ADC_I2C_SUBADDR_CONV, 2, (uint8_t*)&val);
   
+  return val;
+}
+
+void xmeter_read_adc_temp(void)
+{
+  uint16_t val;
+  
+  val = xmeter_get_adc_bits_temp();
+  
   xmeter_adc_temp_f = xmeter_adc_lookup_temp(val);
   
   xmeter_float2val(xmeter_adc_temp_f, &xmeter_adc_temp, XMETER_RES_TEMP);
 
-  CDBG("adc temp bits and float: %x %f\n", val, xmeter_adc_temp_f);
-  xmeter_dump_value("adc temp", &xmeter_adc_temp, 1);
-  
-  return 1;
+  // CDBG("adc temp bits and float: %x %f\n", val, xmeter_adc_temp_f);
+  // xmeter_dump_value("adc temp", &xmeter_adc_temp, 1);
+}
+
+
+/*
+根据输出电压输出电流
+计算输出功率，只用于LCD实时显示！
+*/
+
+void xmeter_calculate_power_out(
+  const xmeter_value_t * current, 
+  const xmeter_value_t * voltage,
+  xmeter_value_t * power_out)
+{
+  double current_f, voltage_f, power_f;
+  current_f = xmeter_val2float(current);
+  voltage_f = xmeter_val2float(voltage);
+  power_f   = current_f * voltage_f;
+  xmeter_float2val(power_f, power_out, XMETER_RES_POWER);
 }
 
 
@@ -1172,6 +1246,11 @@ void xmeter_read_adc(void)
     if(xmeter_compare_value(&xmeter_power_diss, &xmeter_max_power_diss) >= 0) {
       task_set(EV_OVER_PD);
     }
+  }
+  
+  if(xmeter_cc_status() != xmeter_old_cc_status) {
+    task_set(EV_CC_CHANGE);
+    xmeter_old_cc_status = xmeter_cc_status();
   }
 }
 
@@ -1771,7 +1850,7 @@ static uint16_t xmeter_inc_dec_bits(uint16_t val, bit is_inc, bit coarse)
 {
   uint16_t delta;
   
-  delta = coarse ? 0x400 : 1;
+  delta = coarse ? 0x100 : 1;
   
   if(is_inc) {
     if(val > UINT_MAX - delta) {

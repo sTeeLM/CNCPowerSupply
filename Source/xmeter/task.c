@@ -31,6 +31,7 @@ const char * task_names[] =
   "EV_OVER_PD",
   "EV_TEMP_HI",
   "EV_TEMP_LO",
+  "EV_CC_CHANGE",
   "EV_TIMEO",
 };
 
@@ -62,6 +63,7 @@ static const TASK_PROC task_procs[EV_CNT] =
   /* EV_KEY_MOD_SET_XX */
   button_mod_set_proc,
   button_mod_set_proc, 
+  null_proc,
   null_proc,
   null_proc,
   null_proc,

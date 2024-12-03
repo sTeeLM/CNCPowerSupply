@@ -43,14 +43,16 @@ static bit sm_calibrate_dac()
   double k, b;
   bit ret = 0;
   do {
-    if(!xmeter_cal(sm_calibrate_dac_c_bits[0], sm_calibrate_dac_c_bits[1], 
+    if(!xmeter_cal(sm_calibrate_dac_c_bits[0], sm_calibrate_dac_c_bits[1], 0, 
       0.0, 5.0, &k, &b)) {
+        CDBG("sm_calibrate_dac c failed\n");
       break;
     }
     xmeter_write_rom_dac_current_kb(k, b);  
 
-    if(!xmeter_cal(sm_calibrate_dac_v_bits[0], sm_calibrate_dac_v_bits[1], 
+    if(!xmeter_cal(sm_calibrate_dac_v_bits[0], sm_calibrate_dac_v_bits[1], 0,
       0.0, 30.0, &k, &b)) {
+        CDBG("sm_calibrate_dac v failed\n");
       break;
     }
     xmeter_write_rom_dac_voltage_kb(k, b);  
@@ -64,8 +66,9 @@ static bit sm_calibrate_adc_c()
   double k, b;
   bit ret = 0;
   do {
-    if(!xmeter_cal(sm_calibrate_adc_c_bits[0], sm_calibrate_adc_c_bits[1], 
+    if(!xmeter_cal(sm_calibrate_adc_c_bits[0], sm_calibrate_adc_c_bits[1], 1,
       0.0, 5.0, &k, &b)) {
+      CDBG("sm_calibrate_adc_c failed\n");
       break;
     }
     xmeter_write_rom_adc_current_kb(k, b);
@@ -81,8 +84,9 @@ static bit sm_calibrate_adc_vd()
   do {
     f1 = xmeter_val2float(&sm_calibrate_adc_vd_val[0]);
     f2 = xmeter_val2float(&sm_calibrate_adc_vd_val[1]);
-    if(!xmeter_cal(sm_calibrate_adc_vd_bits[0], sm_calibrate_adc_vd_bits[1], 
+    if(!xmeter_cal(sm_calibrate_adc_vd_bits[0], sm_calibrate_adc_vd_bits[1], 1,
       f1, f2, &k, &b)) {
+        CDBG("sm_calibrate_adc_vd failed\n");
       break;
     }
     xmeter_write_rom_adc_voltage_diss_kb(k, b);
@@ -96,8 +100,9 @@ static bit sm_calibrate_adc_vo()
   double k, b;
   bit ret = 0;
   do {
-    if(!xmeter_cal(sm_calibrate_adc_vo_bits[0], sm_calibrate_adc_vo_bits[1], 
+    if(!xmeter_cal(sm_calibrate_adc_vo_bits[0], sm_calibrate_adc_vo_bits[1], 1,
       0.0, 30.0, &k, &b)) {
+        CDBG("sm_calibrate_adc_vo failed\n");
       break;
     }
     xmeter_write_rom_adc_voltage_out_kb(k, b);
@@ -135,7 +140,7 @@ static void sm_calibrate_init_phase1(uint8_t state)
       lcd_set_string(1, 0, "C      D");
       break;
     case SM_CALIBRATE_CURRENT_MAX:
-      lcd_set_string(0, 0, "Zero   A");
+      lcd_set_string(0, 0, "Max    A");
       lcd_set_string(1, 0, "C      D");
       break; 
     case SM_CALIBRATE_VOLTAGE_DISS:
@@ -263,20 +268,21 @@ static void do_calibrate_voltage_zero(unsigned char to_func, unsigned char to_st
     xmeter_dec_dac_bits_v(0);
   }
   xmeter_read_adc();
+  
+  // fill sm_calibrate_dac_v_bits[0]
+  sm_calibrate_dac_v_bits[0]  = xmeter_get_dac_bits_v();
+  // fill sm_calibrate_adc_vo_bits[0]
+  sm_calibrate_adc_vo_bits[0] = xmeter_get_adc_bits_voltage_out();
+  // fill sm_calibrate_adc_vd_bits[1]
+  sm_calibrate_adc_vd_bits[1] = xmeter_get_adc_bits_voltage_diss();
+  // fill sm_calibrate_adc_vd_val[1] at last step..
+  
   sm_calibrate_fill_phase1(SM_CALIBRATE_VOLTAGE_ZERO);
 }
 
 void do_calibrate_voltage_max(unsigned char to_func, unsigned char to_state, enum task_events ev)
 {
   if(sm_cur_state != SM_CALIBRATE_VOLTAGE_MAX) {
-    
-    // fill sm_calibrate_dac_v_bits[0]
-    sm_calibrate_dac_v_bits[0]  = xmeter_get_dac_bits_c();
-    // fill sm_calibrate_adc_vo_bits[0]
-    sm_calibrate_adc_vo_bits[0] = xmeter_get_adc_bits_voltage_out();
-    // fill sm_calibrate_adc_vd_bits[1]
-    sm_calibrate_adc_vd_bits[1] = xmeter_get_adc_bits_voltage_diss();
-    // fill sm_calibrate_adc_vd_val[1] at last step..
     
     xmeter_set_dac_bits_v(0xffff);
     sm_calibrate_init_phase1(SM_CALIBRATE_VOLTAGE_MAX);
@@ -294,21 +300,22 @@ void do_calibrate_voltage_max(unsigned char to_func, unsigned char to_state, enu
     xmeter_dec_dac_bits_v(0);
   }
   xmeter_read_adc();
+    
+  // fill sm_calibrate_dac_v_bits[1]
+  sm_calibrate_dac_v_bits[1]  = xmeter_get_dac_bits_v();
+  // fill sm_calibrate_adc_vo_bits[1]
+  sm_calibrate_adc_vo_bits[1] = xmeter_get_adc_bits_voltage_out();
+  // fill sm_calibrate_adc_vd_bits[1]
+  sm_calibrate_adc_vd_bits[0] = 0x0;
+  // fill sm_calibrate_adc_vd_val[0];
+  xmeter_assign_value(&xmeter_zero3, &sm_calibrate_adc_vd_val[0]);
+  
   sm_calibrate_fill_phase1(SM_CALIBRATE_VOLTAGE_MAX);
 }
 
 void do_calibrate_current_zero(unsigned char to_func, unsigned char to_state, enum task_events ev)
 {
   if(sm_cur_state != SM_CALIBRATE_CURRENT_ZERO) {
-    
-    // fill sm_calibrate_dac_v_bits[1]
-    sm_calibrate_dac_v_bits[1]  = xmeter_get_dac_bits_c();
-    // fill sm_calibrate_adc_vo_bits[1]
-    sm_calibrate_adc_vo_bits[1] = xmeter_get_adc_bits_voltage_out();
-    // fill sm_calibrate_adc_vd_bits[1]
-    sm_calibrate_adc_vd_bits[0] = 0x0;
-    // fill sm_calibrate_adc_vd_val[0];
-    xmeter_assign_value(&xmeter_zero3, &sm_calibrate_adc_vd_val[0]);
     
     // set voltage dac to 5V prox.
     xmeter_set_dac_bits_v(0x2AAA);
@@ -329,6 +336,17 @@ void do_calibrate_current_zero(unsigned char to_func, unsigned char to_state, en
     xmeter_dec_dac_bits_c(0);
   }
   xmeter_read_adc();
+  
+  // save param
+  sm_calibrate_adc_c_bits[0] = xmeter_get_adc_bits_current();
+  sm_calibrate_dac_c_bits[0] = xmeter_get_dac_bits_c();
+    
+  CDBG("sm_calibrate_adc_c_bits: [%04x][%04x]\n", 
+    sm_calibrate_adc_c_bits[0],
+    sm_calibrate_adc_c_bits[1]); 
+  CDBG("sm_calibrate_dac_c_bits: [%04x][%04x]\n", 
+    sm_calibrate_dac_c_bits[0],
+    sm_calibrate_dac_c_bits[1]);  
   sm_calibrate_fill_phase1(SM_CALIBRATE_CURRENT_ZERO);
 }
 
@@ -336,10 +354,11 @@ void do_calibrate_current_max(unsigned char to_func, unsigned char to_state, enu
 {
   if(sm_cur_state != SM_CALIBRATE_CURRENT_MAX) {
     
-    // save param
-    sm_calibrate_dac_c_bits[0] = xmeter_get_dac_bits_c();
-    sm_calibrate_adc_c_bits[0] = xmeter_get_adc_bits_current();
+  
     
+    CDBG("sm_calibrate_adc_c_bits: [%04x][%04x]\n", 
+      sm_calibrate_adc_c_bits[0],
+      sm_calibrate_adc_c_bits[1]);    
     xmeter_set_dac_bits_c(0xffff);  
     
     sm_calibrate_init_phase1(SM_CALIBRATE_CURRENT_MAX);
@@ -357,18 +376,24 @@ void do_calibrate_current_max(unsigned char to_func, unsigned char to_state, enu
     xmeter_dec_dac_bits_c(0);
   }
   xmeter_read_adc();
+  
+  // save param
+  sm_calibrate_adc_c_bits[1] = xmeter_get_adc_bits_current();
+  sm_calibrate_dac_c_bits[1] = xmeter_get_dac_bits_c();
+  CDBG("sm_calibrate_adc_c_bits: [%04x][%04x]\n", 
+    sm_calibrate_adc_c_bits[0],
+    sm_calibrate_adc_c_bits[1]); 
+  CDBG("sm_calibrate_dac_c_bits: [%04x][%04x]\n", 
+    sm_calibrate_dac_c_bits[0],
+    sm_calibrate_dac_c_bits[1]);  
   sm_calibrate_fill_phase1(SM_CALIBRATE_CURRENT_MAX);
 }
 
 void do_calibrate_voltage_diss(unsigned char to_func, unsigned char to_state, enum task_events ev)
 {
   if(sm_cur_state != SM_CALIBRATE_VOLTAGE_DISS) {
-    // save params
-    sm_calibrate_dac_c_bits[1] = xmeter_get_dac_bits_c();
-    sm_calibrate_adc_c_bits[1] = xmeter_get_adc_bits_current();
-    
-    xmeter_assign_value(&xmeter_adc_voltage_diss, &sm_calibrate_adc_vd_val[1]);
-    
+
+    xmeter_assign_value(&xmeter_adc_voltage_diss, &sm_calibrate_adc_vd_val[1]);   
     sm_calibrate_init_phase1(SM_CALIBRATE_VOLTAGE_DISS);
     sm_calibrate_fill_phase1(SM_CALIBRATE_VOLTAGE_DISS);
     return;
@@ -393,8 +418,6 @@ void do_calibrate_bk(unsigned char to_func, unsigned char to_state, enum task_ev
   if(sm_cur_state != SM_CALIBRATE_BK) {
     
     // save param
-    sm_calibrate_dac_c_bits[1] = xmeter_get_dac_bits_c();
-    sm_calibrate_adc_c_bits[1] = xmeter_get_adc_bits_current();
     sm_calibrate_init_phase2(SM_CALIBRATE_STEP_DAC);
     sm_calibrate_fill_phase2(SM_CALIBRATE_STEP_DAC);
     
@@ -409,14 +432,14 @@ void do_calibrate_bk(unsigned char to_func, unsigned char to_state, enum task_ev
       sm_calibrate_dac_v_bits[1]);    
     CDBG("sm_calibrate_adc_c_bits: [%04x][%04x]\n", 
       sm_calibrate_adc_c_bits[0],
-      sm_calibrate_adc_c_bits[1]);
-    CDBG("sm_calibrate_adc_vd_bits: [%04x][%04x]\n", 
-      sm_calibrate_adc_vd_bits[0],
-      sm_calibrate_adc_vd_bits[1]);  
+      sm_calibrate_adc_c_bits[1]); 
     xmeter_dump_value("sm_calibrate_adc_vd_val", sm_calibrate_adc_vd_val, 2);  
     CDBG("sm_calibrate_adc_vo_bits: [%04x][%04x]\n", 
       sm_calibrate_adc_vo_bits[0],
-      sm_calibrate_adc_vo_bits[1]);    
+      sm_calibrate_adc_vo_bits[1]);  
+    CDBG("sm_calibrate_adc_vd_bits: [%04x][%04x]\n", 
+      sm_calibrate_adc_vd_bits[0],
+      sm_calibrate_adc_vd_bits[1]);       
     return;
   }
     

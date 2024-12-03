@@ -14,6 +14,7 @@
 #include "xmeter.h"
 #include "gpio.h"
 #include "control.h"
+#include "console.h"
 
 int main(void)
 {
@@ -34,10 +35,12 @@ int main(void)
   button_initialize();
   beeper_initialize();
   control_initilize();
+  console_initilize();
   
   xmeter_initialize();
   
 	while(1) {
+    console_run();
     task_run();
     control_run();
 	}

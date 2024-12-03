@@ -24,7 +24,8 @@ enum task_events
   EV_OVER_PD             = 15, // 计算耗散功率大于最大限制（可能温度计还没有反应过来），并且对外开关处于打开状态
   EV_TEMP_HI             = 16, // 超过风扇温度上限，并且风扇处于关闭状态
   EV_TEMP_LO             = 17, // 低于风扇温度下线，并且风扇处于打开状态
-  EV_TIMEO               = 18, 
+  EV_CC_CHANGE           = 18, // CC状态变化
+  EV_TIMEO               = 19, // 超时  
   EV_CNT  
 };
 

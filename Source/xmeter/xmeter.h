@@ -31,6 +31,10 @@ extern xmeter_value_t xmeter_dac_current;
 
 /* read adc, and update  xmeter_adc_*** */
 void xmeter_read_adc(void);
+void xmeter_read_adc_current(void);
+void xmeter_read_adc_voltage_out(void);
+void xmeter_read_adc_voltage_diss(void);
+void xmeter_read_adc_temp(void);
 
 bit xmeter_output_on(void);
 bit xmeter_output_off(void);
@@ -121,6 +125,11 @@ void xmeter_set_temp_lo(const xmeter_value_t * val);
 void xmeter_write_rom_temp_lo();
 void xmeter_write_rom_temp_hi();
 
+/* for eyes only, will not change xmeter states */
+void xmeter_calculate_power_out(
+  const xmeter_value_t * current, 
+  const xmeter_value_t * voltage,
+  xmeter_value_t * power_out);
 
 /* is temp below temp_lo ? */
 bit xmeter_temp_safe(void);  
@@ -147,6 +156,13 @@ void xmeter_dec_voltage_value(xmeter_value_t * voltage, bit coarse);
 void xmeter_inc_current_value(xmeter_value_t * voltage, bit coarse);
 void xmeter_dec_current_value(xmeter_value_t * voltage, bit coarse);
 
+/* dump calibrate config */
+void xmeter_read_rom_adc_voltage_diss_kb(double * k, double * b);
+void xmeter_read_rom_adc_voltage_out_kb(double * k, double * b);
+void xmeter_read_rom_adc_current_kb(double * k, double * b);
+void xmeter_read_rom_dac_current_kb(double * k, double * b);
+void xmeter_read_rom_dac_voltage_kb(double * k, double * b);
+
 /* save calibrate config */	
 void xmeter_write_rom_adc_voltage_diss_kb(double k, double b);
 void xmeter_write_rom_adc_voltage_out_kb(double k, double b);
@@ -167,7 +183,7 @@ void xmeter_get_temp_limits(xmeter_value_t * min, xmeter_value_t * max);
 void xmeter_get_power_diss_limits(xmeter_value_t * min, xmeter_value_t * max);
 
 /* 解线性方程，获得斜率k，偏移b */  
-bit xmeter_cal(uint16_t x1, uint16_t x2, double y1, double y2, double * k, double * b);  
+bit xmeter_cal(uint16_t x1, uint16_t x2, bit is_signed, double y1, double y2, double * k, double * b);  
 
 void xmeter_dump_value(const char * name, xmeter_value_t * pval, uint8_t cnt);
 

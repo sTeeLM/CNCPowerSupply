@@ -143,7 +143,7 @@ char _getkey (void) {
   return (c);
 }
 
-static bit com_try_get_key(char * c) 
+bit com_try_get_char(char * c) 
 {
   if (iend == istart) {
      return 0;                                         // wait until there are characters
@@ -169,14 +169,16 @@ bit com_recv_buffer(uint8_t * buffer, uint16_t * len, uint16_t timeoms)
   *len = 0;
   
   while(1) {
-    if(com_try_get_key(&c)) {
+    if(com_try_get_char(&c)) {
       buffer[(*len)++] = c;
       if((*len) == save_len)
         break;
     } else {
-      delay_ms(1);
-      if(timeoms --)
-        break;
+      if(timeoms > 0) {
+        delay_ms(1);
+        if(timeoms --)
+          break;
+      }
     }
   }
   

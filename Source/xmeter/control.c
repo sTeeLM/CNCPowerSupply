@@ -554,10 +554,7 @@ static void control_enter(void)
     CDBG("control_enter\n");
     xmeter_output_on();
     xmeter_fan_off();
-    lcd_clear();
-    lcd_set_string(0, 0, " REMOTE CONTROL ");
-    lcd_set_string(1, 0, "Msg:xxxx Idle:XX");
-    lcd_refresh();
+    lcd_enter_control();
     control_is_enter_bit = 1;
     control_remote_override = 0;
     control_last_msg_sec = clock_get_now_sec();
@@ -570,8 +567,7 @@ static void control_leave(void)
   if(control_is_enter_bit) {
     xmeter_output_off();
     xmeter_fan_off();
-    lcd_clear();
-    lcd_refresh();
+    lcd_leave_control();
     sm_initialize();
     control_is_enter_bit = 0;
     CDBG("control_leave\n");

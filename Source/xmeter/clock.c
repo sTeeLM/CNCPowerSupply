@@ -260,12 +260,12 @@ void clock_time_proc(enum task_events ev)
 void clock_enter_shell(void)
 {
   in_shell = 1;
+  clock_enable_interrupt(0);
 }
 
 void clock_leave_shell(void)
 {
   in_shell = 0;
-  clock_enable_interrupt(0);
   clock_enable_interrupt(1);
 }
 

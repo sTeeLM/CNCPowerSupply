@@ -116,6 +116,7 @@ void sm_xmeter_init_pick(bit is_c)
     xmeter_next_preset_dac_c();
     lcd_set_digit(1, 8, xmeter_dac_current.integer, xmeter_dac_current.decimal);
     xmeter_reset_preset_index_c();
+    xmeter_load_preset_dac_c();  
   } else {
     lcd_set_string(0, 0, "V 0.000 0.000 V");
     lcd_set_string(1, 0, "  0.000 0.000 V");
@@ -129,6 +130,7 @@ void sm_xmeter_init_pick(bit is_c)
     xmeter_next_preset_dac_v();
     lcd_set_digit(1, 8, xmeter_dac_voltage.integer, xmeter_dac_voltage.decimal);
     xmeter_reset_preset_index_v();
+    xmeter_load_preset_dac_v();  
   }
 }
 
@@ -162,20 +164,50 @@ void sm_xmeter_init_set(bit is_c)
 {
   lcd_clear();
   lcd_set_string(0, 0, "V 0.000 V Po  W");
-  lcd_set_string(1, 0, "C 0.000 A 0.000"); 
+  lcd_set_string(1, 0, "C 0.000 A 0.000");
+
+  lcd_set_char(is_c ? 1 : 0, 7, '*');
+
 }
 
 void sm_xmeter_fill_set(bit is_c)
 {
-
-  if(xmeter_cc_status()) {
-    lcd_set_digit(0, 2, xmeter_dac_voltage.integer, xmeter_dac_voltage.decimal);
-    lcd_set_digit(1, 2, xmeter_adc_current.integer, xmeter_adc_current.decimal);  
+  xmeter_value_t power_max;
+  if(is_c) {
+    if(xmeter_cc_status()) { // show true value
+      lcd_set_string(0, 10, "Po ");
+      lcd_set_digit(0, 2, xmeter_adc_voltage_out.integer, xmeter_adc_voltage_out.decimal);
+      lcd_set_char(0, 1, xmeter_adc_voltage_out.neg ? '-' : ' ');
+      lcd_set_digit(1, 2, xmeter_adc_current.integer, xmeter_adc_current.decimal); 
+      lcd_set_char(1, 1, xmeter_adc_current.neg ? '-' : ' '); 
+      lcd_set_digit(1, 10, xmeter_power_out.integer, xmeter_power_out.decimal);      
+    } else {
+      lcd_set_string(0, 10, "Pmax"); // voltage show true value, current show dac, power show simulate
+      lcd_set_digit(0, 2, xmeter_adc_voltage_out.integer, xmeter_adc_voltage_out.decimal);
+      lcd_set_char(0, 1, xmeter_adc_voltage_out.neg ? '-' : ' ');
+      lcd_set_digit(1, 2, xmeter_dac_current.integer, xmeter_dac_current.decimal); 
+      lcd_set_char(1, 1, xmeter_dac_current.neg ? '-' : ' ');
+      xmeter_calculate_power_out(&xmeter_dac_current, &xmeter_adc_voltage_out, &power_max);
+      lcd_set_digit(1, 10, power_max.integer, power_max.decimal);
+    }
   } else {
-    lcd_set_digit(0, 2, xmeter_adc_voltage_out.integer, xmeter_adc_voltage_out.decimal);
-    lcd_set_digit(1, 2, xmeter_dac_current.integer, xmeter_dac_current.decimal);  
+    if(!xmeter_cc_status()) { // show true value
+      lcd_set_string(0, 10, "Po ");
+      lcd_set_digit(0, 2, xmeter_adc_voltage_out.integer, xmeter_adc_voltage_out.decimal);
+      lcd_set_char(0, 1, xmeter_adc_voltage_out.neg ? '-' : ' ');
+      lcd_set_digit(1, 2, xmeter_adc_current.integer, xmeter_adc_current.decimal); 
+      lcd_set_char(1, 1, xmeter_adc_current.neg ? '-' : ' '); 
+      lcd_set_digit(1, 10, xmeter_power_out.integer, xmeter_power_out.decimal);      
+    } else {
+      lcd_set_string(0, 10, "Pmax");
+      lcd_set_digit(0, 2, xmeter_dac_voltage.integer, xmeter_dac_voltage.decimal);
+      lcd_set_char(0, 1, xmeter_dac_voltage.neg ? '-' : ' ');
+      lcd_set_digit(1, 2, xmeter_adc_current.integer, xmeter_adc_current.decimal); 
+      lcd_set_char(1, 1, xmeter_adc_current.neg ? '-' : ' ');
+      xmeter_calculate_power_out(&xmeter_adc_current, &xmeter_dac_voltage, &power_max);
+      lcd_set_digit(1, 10, power_max.integer, power_max.decimal);
+    }
   }
-  lcd_set_digit(1, 10, xmeter_power_out.integer, xmeter_power_out.decimal);
 }
 
 
@@ -206,14 +238,14 @@ void do_xmeter_main(uint8_t to_func, uint8_t to_state, enum task_events ev)
       sm_xmeter_init_main();
       sm_xmeter_fill_main();
       
-      if(sm_cur_function == SM_XMETER && (sm_cur_state == SM_XMETER_PICK_V)) {
+      if(sm_cur_function == SM_XMETER && (sm_cur_state == SM_XMETER_PICK_V || sm_cur_state == SM_XMETER_SET_V)) {
           if(ev != EV_TIMEO) {
             xmeter_write_dac_voltage();
             xmeter_write_rom_dac_voltage();
           } else {
             xmeter_read_dac_voltage();
           }
-      } else if(sm_cur_function == SM_XMETER && (sm_cur_state == SM_XMETER_PICK_C)) {
+      } else if(sm_cur_function == SM_XMETER && (sm_cur_state == SM_XMETER_PICK_C || sm_cur_state == SM_XMETER_SET_C)) {
           if(ev != EV_TIMEO) {
             xmeter_write_dac_current();
             xmeter_write_rom_dac_current();
@@ -319,7 +351,7 @@ static void do_xmeter_set(uint8_t to_func, uint8_t to_state, enum task_events ev
     sm_xmeter_reset_timeo();
     return;
   }
-  if(ev == EV_250MS) {
+  if(ev == EV_250MS || ev == EV_CC_CHANGE) {
     xmeter_read_adc();
     sm_xmeter_fill_set(is_c);
     sm_xmeter_test_timeo();
@@ -335,6 +367,7 @@ static void do_xmeter_set(uint8_t to_func, uint8_t to_state, enum task_events ev
       xmeter_inc_dac_c(ev == EV_KEY_MOD_C);
       xmeter_write_dac_current();
     }
+    sm_xmeter_reset_timeo();
   } else if(ev == EV_KEY_MOD_CC || ev == EV_KEY_SET_CC) {
     if(!is_c) {
       xmeter_dec_dac_v(ev == EV_KEY_MOD_CC);
@@ -343,6 +376,7 @@ static void do_xmeter_set(uint8_t to_func, uint8_t to_state, enum task_events ev
       xmeter_dec_dac_c(ev == EV_KEY_MOD_CC);
       xmeter_write_dac_current();
     }
+    sm_xmeter_reset_timeo();
   }  
 }
 
@@ -415,6 +449,8 @@ static const struct sm_trans_slot code sm_trans_xmeter_main[] = {
   {EV_KEY_MOD_LPRESS, SM_XMETER, SM_XMETER_AUX0, do_xmeter_aux0}, 
   {EV_KEY_SET_LPRESS, SM_SET_PARAM, SM_SET_PARAM_FAN, do_set_param_fan}, /* 进入参数设置 */
   {EV_KEY_MOD_SET_PRESS, SM_CALIBRATE, SM_CALIBRATE_PHY_VOLTAGE, do_calibrate_phy_voltage}, /* 进入校准功能 */  
+  {EV_KEY_MOD_SET_LPRESS, SM_CALIBRATE, SM_CALIBRATE_PHY_VOLTAGE, do_calibrate_phy_voltage}, /* 进入校准功能 */  
+
   {EV_KEY_MOD_C, SM_XMETER, SM_XMETER_SET_V, do_xmeter_set_v}, 
   {EV_KEY_MOD_CC, SM_XMETER, SM_XMETER_SET_V, do_xmeter_set_v},
   {EV_KEY_SET_C, SM_XMETER, SM_XMETER_SET_C, do_xmeter_set_c}, 
@@ -500,6 +536,7 @@ static const struct sm_trans_slot code  sm_trans_xmeter_set_v[] = {
   {EV_OVER_PD, SM_XMETER, SM_XMETER_OVER_HEAT, do_xmeter_overpd},
   {EV_TEMP_HI, SM_XMETER, SM_XMETER_SET_V, do_xmeter_set_v},
   {EV_TEMP_LO, SM_XMETER, SM_XMETER_SET_V, do_xmeter_set_v},
+  {EV_CC_CHANGE, SM_XMETER, SM_XMETER_SET_V, do_xmeter_set_v},
   {NULL, NULL, NULL, NULL}
 };
 
@@ -515,6 +552,7 @@ static const struct sm_trans_slot code  sm_trans_xmeter_set_c[] = {
   {EV_OVER_PD, SM_XMETER, SM_XMETER_OVER_HEAT, do_xmeter_overpd},
   {EV_TEMP_HI, SM_XMETER, SM_XMETER_SET_C, do_xmeter_set_c},
   {EV_TEMP_LO, SM_XMETER, SM_XMETER_SET_C, do_xmeter_set_c},
+  {EV_CC_CHANGE, SM_XMETER, SM_XMETER_SET_V, do_xmeter_set_c},
   {NULL, NULL, NULL, NULL}
 };
 

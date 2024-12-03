@@ -30,7 +30,7 @@ CONTROL_MSG_CODE_START_STOP_FAN      = 3
 CONTROL_MSG_CODE_START_STOP_SWITCH   = 4
 CONTROL_MSG_CODE_GET_XMETER_STATUS   = 5
 CONTROL_MSG_CODE_GET_ADC_CURRENT     = 6
-CONTROL_MSG_CODE_GET_ADC_VOLTAGE_IN  = 7
+CONTROL_MSG_CODE_GET_ADC_VOLTAGE_DISS= 7
 CONTROL_MSG_CODE_GET_ADC_VOLTAGE_OUT = 8
 CONTROL_MSG_CODE_GET_ADC_TEMP        = 9
 CONTROL_MSG_CODE_GET_POWER_OUT       = 10
@@ -255,8 +255,8 @@ def do_set_xmeter_value(serial, cmd_str, cmd_code, args):
 def do_get_adc_current(serial, args):
     do_get_xmeter_value(serial, 'get_adc_current', CONTROL_MSG_CODE_GET_ADC_CURRENT, args)
 
-def do_get_adc_voltage_in(serial, args):
-    do_get_xmeter_value(serial, 'get_adc_voltage_in', CONTROL_MSG_CODE_GET_ADC_VOLTAGE_IN, args)
+def do_get_adc_voltage_diss(serial, args):
+    do_get_xmeter_value(serial, 'get_adc_voltage_diss', CONTROL_MSG_CODE_GET_ADC_VOLTAGE_DISS, args)
 
 def do_get_adc_voltage_out(serial, args):
     do_get_xmeter_value(serial, 'get_adc_voltage_out', CONTROL_MSG_CODE_GET_ADC_VOLTAGE_OUT, args)
@@ -537,7 +537,7 @@ tests = {
     'switch': do_start_stop_switch,
     'status' : do_get_status,
     'get_adc_current' : do_get_adc_current,
-    'get_adc_voltage_in' : do_get_adc_voltage_in,
+    'get_adc_voltage_diss' : do_get_adc_voltage_diss,
     'get_adc_voltage_out' : do_get_adc_voltage_out,    
     'get_adc_temp' : do_get_adc_temp,
     'get_power_out' : do_get_power_out,

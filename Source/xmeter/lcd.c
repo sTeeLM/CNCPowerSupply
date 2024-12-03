@@ -354,3 +354,30 @@ void lcd_set_blink_range(uint8_t row, uint8_t from, uint8_t to, bit blink)
     lcd_set_blink(row, col, blink);
   }
 }
+
+void lcd_enter_shell()
+{
+  lcd_clear();
+  lcd_set_string(0, 0, "    CONSOLE     ");
+  lcd_refresh();  
+}
+
+void lcd_leave_shell()
+{
+  lcd_clear();
+  lcd_refresh(); 
+}
+
+void lcd_enter_control()
+{
+  lcd_clear();
+  lcd_set_string(0, 0, " REMOTE CONTROL ");
+  lcd_set_string(1, 0, "Msg:xxxx Idle:XX");
+  lcd_refresh();  
+}
+
+void lcd_leave_control()
+{
+  lcd_clear();
+  lcd_refresh(); 
+}

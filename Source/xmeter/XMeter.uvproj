@@ -324,7 +324,7 @@
               <MiscControls></MiscControls>
               <Define>__OSCILLATO_6T__</Define>
               <Undefine></Undefine>
-              <IncludePath>..\protocol;.\state_machine</IncludePath>
+              <IncludePath>..\protocol;.\state_machine;.\console</IncludePath>
             </VariousControls>
           </C51>
           <Ax51>
@@ -461,6 +461,11 @@
               <FileType>1</FileType>
               <FilePath>..\protocol\protocol.c</FilePath>
             </File>
+            <File>
+              <FileName>console.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\console.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -480,6 +485,36 @@
               <FileName>sm_calibrate.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\state_machine\sm_calibrate.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>console</GroupName>
+          <Files>
+            <File>
+              <FileName>con_calibrate_current.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\console\con_calibrate_current.c</FilePath>
+            </File>
+            <File>
+              <FileName>con_calibrate_temperature.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\console\con_calibrate_temperature.c</FilePath>
+            </File>
+            <File>
+              <FileName>con_calibrate_voltage_diss.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\console\con_calibrate_voltage_diss.c</FilePath>
+            </File>
+            <File>
+              <FileName>con_calibrate_voltage_out.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\console\con_calibrate_voltage_out.c</FilePath>
+            </File>
+            <File>
+              <FileName>con_common.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\console\con_common.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -525,7 +560,7 @@
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
           <OutputDirectory>.\Objects\</OutputDirectory>
-          <OutputName>XMeter</OutputName>
+          <OutputName>XMeter_Debug</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>1</CreateHexFile>
@@ -803,7 +838,7 @@
               <MiscControls></MiscControls>
               <Define>__OSCILLATO_6T__,__XMETER_DEBUG__</Define>
               <Undefine></Undefine>
-              <IncludePath>..\protocol;.\state_machine</IncludePath>
+              <IncludePath>..\protocol;.\state_machine;.\console</IncludePath>
             </VariousControls>
           </C51>
           <Ax51>
@@ -940,6 +975,11 @@
               <FileType>1</FileType>
               <FilePath>..\protocol\protocol.c</FilePath>
             </File>
+            <File>
+              <FileName>console.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\console.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -959,6 +999,36 @@
               <FileName>sm_calibrate.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\state_machine\sm_calibrate.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>console</GroupName>
+          <Files>
+            <File>
+              <FileName>con_calibrate_current.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\console\con_calibrate_current.c</FilePath>
+            </File>
+            <File>
+              <FileName>con_calibrate_temperature.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\console\con_calibrate_temperature.c</FilePath>
+            </File>
+            <File>
+              <FileName>con_calibrate_voltage_diss.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\console\con_calibrate_voltage_diss.c</FilePath>
+            </File>
+            <File>
+              <FileName>con_calibrate_voltage_out.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\console\con_calibrate_voltage_out.c</FilePath>
+            </File>
+            <File>
+              <FileName>con_common.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\console\con_common.c</FilePath>
             </File>
           </Files>
         </Group>

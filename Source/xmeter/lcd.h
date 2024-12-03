@@ -39,4 +39,10 @@ void lcd_set_blink_range(uint8_t row, uint8_t from, uint8_t to, bit blink);
 
 void lcd_set_special_char(uint8_t row, uint8_t col, uint8_t c);
 
+void lcd_enter_shell();
+void lcd_leave_shell();
+
+void lcd_enter_control();
+void lcd_leave_control();
+
 #endif

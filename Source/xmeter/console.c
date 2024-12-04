@@ -66,9 +66,8 @@ struct console_cmds cmds[] =
                       "cvo done: do calibrate and save rom",
                       con_cal_voltage_out},
   {"cvd", "calibrate voltage diss", 
-                      "cvd: dump paramenters\n"
-                      "cvd 0 xx: record first value\n" 
-                      "cvd 1 xx: record second value\n"
+                      "cvd: dump paramenters\n" 
+                      "cvd 1 xx: record second value (first value always 0)\n"
                       "cvd done: do calibrate and save rom",
                       con_cal_voltage_diss}, 
   {"ct",  "calibrate temperature", 
@@ -108,7 +107,7 @@ static void console_call_cmd(char * buf, char arg1, char arg2)
   }
 }
 
-static int16_t console_get_char(void)
+int16_t console_get_char(void)
 {
   char c;
   uint16_t len = 1;
@@ -116,7 +115,7 @@ static int16_t console_get_char(void)
   return c;
 }
 
-static int16_t console_try_get_key(void)
+int16_t console_try_get_char(void)
 {
   char c;
   bit ret = com_try_get_char(&c);
@@ -125,21 +124,23 @@ static int16_t console_try_get_key(void)
 
 static void console_gets(char * buffer, uint16_t len)
 {
-  uint16_t i = 0, c;
+  uint16_t i = 0;
+  char c;
+  static char erase_in_line [2]={0x9b, 0x4b}; 
   while((c = console_get_char()) > 0 && i < len) {
-    if(c != '\r' && c != '\n' && c != '\b') {
+    if(c != '\r' && c != '\n' && c != 0x8 && c != 0x7f) {
       com_send_buffer((uint8_t *)&c, 1);
-    } else if(c == '\b' && i > 0) {
+    } else if((c == 0x8 ||  c == 0x7f) && i > 0) {
       com_send_buffer((uint8_t *)&c, 1);
-      com_send_buffer((uint8_t *)&"\e[K", 3);
+      com_send_buffer(erase_in_line, 2);
     }
-    if(c != '\r' && c != '\n' && c != '\b') {
+    if(c != '\r' && c != '\n' && c != 0x8 && c != 0x7f) {
       buffer[i++] = c;
-    } else if(c == '\b'){ // backspace
+    } else if((c == 0x8 ||  c == 0x7f)){ // backspace or del
       if(i > 0)
         buffer[--i] = 0;
-    } else if(c != '\r'){
-      console_try_get_key();
+    } else if(c == '\r' || c == '\n'){
+      buffer[i++] = 0;
       break;
     }
   }
@@ -161,7 +162,7 @@ void console_run(void)
 #ifdef __XMETER_DEBUG__    
   char arg1_pos, arg2_pos, c;
 
-  if((c = console_try_get_key()) != 'c' || c == 0) {
+  if((c = console_try_get_char()) != 'c' || c == 0) {
     return;
   }
   

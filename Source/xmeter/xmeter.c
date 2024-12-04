@@ -488,20 +488,20 @@ void xmeter_read_rom_adc_voltage_out_kb(double * k, double * b)
 
 void xmeter_read_rom_adc_current_kb(double * k, double * b)
 {
-  rom_read32(ROM_XMETER_ADC_CURRENT_K, &k);
-  rom_read32(ROM_XMETER_ADC_CURRENT_B, &b);
+  rom_read32(ROM_XMETER_ADC_CURRENT_K, k);
+  rom_read32(ROM_XMETER_ADC_CURRENT_B, b);
 }
 
 void xmeter_read_rom_dac_current_kb(double * k, double * b)
 {
-  rom_read32(ROM_XMETER_DAC_CURRENT_K, &k);
-  rom_read32(ROM_XMETER_DAC_CURRENT_B, &b);
+  rom_read32(ROM_XMETER_DAC_CURRENT_K, k);
+  rom_read32(ROM_XMETER_DAC_CURRENT_B, b);
 }
 
 void xmeter_read_rom_dac_voltage_kb(double * k, double * b)
 {
-  rom_read32(ROM_XMETER_DAC_VOLTAGE_K, &k);
-  rom_read32(ROM_XMETER_DAC_VOLTAGE_B, &b); 
+  rom_read32(ROM_XMETER_DAC_VOLTAGE_K, k);
+  rom_read32(ROM_XMETER_DAC_VOLTAGE_B, b); 
 }
 
 void xmeter_write_rom_adc_voltage_diss_kb(double k, double b)

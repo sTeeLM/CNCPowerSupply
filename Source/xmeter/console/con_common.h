@@ -3,8 +3,8 @@
 
 #include <stdint.h>
 
-extern uint16_t adc_bits[2];
-extern uint16_t dac_bits[2]; 
-extern double val[2];
+extern uint16_t con_adc_bits[2];
+extern uint16_t con_dac_bits[2]; 
+extern double con_val[2];
 
 #endif

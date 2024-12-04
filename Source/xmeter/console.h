@@ -23,4 +23,7 @@ void console_printf(const char * fmt /*format*/, ...);
 
 extern char console_buf[];
 extern struct console_cmds cmds[];
+
+int16_t console_get_char(void);
+int16_t console_try_get_char(void);
 #endif

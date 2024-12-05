@@ -7,6 +7,7 @@
 #include "clock.h"
 #include "lcd.h"
 #include "debug.h"
+#include "sm.h"
 
 #include "con_calibrate_current.h"
 #include "con_calibrate_voltage_out.h"
@@ -174,6 +175,7 @@ void console_run(void)
   // stop the clock
   clock_enter_shell();
   lcd_enter_shell();
+  sm_enter_shell();
   
   do {
     console_printf("console>");
@@ -229,6 +231,7 @@ void console_run(void)
     
   } while (strcmp(console_buf, "!") != 0);
 
+  sm_leave_shell();
   lcd_leave_shell();
   clock_leave_shell(); 
 #endif

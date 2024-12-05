@@ -555,6 +555,7 @@ static void control_enter(void)
     xmeter_output_on();
     xmeter_fan_off();
     lcd_enter_control();
+    sm_enter_control();
     control_is_enter_bit = 1;
     control_remote_override = 0;
     control_last_msg_sec = clock_get_now_sec();
@@ -568,7 +569,7 @@ static void control_leave(void)
     xmeter_output_off();
     xmeter_fan_off();
     lcd_leave_control();
-    sm_initialize();
+    sm_leave_control();
     control_is_enter_bit = 0;
     CDBG("control_leave\n");
   }

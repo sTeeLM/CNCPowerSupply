@@ -43,4 +43,10 @@ void sm_initialize(void);
 
 void sm_run(enum task_events ev);
 
+void sm_enter_control(void);
+void sm_leave_control(void);
+
+void sm_enter_shell(void);
+void sm_leave_shell(void);
+
 #endif

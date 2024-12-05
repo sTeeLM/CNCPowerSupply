@@ -1,7 +1,7 @@
 Board Information Report
 Filename     : D:\Lab\CNCPowerSupply\PCBs\EMIRemover\EMIRemover.PcbDoc
-Date         : 2024/11/22
-Time         : 21:38:47
+Date         : 2024/12/5
+Time         : 12:56:43
 Time Elapsed : 00:00:00
 
 General

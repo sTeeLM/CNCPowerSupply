@@ -26,6 +26,31 @@ void sm_initialize(void)
   task_set(EV_INIT);
 }
 
+void sm_enter_shell(void)
+{
+  CDBG(("sm_enter_shell\n"));
+}
+
+void sm_leave_shell(void)
+{
+  CDBG(("sm_leave_shell\n"));
+  sm_cur_function = SM_XMETER;
+  sm_cur_state = SM_XMETER_MAIN;
+  task_set(EV_INIT);
+}
+
+void sm_enter_control(void)
+{
+  CDBG(("sm_enter_control\n"));
+}
+
+void sm_leave_control(void)
+{
+  CDBG(("sm_leave_control\n"));
+  sm_cur_function = SM_XMETER;
+  sm_cur_state = SM_XMETER_MAIN;
+  task_set(EV_INIT);
+}
 
 void sm_run(enum task_events ev)
 {

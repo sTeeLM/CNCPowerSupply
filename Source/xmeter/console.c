@@ -55,20 +55,21 @@ struct console_cmds cmds[] =
                       con_quit},
   {"cc", "calibrate current", 
                       "cc: dump paramenters\n"
-                      "cc 0 xx: record first value\n" 
-                      "cc 1 xx: record second value\n"
-                      "cc done: do calibrate and save rom",
+                      "cc load: load paramenters from rom\n"
+                      "cc n xx: set record n value\n" 
+                      "cc save: save paramenters to rom",
                       con_cal_current}, 
   {"cvo", "calibrate voltage out", 
                       "cvo: dump paramenters\n"
-                      "cvo 0 xx: record first value\n" 
-                      "cvo 1 xx: record second value\n"
-                      "cvo done: do calibrate and save rom",
+                      "cvo load: load paramenters from rom\n"
+                      "cvo n xx: set record n value\n" 
+                      "cvo save: save paramenters to rom",
                       con_cal_voltage_out},
   {"cvd", "calibrate voltage diss", 
                       "cvd: dump paramenters\n" 
-                      "cvd 1 xx: record second value (first value always 0)\n"
-                      "cvd done: do calibrate and save rom",
+                      "cvd load: load paramenters from rom\n"
+                      "cvd max xx: record max value (min value always 0)\n"
+                      "cvd save: do calibrate and save rom",
                       con_cal_voltage_diss}, 
   {"ct",  "calibrate temperature", 
                       "ct: dump temperature repeatlly until hit key",

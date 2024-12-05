@@ -381,3 +381,22 @@ void lcd_leave_control()
   lcd_clear();
   lcd_refresh(); 
 }
+
+void lcd_show_progress(uint8_t row, uint8_t progress)
+{
+  uint8_t i;
+  row %= 2;
+  progress %= 17;
+  
+  if(progress > 0) {
+    for(i = 0 ; i < progress; i ++) {
+      lcd_set_char(row, i, 0xFF);
+    }
+  }
+  
+  for(i = progress; i < 16; i ++) {
+    lcd_set_char(row, i, ' ');
+  }
+  
+  lcd_refresh();  
+}

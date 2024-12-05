@@ -6,6 +6,7 @@
 #include "delay.h"
 #include "gpio.h"
 #include "xmeter.h"
+#include "lcd.h"
 
 #define ROM_I2C_ADDR 0xA0
 
@@ -90,6 +91,8 @@ void rom_initialize(void)
   CDBG("rom_initialize ROM_RESET = %bu(%s)\n", ROM_RESET == 1 ? 1 : 0, ROM_RESET == 1? "OFF" : "ON");
   if(rom_is_factory_reset()) { // reset rom
     CDBG("reset rom!\n");
+    lcd_set_string(0, 0, "   RESETING...  ");
+   
     rom_reset();
   }
 }

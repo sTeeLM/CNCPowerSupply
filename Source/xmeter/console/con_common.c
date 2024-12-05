@@ -1,11 +1,5 @@
 #include "con_common.h"
 
 /* save memspace */
-uint16_t con_adc_bits[2];
-uint16_t con_dac_bits[2]; 
-double con_val[2];
-
-void console_wait_button(void)
-{
-  
-}
+xmeter_grid_t con_grid_adc[XMETER_GRID_SIZE];
+xmeter_grid_t con_grid_dac[XMETER_GRID_SIZE];

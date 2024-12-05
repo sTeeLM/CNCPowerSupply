@@ -1,5 +1,5 @@
-#ifndef __IVCLOCK_TASK_H__
-#define __IVCLOCK_TASK_H__
+#ifndef __XMETER_TASK_H__
+#define __XMETER_TASK_H__
 
 #include <stdint.h>
 
@@ -32,7 +32,7 @@ enum task_events
 extern uint16_t ev_bits0;
 extern uint16_t ev_bits1;
 
-extern const char * task_names[];
+extern const char * code task_names[];
 
 typedef void (*TASK_PROC)(enum task_events);
 

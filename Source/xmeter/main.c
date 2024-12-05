@@ -15,6 +15,7 @@
 #include "gpio.h"
 #include "control.h"
 #include "console.h"
+#include "version.h"
 
 int main(void)
 {
@@ -22,22 +23,33 @@ int main(void)
   gpio_initialize();
   debug_initialize();                           // initialize debug system
   com_initialize(); 
-	rom_initialize();
+  
   lcd_initialize();
   
-  lcd_set_string(0,0, "++XMETER V1.0++");
-  lcd_set_string(1,0, "---by sTeeLM---");
+	rom_initialize();
+  
+  lcd_clear();
+  lcd_set_string(0,0, "++XMETER V"  __XMETER_VERSION_STRING__ " ++");
   lcd_refresh();
+  
+  lcd_show_progress(1,1);
   
   clock_initialize();
   task_initialize();
   sm_initialize();
+  
+  lcd_show_progress(1,1); 
+  
   button_initialize();
   beeper_initialize();
   control_initilize();
   console_initilize();
   
+  lcd_show_progress(1,2); 
+  
   xmeter_initialize();
+  
+  lcd_show_progress(1,16);
   
 	while(1) {
     console_run();

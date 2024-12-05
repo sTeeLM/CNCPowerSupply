@@ -481,11 +481,6 @@
               <FileType>1</FileType>
               <FilePath>.\state_machine\sm_set_param.c</FilePath>
             </File>
-            <File>
-              <FileName>sm_calibrate.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\state_machine\sm_calibrate.c</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
@@ -994,11 +989,6 @@
               <FileName>sm_set_param.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\state_machine\sm_set_param.c</FilePath>
-            </File>
-            <File>
-              <FileName>sm_calibrate.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\state_machine\sm_calibrate.c</FilePath>
             </File>
           </Files>
         </Group>

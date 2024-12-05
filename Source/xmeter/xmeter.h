@@ -25,6 +25,11 @@ void xmeter_rom_factory_reset(void);
 
 void xmeter_initialize(void);
 void xmeter_load_config(void);
+void xmeter_reload_adc_current_config(void);
+void xmeter_reload_adc_voltage_out_config(void);
+void xmeter_reload_adc_voltage_diss_config(void);
+void xmeter_reload_dac_current_config(void);
+void xmeter_reload_dac_voltage_config(void);
 
 extern xmeter_value_t xmeter_dac_voltage;
 extern xmeter_value_t xmeter_dac_current;
@@ -156,19 +161,26 @@ void xmeter_dec_voltage_value(xmeter_value_t * voltage, bit coarse);
 void xmeter_inc_current_value(xmeter_value_t * voltage, bit coarse);
 void xmeter_dec_current_value(xmeter_value_t * voltage, bit coarse);
 
-/* dump calibrate config */
-void xmeter_read_rom_adc_voltage_diss_kb(double * k, double * b);
-void xmeter_read_rom_adc_voltage_out_kb(double * k, double * b);
-void xmeter_read_rom_adc_current_kb(double * k, double * b);
-void xmeter_read_rom_dac_current_kb(double * k, double * b);
-void xmeter_read_rom_dac_voltage_kb(double * k, double * b);
+#define XMETER_GRID_SIZE 6
+
+typedef struct _xmeter_grid {
+  double val;
+  uint16_t bits;
+}xmeter_grid_t;
 
 /* save calibrate config */	
-void xmeter_write_rom_adc_voltage_diss_kb(double k, double b);
-void xmeter_write_rom_adc_voltage_out_kb(double k, double b);
-void xmeter_write_rom_adc_current_kb(double k, double b);
-void xmeter_write_rom_dac_current_kb(double k, double b);
-void xmeter_write_rom_dac_voltage_kb(double k, double b);
+void xmeter_write_rom_adc_current_g(const xmeter_grid_t * grid, uint16_t cnt);
+void xmeter_write_rom_adc_voltage_out_g(const xmeter_grid_t * grid, uint16_t cnt);
+void xmeter_write_rom_adc_voltage_diss_g(const xmeter_grid_t * grid, uint16_t cnt);
+void xmeter_write_rom_dac_current_g(const xmeter_grid_t * grid, uint16_t cnt);
+void xmeter_write_rom_dac_voltage_g(const xmeter_grid_t * grid, uint16_t cnt);
+
+/* dump calibrate config */
+void xmeter_read_rom_adc_current_g(xmeter_grid_t * grid, uint16_t cnt);
+void xmeter_read_rom_adc_voltage_out_g(xmeter_grid_t * grid, uint16_t cnt);
+void xmeter_read_rom_adc_voltage_diss_g(xmeter_grid_t * grid, uint16_t cnt);
+void xmeter_read_rom_dac_current_g(xmeter_grid_t * grid, uint16_t cnt);
+void xmeter_read_rom_dac_voltage_g(xmeter_grid_t * grid, uint16_t cnt);
 
 /* 调整步长 */
 void xmeter_get_voltage_steps(xmeter_value_t * coarse, xmeter_value_t * fine);
@@ -182,8 +194,8 @@ void xmeter_get_voltage_out_limits(xmeter_value_t * min, xmeter_value_t * max);
 void xmeter_get_temp_limits(xmeter_value_t * min, xmeter_value_t * max);
 void xmeter_get_power_diss_limits(xmeter_value_t * min, xmeter_value_t * max);
 
-/* 解线性方程，获得斜率k，偏移b */  
-bit xmeter_cal(uint16_t x1, uint16_t x2, bit is_signed, double y1, double y2, double * k, double * b);  
+/* 根据最大最小值填充插值格子 */  
+void xmeter_cal_grid(uint16_t x1, uint16_t x2, bit is_signed, double y1, double y2, xmeter_grid_t * grid, uint16_t cnt);  
 
 void xmeter_dump_value(const char * name, xmeter_value_t * pval, uint8_t cnt);
 

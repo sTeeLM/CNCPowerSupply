@@ -1,6 +1,5 @@
 #include "sm_xmeter.h"
 #include "sm_set_param.h"
-#include "sm_calibrate.h"
 #include "task.h"
 #include "sm.h"
 #include "cext.h"
@@ -8,6 +7,7 @@
 #include "xmeter.h"
 #include "debug.h"
 #include "clock.h"
+
 /*
 over diss power screen (关闭输出，直到手工按set置位)
  OVER DP
@@ -222,16 +222,7 @@ void do_xmeter_main(uint8_t to_func, uint8_t to_state, enum task_events ev)
   /* 从内外部切换过来或者启动 */
   if((sm_cur_function == SM_XMETER && sm_cur_state == SM_XMETER_MAIN && ev == EV_INIT)
     || (sm_cur_function == SM_XMETER && sm_cur_state != SM_XMETER_MAIN)
-    || (sm_cur_function != SM_XMETER)) {  
-      
-      if(sm_cur_function == SM_CALIBRATE && sm_cur_state == SM_CALIBRATE_BK) {
-        lcd_clear();
-        lcd_set_string(0, 0, "Reloading config");
-        lcd_set_string(1, 0, "Please Wait.....");
-        lcd_refresh();
-        xmeter_load_config(); /* reload config after calibtate*/
-      }      
-      
+    || (sm_cur_function != SM_XMETER)) {      
       xmeter_output_on();
       xmeter_fan_off();
       xmeter_read_adc();
@@ -297,11 +288,11 @@ static void do_xmeter_aux1(uint8_t to_func, uint8_t to_state, enum task_events e
 }
 
 static void do_xmeter_pick(uint8_t to_func, uint8_t to_state, enum task_events ev, bit is_c)
-{
+{ 
   if(sm_cur_state != to_state) {
     sm_xmeter_init_pick(is_c);
     sm_xmeter_fill_pick(is_c);
-    sm_xmeter_reset_timeo();
+    sm_xmeter_reset_timeo(); 
     return;
   }
   
@@ -325,7 +316,7 @@ static void do_xmeter_pick(uint8_t to_func, uint8_t to_state, enum task_events e
       xmeter_prev_preset_dac_v();
     else
       xmeter_prev_preset_dac_c();
-  }  
+  }    
 }
 
 static void do_xmeter_pick_v(uint8_t to_func, uint8_t to_state, enum task_events ev)
@@ -340,7 +331,7 @@ static void do_xmeter_pick_c(uint8_t to_func, uint8_t to_state, enum task_events
 }
 
 static void do_xmeter_set(uint8_t to_func, uint8_t to_state, enum task_events ev, bit is_c)
-{
+{  
   if(sm_cur_state != to_state) {
     if(!is_c)
       xmeter_read_dac_voltage();
@@ -364,7 +355,7 @@ static void do_xmeter_set(uint8_t to_func, uint8_t to_state, enum task_events ev
       xmeter_inc_dac_v(ev == EV_KEY_MOD_C);
       xmeter_write_dac_voltage();
     } else {
-      xmeter_inc_dac_c(ev == EV_KEY_MOD_C);
+      xmeter_inc_dac_c(ev == EV_KEY_SET_C);
       xmeter_write_dac_current();
     }
     sm_xmeter_reset_timeo();
@@ -373,7 +364,7 @@ static void do_xmeter_set(uint8_t to_func, uint8_t to_state, enum task_events ev
       xmeter_dec_dac_v(ev == EV_KEY_MOD_CC);
       xmeter_write_dac_voltage();
     } else {
-      xmeter_dec_dac_c(ev == EV_KEY_MOD_CC);
+      xmeter_dec_dac_c(ev == EV_KEY_SET_CC);
       xmeter_write_dac_current();
     }
     sm_xmeter_reset_timeo();
@@ -448,8 +439,6 @@ static const struct sm_trans_slot code sm_trans_xmeter_main[] = {
   {EV_KEY_SET_PRESS, SM_XMETER, SM_XMETER_PICK_C, do_xmeter_pick_c},   
   {EV_KEY_MOD_LPRESS, SM_XMETER, SM_XMETER_AUX0, do_xmeter_aux0}, 
   {EV_KEY_SET_LPRESS, SM_SET_PARAM, SM_SET_PARAM_FAN, do_set_param_fan}, /* 进入参数设置 */
-  {EV_KEY_MOD_SET_PRESS, SM_CALIBRATE, SM_CALIBRATE_PHY_VOLTAGE, do_calibrate_phy_voltage}, /* 进入校准功能 */  
-  {EV_KEY_MOD_SET_LPRESS, SM_CALIBRATE, SM_CALIBRATE_PHY_VOLTAGE, do_calibrate_phy_voltage}, /* 进入校准功能 */  
 
   {EV_KEY_MOD_C, SM_XMETER, SM_XMETER_SET_V, do_xmeter_set_v}, 
   {EV_KEY_MOD_CC, SM_XMETER, SM_XMETER_SET_V, do_xmeter_set_v},

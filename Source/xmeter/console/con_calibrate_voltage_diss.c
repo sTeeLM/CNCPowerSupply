@@ -8,34 +8,34 @@
 
 int8_t con_cal_voltage_diss(char arg1, char arg2)
 {
-
-  double adc_k, adc_b;
-
+  uint16_t bits, index;
+  double value;
   if(arg1 == 0) {
-    xmeter_read_rom_adc_voltage_diss_kb(&adc_k, &adc_b);
-    console_printf("[ADC] k = %f b = %f\n", adc_k, adc_b);
-  } else if(arg1 > 0 && console_buf[arg1] == '1' && arg2 > 0) {
-    con_adc_bits[0] = 0;
-    con_val[0] = 0.0;
-    con_adc_bits[1] = xmeter_get_adc_bits_voltage_diss();
-    sscanf(&console_buf[arg2], "%f", &con_val[1]);
-    console_printf("[ADC][0] bits = %04x\n", con_adc_bits[0]);
-    console_printf("[VAL][0] val  = %f V\n", con_val[0]);
-    console_printf("[ADC][1] bits = %04x\n", con_adc_bits[1]);
-    console_printf("[VAL][1] val  = %f V\n", con_val[1]);
-  } else if(arg1 > 0 && strcmp(&console_buf[arg1], "done") == 0 && arg2 == 0) {
-    if(xmeter_cal(con_adc_bits[0], con_adc_bits[1], 1, con_val[0], con_val[1], &adc_k, &adc_b)) {
-      console_printf("[ADC] [%04x] [%04x] -> [%f V] [%f V] => k = %f b = %f\n", 
-        con_adc_bits[0], con_adc_bits[1], con_val[0], con_val[1], adc_k, adc_b);
-      xmeter_write_rom_adc_voltage_diss_kb(adc_k, adc_b);
-      console_printf("save rom done!\n");
-    } else {
-        console_printf("[ADC] [%04x] [%04x] -> [%f V] [%f V] failed\n", 
-          con_adc_bits[0], con_adc_bits[1], con_val[0], con_val[1]);
+    for(index = 0 ; index < XMETER_GRID_SIZE; index ++) {
+      console_printf("[ADC][%u] %04x -> %f\n", index, con_grid_adc[index].bits, con_grid_adc[index].val);
     }
+    
+  } else if(arg1 > 0 && strcmp(&console_buf[arg1], "load") == 0) {
+    xmeter_read_rom_adc_voltage_diss_g(con_grid_adc, XMETER_GRID_SIZE);
+    console_printf("load ok!\n");
+    
+  } else if(arg1 > 0 && strcmp(&console_buf[arg1], "save") == 0) {
+    xmeter_write_rom_adc_voltage_diss_g(con_grid_adc, XMETER_GRID_SIZE);
+
+    xmeter_reload_adc_voltage_diss_config();
+
+    console_printf("save ok!\n");
+    
+  } else if(arg1 > 0 && arg2 > 0) {
+    if(index > XMETER_GRID_SIZE) 
+      return 1;
+    sscanf(&console_buf[arg2], "%f", &value);
+    bits = xmeter_get_adc_bits_voltage_diss();    
+    xmeter_cal_grid(0x0, bits, 1, 0.0, value, con_grid_adc, XMETER_GRID_SIZE);
+    console_printf("cal ok!\n");
+    
   } else {
     return 1;
   }
-
   return 0;
 }

@@ -11,7 +11,7 @@
 #include "button.h"
 
 
-const char * task_names[] =
+const char * code task_names[] =
 {
   "EV_INIT",
   "EV_KEY_SCAN",  

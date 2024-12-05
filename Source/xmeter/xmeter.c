@@ -5,6 +5,7 @@
 #include "delay.h"
 #include "rom.h"
 #include "task.h"
+#include "lcd.h"
 
 #include <stdint.h>
 #include <string.h>
@@ -58,16 +59,13 @@ xmeter_value_t xmeter_adc_temp;            // 温度
 xmeter_value_t xmeter_adc_voltage_diss;    // 耗散电压
 
 static double xmeter_adc_current_f;
-static double xmeter_adc_current_k;
-static double xmeter_adc_current_b;
+static xmeter_grid_t xmeter_adc_current_g[XMETER_GRID_SIZE];
 
 static double xmeter_adc_voltage_out_f;
-static double xmeter_adc_voltage_out_k;
-static double xmeter_adc_voltage_out_b;
+static xmeter_grid_t xmeter_adc_voltage_out_g[XMETER_GRID_SIZE];
 
 static double xmeter_adc_voltage_diss_f;
-static double xmeter_adc_voltage_diss_k;
-static double xmeter_adc_voltage_diss_b;
+static xmeter_grid_t xmeter_adc_voltage_diss_g[XMETER_GRID_SIZE];
 
 static double xmeter_adc_temp_f;
 static double xmeter_power_out_f;
@@ -76,10 +74,9 @@ static double xmeter_power_diss_f;
 xmeter_value_t xmeter_dac_current;
 xmeter_value_t xmeter_dac_voltage;
 
-static double xmeter_dac_current_k;
-static double xmeter_dac_current_b;
-static double xmeter_dac_voltage_k;
-static double xmeter_dac_voltage_b;
+static xmeter_grid_t xmeter_dac_current_g[XMETER_GRID_SIZE];
+
+static xmeter_grid_t xmeter_dac_voltage_g[XMETER_GRID_SIZE];
 
 static const xmeter_value_t code xmeter_dac_max_voltage = {0, XMETER_RES_VOLTAGE, 30, 0}; /* 30V */
 static const xmeter_value_t code xmeter_dac_max_current = {0, XMETER_RES_CURRENT, 5, 0}; /* 5A */
@@ -116,19 +113,13 @@ static uint8_t xmeter_dac_preset_voltage_index;
 
 static bit xmeter_old_cc_status;
 
-struct xmeter_adc_temp_slot
-{
-  double temp;
-  uint16_t adc_val;
-};
-
 /*
   47k电阻串联，NTC 100K，B=3950K
   分压3V, ADC量程7FFF->4.096V
   中心温度在40度附近
 */
-static const struct xmeter_adc_temp_slot code 
-  xmeter_adc_temp_table[] = 
+static const xmeter_grid_t code 
+  xmeter_adc_temp_g[] = 
 {
 {-55.000 ,0X5D1F},
 {-54.000 ,0X5D17},
@@ -447,97 +438,97 @@ void xmeter_dump_value(const char * name, xmeter_value_t * pval, uint8_t cnt)
   }
 }
 
-bit xmeter_cal(uint16_t x1, uint16_t x2, bit is_signed, double y1, double y2, double * k, double * b)
+void xmeter_cal_grid(
+    uint16_t x1, uint16_t x2, 
+    bit is_signed, 
+    double y1, double y2, 
+    xmeter_grid_t * grid, uint16_t cnt)
 {
-  int16_t sx1, sx2;
+  uint32_t sx1, sx2, dx;
+  double dy;
+  uint16_t i;
   
-  if(!is_signed) {
-    if(x2 <= x1)
-      return 0;
-    
-    *k = (y2 - y1) / (x2 - x1);
-    
-    *b = y2 - x2 * (*k);
-    
-    return *k != 0.0;
-  } else {
-    sx1 = (int16_t)x1;
-    sx2 = (int16_t)x2;
-    
-    if(sx2 <= sx1)
-      return 0;
-    
-    *k = (y2 - y1) / (sx2 - sx1);
-    
-    *b = y2 - sx2 * (*k);
-    return *k != 0.0;
+  sx1 = is_signed ? (int16_t)x1 : x1;
+  sx2 = is_signed ? (int16_t)x2 : x2; 
+  
+  dx = (sx2 - sx1) / (cnt - 1);
+  dy = (y2 - y1) / (cnt - 1);
+  
+  for(i = 0 ; i < cnt - 1; i ++) {
+    grid[i].val = y1 + dy * i;
+    grid[i].bits = (uint16_t)(sx1 + dx * i);
+  }
+  
+  grid[i].val = y2;
+  grid[i].bits = (uint16_t)(sx2);
+}
+
+static void xmeter_dump_grid(const char * name, const xmeter_grid_t * grid, uint16_t cnt)
+{
+  uint16_t i;
+  CDBG("%s:\n", name);
+  for(i = 0 ; i < cnt; i ++) {
+    CDBG("%04x -> %f:\n", grid[i].bits, grid[i].val);
   }
 }
 
-void xmeter_read_rom_adc_voltage_diss_kb(double * k, double * b)
+void xmeter_write_rom_adc_current_g(const xmeter_grid_t * grid, uint16_t cnt)
 {
-  rom_read32(ROM_XMETER_ADC_VOLTAGE_DISS_K, k);
-  rom_read32(ROM_XMETER_ADC_VOLTAGE_DISS_B, b);
+  rom_write_struct(ROM_XMETER_ADC_CURRENT_G, grid, cnt * sizeof(xmeter_grid_t));
 }
 
-void xmeter_read_rom_adc_voltage_out_kb(double * k, double * b)
+void xmeter_write_rom_adc_voltage_out_g(const xmeter_grid_t * grid, uint16_t cnt)
 {
-  rom_read32(ROM_XMETER_ADC_VOLTAGE_OUT_K, k);
-  rom_read32(ROM_XMETER_ADC_VOLTAGE_OUT_B, b); 
+  rom_write_struct(ROM_XMETER_ADC_VOLTAGE_OUT_G, grid, cnt * sizeof(xmeter_grid_t));
 }
 
-void xmeter_read_rom_adc_current_kb(double * k, double * b)
+void xmeter_write_rom_adc_voltage_diss_g(const xmeter_grid_t * grid, uint16_t cnt)
 {
-  rom_read32(ROM_XMETER_ADC_CURRENT_K, k);
-  rom_read32(ROM_XMETER_ADC_CURRENT_B, b);
+  rom_write_struct(ROM_XMETER_ADC_VOLTAGE_DISS_G, grid, cnt * sizeof(xmeter_grid_t));
 }
 
-void xmeter_read_rom_dac_current_kb(double * k, double * b)
+void xmeter_write_rom_dac_current_g(const xmeter_grid_t * grid, uint16_t cnt)
 {
-  rom_read32(ROM_XMETER_DAC_CURRENT_K, k);
-  rom_read32(ROM_XMETER_DAC_CURRENT_B, b);
+  rom_write_struct(ROM_XMETER_DAC_CURRENT_G, grid, cnt * sizeof(xmeter_grid_t));
 }
 
-void xmeter_read_rom_dac_voltage_kb(double * k, double * b)
+void xmeter_write_rom_dac_voltage_g(const xmeter_grid_t * grid, uint16_t cnt)
 {
-  rom_read32(ROM_XMETER_DAC_VOLTAGE_K, k);
-  rom_read32(ROM_XMETER_DAC_VOLTAGE_B, b); 
+  rom_write_struct(ROM_XMETER_DAC_VOLTAGE_G, grid, cnt * sizeof(xmeter_grid_t));
 }
 
-void xmeter_write_rom_adc_voltage_diss_kb(double k, double b)
+void xmeter_read_rom_adc_current_g(xmeter_grid_t * grid, uint16_t cnt)
 {
-  rom_write32(ROM_XMETER_ADC_VOLTAGE_DISS_K, &k);
-  rom_write32(ROM_XMETER_ADC_VOLTAGE_DISS_B, &b);
+  rom_read_struct(ROM_XMETER_ADC_CURRENT_G, grid, cnt * sizeof(xmeter_grid_t));
 }
 
-void xmeter_write_rom_adc_voltage_out_kb(double k, double b)
+void xmeter_read_rom_adc_voltage_out_g(xmeter_grid_t * grid, uint16_t cnt)
 {
-  rom_write32(ROM_XMETER_ADC_VOLTAGE_OUT_K, &k);
-  rom_write32(ROM_XMETER_ADC_VOLTAGE_OUT_B, &b); 
+  rom_read_struct(ROM_XMETER_ADC_VOLTAGE_OUT_G, grid, cnt * sizeof(xmeter_grid_t));
 }
 
-void xmeter_write_rom_adc_current_kb(double k, double b)
+void xmeter_read_rom_adc_voltage_diss_g(xmeter_grid_t * grid, uint16_t cnt)
 {
-  rom_write32(ROM_XMETER_ADC_CURRENT_K, &k);
-  rom_write32(ROM_XMETER_ADC_CURRENT_B, &b);
+  rom_read_struct(ROM_XMETER_ADC_VOLTAGE_DISS_G, grid, cnt * sizeof(xmeter_grid_t));
 }
 
-void xmeter_write_rom_dac_current_kb(double k, double b)
+void xmeter_read_rom_dac_current_g(xmeter_grid_t * grid, uint16_t cnt)
 {
-  rom_write32(ROM_XMETER_DAC_CURRENT_K, &k);
-  rom_write32(ROM_XMETER_DAC_CURRENT_B, &b);
+  rom_read_struct(ROM_XMETER_DAC_CURRENT_G, grid, cnt * sizeof(xmeter_grid_t));
 }
 
-void xmeter_write_rom_dac_voltage_kb(double k, double b)
+void xmeter_read_rom_dac_voltage_g(xmeter_grid_t * grid, uint16_t cnt)
 {
-  rom_write32(ROM_XMETER_DAC_VOLTAGE_K, &k);
-  rom_write32(ROM_XMETER_DAC_VOLTAGE_B, &b); 
+  rom_read_struct(ROM_XMETER_DAC_VOLTAGE_G, grid, cnt * sizeof(xmeter_grid_t));
 }
 
 void xmeter_rom_factory_reset(void)
 {
-  double k, b;
+  
   xmeter_value_t val[4];
+  
+  lcd_show_progress(1, 0);
+  
   /*
   电路设计 Note:
     输入部分保障ADC最大测量30/45V、5A
@@ -548,36 +539,46 @@ void xmeter_rom_factory_reset(void)
      0000 -> 0.0
      7fff -> 10.24 (ADC输入电流)
   */
-  xmeter_cal(0x0, 0x7fff, 1, 0.0, 10.24, &k, &b);
-  xmeter_write_rom_adc_current_kb(k, b);
+  xmeter_cal_grid(0x0, 0x7fff, 1, 0.0, 10.24, xmeter_adc_current_g, XMETER_GRID_SIZE);
+  xmeter_write_rom_adc_current_g(xmeter_adc_current_g, XMETER_GRID_SIZE);
+  
+  lcd_show_progress(1, 1);
   
   /* xmeter_adc_voltage_out, fsr is 0~30
      0000 -> 0.0
      7fff -> 30 (ADC输入电压)
   */  
-  xmeter_cal(0x0, 0x7fff, 1, 0.0, 30, &k, &b); 
-  xmeter_write_rom_adc_voltage_out_kb(k, b);
+  xmeter_cal_grid(0x0, 0x7fff, 1, 0.0, 30, xmeter_adc_voltage_out_g, XMETER_GRID_SIZE); 
+  xmeter_write_rom_adc_voltage_out_g(xmeter_adc_voltage_out_g, XMETER_GRID_SIZE);
+  
+  lcd_show_progress(1, 2);
   
   /* xmeter_adc_voltage_in, fsr is 0~40
      0000 -> 0.0
      7fff -> 40 (ADC耗散电压)
   */  
-  xmeter_cal(0x0, 0x7fff, 1, 0.0, 40.0, &k, &b);
-  xmeter_write_rom_adc_voltage_diss_kb(k, b);
+  xmeter_cal_grid(0x0, 0x7fff, 1, 0.0, 40.0, xmeter_adc_voltage_diss_g, XMETER_GRID_SIZE);
+  xmeter_write_rom_adc_voltage_diss_g(xmeter_adc_voltage_diss_g, XMETER_GRID_SIZE);
+  
+  lcd_show_progress(1, 3);
   
   /* xmeter_dac_current, fsr is 0~5.0
      0000 -> 0.0
      ffff -> 5.0 (DAC输出电压)
   */    
-  xmeter_cal(0x0, 0xffff, 0, 0.0, 5.0, &k, &b);
-  xmeter_write_rom_dac_current_kb(k, b);
+  xmeter_cal_grid(0x0, 0xffff, 0, 0.0, 5.0, xmeter_dac_current_g, XMETER_GRID_SIZE);
+  xmeter_write_rom_dac_current_g(xmeter_dac_current_g, XMETER_GRID_SIZE);
+  
+  lcd_show_progress(1, 4);
   
   /* xmeter_dac_voltage, fsr is 0~30.0
      0000 -> 0.0
      ffff -> 30 (DAC输出电压)
   */    
-  xmeter_cal(0x0, 0xffff, 0, 0.0, 30, &k, &b);
-  xmeter_write_rom_dac_voltage_kb(k, b);
+  xmeter_cal_grid(0x0, 0xffff, 0, 0.0, 30, xmeter_dac_voltage_g, XMETER_GRID_SIZE);
+  xmeter_write_rom_dac_voltage_g(xmeter_dac_voltage_g, XMETER_GRID_SIZE);
+  
+  lcd_show_progress(1, 5);
   
   /* preset current 100mA */
   val[0].neg = 0;
@@ -604,6 +605,8 @@ void xmeter_rom_factory_reset(void)
   val[3].decimal = 0;
   rom_write_struct(ROM_XMETER_DAC_PRESET_CURRENT, val, sizeof(val));
   
+  lcd_show_progress(1, 6);
+  
   /* preset voltage 3.3V */
   val[0].neg = 0;
   val[0].res = XMETER_RES_VOLTAGE;  
@@ -629,6 +632,8 @@ void xmeter_rom_factory_reset(void)
   val[3].decimal = 0;
   rom_write_struct(ROM_XMETER_DAC_PRESET_VOLTAGE, val, sizeof(val));
   
+  lcd_show_progress(1, 8);
+  
   /* last dac current 1A and voltage 5V*/
   val[0].neg = 0;
   val[0].res = XMETER_RES_CURRENT;  
@@ -636,11 +641,15 @@ void xmeter_rom_factory_reset(void)
   val[0].decimal = 0;
   rom_write_struct(ROM_XMETER_DAC_LAST_CURRENT, val, sizeof(xmeter_value_t));
   
+  lcd_show_progress(1, 11);
+  
   val[0].neg = 0;
   val[0].res = XMETER_RES_VOLTAGE;  
   val[0].integer = 5;
   val[0].decimal = 0;
   rom_write_struct(ROM_XMETER_DAC_LAST_VOLTAGE, val, sizeof(xmeter_value_t));  
+
+  lcd_show_progress(1, 12);
 
   /* temp high is 45 C */
   val[0].neg = 0;
@@ -649,12 +658,16 @@ void xmeter_rom_factory_reset(void)
   val[0].decimal = 0;
   rom_write_struct(ROM_XMETER_TEMP_HI, val, sizeof(xmeter_value_t));  
   
+  lcd_show_progress(1, 13);
+  
   /* temp low is 40 C */
   val[0].neg = 0;
   val[0].res = XMETER_RES_TEMP;  
   val[0].integer = 40;
   val[0].decimal = 0;
   rom_write_struct(ROM_XMETER_TEMP_LO, val, sizeof(xmeter_value_t));  
+
+  lcd_show_progress(1, 14);
 
   /* temp overheat is 80 C */
   val[0].neg = 0;
@@ -663,48 +676,76 @@ void xmeter_rom_factory_reset(void)
   val[0].decimal = 0;
   rom_write_struct(ROM_XMETER_TEMP_OVERHEAT, val, sizeof(xmeter_value_t));  
   
+  lcd_show_progress(1, 15);
+  
   /* max diss power is 120 W */
   val[0].neg = 0;
   val[0].res = XMETER_RES_POWER;  
   val[0].integer = 120;
   val[0].decimal = 0;
-  rom_write_struct(ROM_XMETER_MAX_POWER_DISS, val, sizeof(xmeter_value_t));    
+  rom_write_struct(ROM_XMETER_MAX_POWER_DISS, val, sizeof(xmeter_value_t)); 
+
+  lcd_show_progress(1, 16);
+}
+
+void xmeter_reload_adc_current_config(void)
+{
+  xmeter_read_rom_adc_current_g(xmeter_adc_current_g, XMETER_GRID_SIZE);
+  xmeter_dump_grid("ADC_c", xmeter_adc_current_g, XMETER_GRID_SIZE);
+}
+
+void xmeter_reload_adc_voltage_out_config(void)
+{
+  xmeter_read_rom_adc_voltage_out_g(xmeter_adc_voltage_out_g, XMETER_GRID_SIZE);
+  xmeter_dump_grid("ADC_vo", xmeter_adc_voltage_out_g, XMETER_GRID_SIZE);
+}
+
+void xmeter_reload_adc_voltage_diss_config(void)
+{
+  xmeter_read_rom_adc_voltage_diss_g(xmeter_adc_voltage_diss_g, XMETER_GRID_SIZE);
+  xmeter_dump_grid("ADC_vd", xmeter_adc_voltage_diss_g, XMETER_GRID_SIZE);
+}
+
+void xmeter_reload_dac_current_config(void)
+{
+  xmeter_read_rom_dac_current_g(xmeter_dac_current_g, XMETER_GRID_SIZE);
+  xmeter_dump_grid("DAC_c", xmeter_dac_current_g, XMETER_GRID_SIZE);
+}
+
+void xmeter_reload_dac_voltage_config(void)
+{
+  xmeter_read_rom_dac_voltage_g(xmeter_dac_voltage_g, XMETER_GRID_SIZE);
+  xmeter_dump_grid("DAC_v", xmeter_dac_voltage_g, XMETER_GRID_SIZE);
 }
 
 void xmeter_load_config(void)
 {
-  rom_read32(ROM_XMETER_ADC_CURRENT_K, &xmeter_adc_current_k);
-  CDBG("ADC_Ck = %f\n", xmeter_adc_current_k);
+  lcd_show_progress(1, 3);
   
-  rom_read32(ROM_XMETER_ADC_CURRENT_B, &xmeter_adc_current_b); 
-  CDBG("ADC_Cb = %f\n", xmeter_adc_current_b);  
+  xmeter_reload_adc_current_config();
   
-  rom_read32(ROM_XMETER_ADC_VOLTAGE_OUT_K, &xmeter_adc_voltage_out_k);
-  CDBG("ADC_Vok = %f\n", xmeter_adc_voltage_out_k); 
+  lcd_show_progress(1, 4);
   
-  rom_read32(ROM_XMETER_ADC_VOLTAGE_OUT_B, &xmeter_adc_voltage_out_b);
-  CDBG("ADC_Vob = %f\n", xmeter_adc_voltage_out_b); 
-
-  rom_read32(ROM_XMETER_ADC_VOLTAGE_DISS_K, &xmeter_adc_voltage_diss_k);
-  CDBG("ADC_Vdk = %f\n", xmeter_adc_voltage_diss_k); 
+  xmeter_reload_adc_voltage_out_config();
   
-  rom_read32(ROM_XMETER_ADC_VOLTAGE_DISS_B, &xmeter_adc_voltage_diss_b);
-  CDBG("ADC_Vdb = %f\n", xmeter_adc_voltage_diss_b); 
+  lcd_show_progress(1, 5);
   
-  rom_read32(ROM_XMETER_DAC_CURRENT_K, &xmeter_dac_current_k);
-  CDBG("DAC_Ck = %f\n", xmeter_dac_current_k);
+  xmeter_reload_adc_voltage_diss_config();
   
-  rom_read32(ROM_XMETER_DAC_CURRENT_B, &xmeter_dac_current_b); 
-  CDBG("DAC_Cb = %f\n", xmeter_dac_current_b);  
+  lcd_show_progress(1, 6);
   
-  rom_read32(ROM_XMETER_DAC_VOLTAGE_K, &xmeter_dac_voltage_k);
-  CDBG("DAC_Vk = %f\n", xmeter_dac_voltage_k); 
+  xmeter_reload_dac_current_config();
   
-  rom_read32(ROM_XMETER_DAC_VOLTAGE_B, &xmeter_dac_voltage_b);
-  CDBG("DAC_Vb = %f\n", xmeter_dac_voltage_b); 
-
+  lcd_show_progress(1, 7);
+  
+  xmeter_reload_dac_voltage_config();
+  
+  lcd_show_progress(1, 8);
+  
   rom_read_struct(ROM_XMETER_DAC_PRESET_CURRENT, xmeter_dac_preset_current, sizeof(xmeter_dac_preset_current));
   xmeter_dump_value("DAC_Preset_C", xmeter_dac_preset_current, 4); 
+
+  lcd_show_progress(1, 9);
 
   rom_read_struct(ROM_XMETER_DAC_PRESET_VOLTAGE, xmeter_dac_preset_voltage, sizeof(xmeter_dac_preset_voltage));
   xmeter_dump_value("DAC_Preset_V", xmeter_dac_preset_voltage, 4); 
@@ -712,23 +753,37 @@ void xmeter_load_config(void)
   xmeter_dac_preset_current_index = 0;
   xmeter_dac_preset_voltage_index = 0;
   
+  lcd_show_progress(1, 10);
+  
   rom_read_struct(ROM_XMETER_DAC_LAST_CURRENT, &xmeter_dac_current, sizeof(xmeter_dac_current));
   xmeter_dump_value("DAC_Last_C", &xmeter_dac_current, 1);   
+
+  lcd_show_progress(1, 11);
 
   rom_read_struct(ROM_XMETER_DAC_LAST_VOLTAGE, &xmeter_dac_voltage, sizeof(xmeter_dac_voltage));
   xmeter_dump_value("DAC_Last_V", &xmeter_dac_voltage, 1);
   
+  lcd_show_progress(1, 12);
+  
   rom_read_struct(ROM_XMETER_TEMP_HI, &xmeter_temp_hi, sizeof(xmeter_value_t));  
   xmeter_dump_value("Temp_Hi", &xmeter_temp_hi, 1);
+  
+  lcd_show_progress(1, 13);
   
   rom_read_struct(ROM_XMETER_TEMP_LO, &xmeter_temp_lo, sizeof(xmeter_value_t));  
   xmeter_dump_value("Temp_Lo", &xmeter_temp_lo, 1);  
   
+  lcd_show_progress(1, 14);
+  
   rom_read_struct(ROM_XMETER_TEMP_OVERHEAT, &xmeter_temp_overheat, sizeof(xmeter_value_t));  
   xmeter_dump_value("Temp_Overheat", &xmeter_temp_overheat, 1);  
 
+  lcd_show_progress(1, 15);
+
   rom_read_struct(ROM_XMETER_MAX_POWER_DISS, &xmeter_max_power_diss, sizeof(xmeter_value_t));  
-  xmeter_dump_value("Max_Diss_Power", &xmeter_max_power_diss, 1);  
+  xmeter_dump_value("Max_Diss_Power", &xmeter_max_power_diss, 1); 
+
+  lcd_show_progress(1, 16);
 }  
   
 void xmeter_init_adc(void)
@@ -894,33 +949,121 @@ static bit xmeter_wait_for_conv_ready(void)
   
   return wait_cnt != 0;
 }
-
-static double xmeter_adc_lookup_temp(uint16_t val)
+/* from x3 -> y3 */
+static double xmeter_interpolate(uint32_t x1, uint32_t x2, double y1, double y2, int32_t x3)
 {
-  uint16_t cnt = sizeof(xmeter_adc_temp_table) / sizeof(struct xmeter_adc_temp_slot);
-  uint16_t i, dx;
   double dy;
+  int32_t dx;
   
-  if(val >= xmeter_adc_temp_table[0].adc_val) 
-    return xmeter_adc_temp_table[0].temp;
-    
-  if(val <= xmeter_adc_temp_table[cnt - 1].adc_val) 
-    return xmeter_adc_temp_table[cnt - 1].temp;
+  if(x2 == x1)
+    return 0.0;
   
-  /* lookup table */
-  for(i = 0 ; i < cnt - 1; i ++) {
-    if(xmeter_adc_temp_table[i].adc_val >= val &&
-      xmeter_adc_temp_table[i + 1].adc_val < val) {
+  dy = y2 - y1;
+  dx = x2 - x1;
+  
+  // k = (y2 - y1) / (x2 - x1);
+  // b = y2 - k * x2;
+  // return k * x3 + b;
+  return dy * x3 / dx + y1 - dy * x1 / dx;
+}
+/* from y3 -> x3 */
+static int32_t xmeter_interpolate_r(uint32_t x1, uint32_t x2, double y1, double y2, double y3)
+{
+  double dy;
+  int32_t dx;
+  
+  dy = y2 - y1;
+  dx = x2 - x1;
+  
+  if(y2 == y1)
+    return 0;
+  
+  //k = (y2 - y1) / (x2 - x1);
+  
+  //if(k == 0.0)
+  //  return 0;
+  
+  //b = y2 - k * x2;
+  
+  //return (int32_t)((y3 - b)/k);
+  return (int32_t)((y3 - y1) * dx / dy + x1);
+}
+
+static uint16_t xmeter_float2bits(double f, xmeter_grid_t * grid, uint16_t cnt, uint8_t is_signed)
+{
+  int32_t x1, x2;
+  double y1, y2;
+  uint16_t i;
+  
+  if(cnt < 2)
+    return 0;
+  
+  if(f < grid[0].val) {
+    x1 = is_signed ? (int32_t)(int16_t)grid[0].bits : grid[0].bits;
+    x2 = is_signed ? (int32_t)(int16_t)grid[1].bits : grid[1].bits;
+    y1 = grid[0].val;
+    y2 = grid[1].val;
+  } else if(f >= grid[cnt - 1].val) {
+    x1 = is_signed ? (int32_t)(int16_t)grid[cnt - 2].bits : grid[cnt - 2].bits;
+    x2 = is_signed ? (int32_t)(int16_t)grid[cnt - 1].bits : grid[cnt - 1].bits;
+    y1 = grid[cnt - 2].val;
+    y2 = grid[cnt - 1].val;
+  } else {
+    for(i = 0 ; i <  cnt - 1; i ++) {
+      if(f >= grid[i].val && f < grid[i + 1].val) {
         break;
       }
+    }
+    x1 = is_signed ? (int32_t)(int16_t)grid[i].bits : grid[i].bits;
+    x2 = is_signed ? (int32_t)(int16_t)grid[i+1].bits : grid[i+1].bits;
+    y1 = grid[i].val;
+    y2 = grid[i+1].val;  
+  }
+  return (uint16_t)xmeter_interpolate_r(x1, x2, y1, y2, f);
+}
+
+static double xmeter_bits2float(uint16_t bits, xmeter_grid_t * grid, uint16_t cnt, uint8_t is_signed)
+{
+  int32_t x1, x2, x3, xleft, xright;
+  double y1, y2;
+  uint16_t i;
+  
+  if(cnt < 2)
+    return 0;
+  
+  x3 = is_signed ? (int32_t)(int16_t)bits : bits;
+  
+  xleft = is_signed ? (int32_t)(int16_t)grid[0].bits : grid[0].bits;
+  xright = is_signed ? (int32_t)(int16_t)grid[cnt - 1].bits : grid[cnt - 1].bits;
+  
+  if((xleft < xright && x3 < xleft) || (xleft >= xright && x3 > xleft)) {
+    x1 = is_signed ? (int32_t)(int16_t)grid[0].bits : grid[0].bits;
+    x2 = is_signed ? (int32_t)(int16_t)grid[1].bits : grid[1].bits;
+    y1 = grid[0].val;
+    y2 = grid[1].val;
+  } else if((xleft < xright && x3 >= xright) || (xleft >= xright && x3 <= xright)) {
+    x1 = is_signed ? (int32_t)(int16_t)grid[cnt - 2].bits : grid[cnt - 2].bits;
+    x2 = is_signed ? (int32_t)(int16_t)grid[cnt - 1].bits : grid[cnt - 1].bits;
+    y1 = grid[cnt - 2].val;
+    y2 = grid[cnt - 1].val;
+  }else {
+    for(i = 0 ; i <  cnt - 1; i ++) {
+      x1 = is_signed ? (int32_t)(int16_t)grid[i].bits : grid[i].bits;
+      x2 = is_signed ? (int32_t)(int16_t)grid[i+1].bits : grid[i+1].bits;
+      if(xleft < xright && x3 >= x1 && x3 < x2) {
+        break;
+      }
+      if(xleft >= xright && x3 <= x1 && x3 > x2) {
+        break;
+      }
+    }
+    y1 = grid[i].val;
+    y2 = grid[i+1].val;  
   }
   
-  /* 插值 */
-  dx = xmeter_adc_temp_table[i].adc_val - xmeter_adc_temp_table[i+1].adc_val;
-  dy = xmeter_adc_temp_table[i+1].temp - xmeter_adc_temp_table[i].temp;
-  
-  return xmeter_adc_temp_table[i].temp + (xmeter_adc_temp_table[i].adc_val - val) * dy / dx;
+  return xmeter_interpolate(x1, x2, y1, y2, x3);
 }
+
 
 /*
 is_signed: interpret return as a signed integer
@@ -929,30 +1072,13 @@ is_signed: interpret return as a signed integer
 static uint16_t xmeter_value2bits(
   xmeter_value_t * val,
   double * f,
-  double k, double b, uint8_t is_signed)
+  xmeter_grid_t * grid, 
+  uint16_t cnt, 
+  uint8_t is_signed)
 {
-  int32_t temp_bits;
   *f = xmeter_val2float(val);
-  if(k == 0) {
-    CDBG(("[ERROR!] invalid k!\n"));
-    k = 1;
-  }
-  temp_bits = (*f - b) / k;
-  
-  if(is_signed) {
-    if(temp_bits > SHRT_MAX) {
-      temp_bits = SHRT_MAX;
-    } else if(temp_bits < SHRT_MIN) {
-      temp_bits = SHRT_MIN;
-    }
-  } else {
-    if(temp_bits > USHRT_MAX) {
-      temp_bits = USHRT_MAX;
-    } else if(temp_bits < 0) {
-      temp_bits = 0;
-    }
-  }
-  return (uint16_t)temp_bits;
+  return xmeter_float2bits(*f, grid, cnt, is_signed);
+
 }
 
 /*
@@ -962,18 +1088,13 @@ is_signed: interpret bits as a signed integer
 static double xmeter_bits2value(
   uint16_t bits, 
   xmeter_value_t * val,
-  double k, double b, uint8_t res, uint8_t is_signed)
+  xmeter_grid_t * grid, 
+  uint16_t cnt,
+  uint8_t res, 
+  uint8_t is_signed)
 {
   double ret;
-  int32_t temp_bits;
-  
-  if(is_signed) {
-    temp_bits = (int16_t)bits;
-  } else {
-    temp_bits = bits;
-  }
-  
-  ret = temp_bits * k + b;
+  ret = xmeter_bits2float(bits, grid, cnt, is_signed);
   xmeter_float2val(ret, val, res);
   return ret;
 }
@@ -1020,8 +1141,11 @@ void xmeter_read_adc_current(void)
   xmeter_adc_current_f = xmeter_bits2value(
     val, 
     &xmeter_adc_current, 
-    xmeter_adc_current_k, 
-    xmeter_adc_current_b, XMETER_RES_CURRENT, 1);
+    xmeter_adc_current_g, 
+    XMETER_GRID_SIZE, 
+    XMETER_RES_CURRENT, 1);
+  
+  //xmeter_dump_value("ADC_c", &xmeter_adc_current, 1);
 }
 
 uint16_t xmeter_get_adc_bits_voltage_out(void)
@@ -1063,8 +1187,11 @@ void xmeter_read_adc_voltage_out(void)
   xmeter_adc_voltage_out_f = xmeter_bits2value(
     val, 
     &xmeter_adc_voltage_out, 
-    xmeter_adc_voltage_out_k, 
-    xmeter_adc_voltage_out_b, XMETER_RES_VOLTAGE, 1); 
+    xmeter_adc_voltage_out_g, 
+    XMETER_GRID_SIZE, 
+    XMETER_RES_VOLTAGE, 1); 
+  
+  //xmeter_dump_value("ADC_vo", &xmeter_adc_voltage_out, 1);
 }
 
 uint16_t xmeter_get_adc_bits_voltage_diss(void)
@@ -1106,11 +1233,11 @@ void xmeter_read_adc_voltage_diss(void)
   xmeter_adc_voltage_diss_f = xmeter_bits2value(
     val, 
     &xmeter_adc_voltage_diss, 
-    xmeter_adc_voltage_diss_k, 
-    xmeter_adc_voltage_diss_b, XMETER_RES_VOLTAGE, 1);   
+    xmeter_adc_voltage_diss_g, 
+    XMETER_GRID_SIZE, 
+    XMETER_RES_VOLTAGE, 1);   
   
-  //CDBG(("adc vdis bits and float: %x %f\n", val, xmeter_adc_voltage_diss_f));
-  //xmeter_dump_value("adc vdis", &xmeter_adc_voltage_diss, 1);
+  //xmeter_dump_value("ADC_vd", &xmeter_adc_voltage_diss, 1);
 }
 
 uint16_t xmeter_get_adc_bits_temp(void)
@@ -1149,12 +1276,13 @@ void xmeter_read_adc_temp(void)
   
   val = xmeter_get_adc_bits_temp();
   
-  xmeter_adc_temp_f = xmeter_adc_lookup_temp(val);
+  xmeter_adc_temp_f = xmeter_bits2float(val, 
+    xmeter_adc_temp_g, 
+    sizeof(xmeter_adc_temp_g) / sizeof(xmeter_grid_t), 1);
   
   xmeter_float2val(xmeter_adc_temp_f, &xmeter_adc_temp, XMETER_RES_TEMP);
 
-  // CDBG("adc temp bits and float: %x %f\n", val, xmeter_adc_temp_f);
-  // xmeter_dump_value("adc temp", &xmeter_adc_temp, 1);
+  //xmeter_dump_value("ADC_t", &xmeter_adc_temp, 1);
 }
 
 
@@ -1454,8 +1582,12 @@ void xmeter_dec_dac_c(bit coarse)
 
 void xmeter_next_preset_dac_v(void)
 {
+  
   xmeter_dac_preset_voltage_index 
     = (xmeter_dac_preset_voltage_index + 1) % XMETER_PRESET_CNT;
+  
+ // CDBG("xmeter_next_preset_dac_v %bu\n", xmeter_dac_preset_voltage_index);
+ // xmeter_dump_value("preset v", &xmeter_dac_preset_voltage[xmeter_dac_preset_voltage_index], 1);
   
   xmeter_assign_value(&xmeter_dac_preset_voltage[xmeter_dac_preset_voltage_index],
     &xmeter_dac_voltage);
@@ -1464,11 +1596,14 @@ void xmeter_next_preset_dac_v(void)
 void xmeter_prev_preset_dac_v(void)
 {
   if(xmeter_dac_preset_voltage_index == 0) {
-    xmeter_dac_preset_voltage_index = XMETER_PRESET_CNT;
+    xmeter_dac_preset_voltage_index = XMETER_PRESET_CNT - 1;
   } else {
     xmeter_dac_preset_voltage_index 
       = (xmeter_dac_preset_voltage_index - 1);
   }
+  
+ // CDBG("xmeter_prev_preset_dac_v %bu\n", xmeter_dac_preset_voltage_index);
+ // xmeter_dump_value("preset v", &xmeter_dac_preset_voltage[xmeter_dac_preset_voltage_index], 1);
   
   xmeter_assign_value(&xmeter_dac_preset_voltage[xmeter_dac_preset_voltage_index],
     &xmeter_dac_voltage);
@@ -1486,7 +1621,7 @@ void xmeter_next_preset_dac_c(void)
 void xmeter_prev_preset_dac_c(void)
 {
   if(xmeter_dac_preset_current_index == 0) {
-    xmeter_dac_preset_current_index = XMETER_PRESET_CNT;
+    xmeter_dac_preset_current_index = XMETER_PRESET_CNT - 1;
   } else {
     xmeter_dac_preset_current_index 
       = (xmeter_dac_preset_current_index - 1);
@@ -2034,8 +2169,9 @@ void xmeter_read_dac_voltage(void)
   /* read dac and translate bits to value */
   uint16_t bits = xmeter_get_dac_bits_v();
   
-  xmeter_bits2value(bits, &xmeter_dac_voltage, 
-    xmeter_dac_voltage_k, xmeter_dac_voltage_b, XMETER_RES_VOLTAGE, 0);
+  xmeter_bits2value(bits, 
+  &xmeter_dac_voltage, 
+  xmeter_dac_voltage_g, XMETER_GRID_SIZE, XMETER_RES_VOLTAGE, 0);
 }
 
 void xmeter_read_dac_current(void)
@@ -2044,7 +2180,7 @@ void xmeter_read_dac_current(void)
   uint16_t bits = xmeter_get_dac_bits_c();
   
   xmeter_bits2value(bits, &xmeter_dac_current, 
-    xmeter_dac_current_k, xmeter_dac_current_b, XMETER_RES_CURRENT, 0);
+    xmeter_dac_current_g, XMETER_GRID_SIZE, XMETER_RES_CURRENT, 0);
 }
 
 /* make xmeter_dac_** work! */
@@ -2053,7 +2189,7 @@ void xmeter_write_dac_voltage(void)
   double f;
   /* translate value to bis and write to dac */
   uint16_t bits = xmeter_value2bits(&xmeter_dac_voltage,
-    &f, xmeter_dac_voltage_k, xmeter_dac_voltage_b, 0);
+    &f, xmeter_dac_voltage_g, XMETER_GRID_SIZE, 0);
   
   xmeter_set_dac_bits_v(bits);
 }
@@ -2069,7 +2205,7 @@ void xmeter_write_dac_current(void)
   
   /* translate value to bis and write to dac */
   uint16_t bits = xmeter_value2bits(&xmeter_dac_current,
-    &f, xmeter_dac_current_k, xmeter_dac_current_b, 0);
+    &f, xmeter_dac_current_g, XMETER_GRID_SIZE, 0);
   
   xmeter_set_dac_bits_c(bits);
 }

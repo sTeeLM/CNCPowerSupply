@@ -8,7 +8,8 @@
 
 int8_t con_cal_voltage_out(char arg1, char arg2)
 { 
-  uint16_t index;
+  uint16_t index, bits;
+  double float_val;
   
   if(arg1 == 0) {
     for(index = 0 ; index < XMETER_GRID_SIZE; index ++) {
@@ -17,6 +18,17 @@ int8_t con_cal_voltage_out(char arg1, char arg2)
     for(index = 0 ; index < XMETER_GRID_SIZE; index ++) {
       console_printf("[DAC][%u] %04x -> %f\n", index, con_grid_dac[index].bits, con_grid_dac[index].val);
     }
+  } else if(arg1 > 0 && strcmp(&console_buf[arg1], "sadc") == 0 && arg2 > 0) {
+    sscanf(&console_buf[arg2], "%u:%x:%f", &index, &bits, &float_val);
+    con_grid_adc[index].bits = bits;
+    con_grid_adc[index].val = float_val;
+    console_printf("[ADC][%u] %04x -> %f\n", index, con_grid_adc[index].bits, con_grid_adc[index].val);
+  } else if(arg1 > 0 && strcmp(&console_buf[arg1], "sdac") == 0 && arg2 > 0) {
+    sscanf(&console_buf[arg2], "%u:%x:%f", &index, &bits, &float_val);
+    con_grid_dac[index].bits = bits;
+    con_grid_dac[index].val = float_val;
+    console_printf("[ADC][%u] %04x -> %f\n", index, con_grid_dac[index].bits, con_grid_dac[index].val);
+    
   } else if(arg1 > 0 && strcmp(&console_buf[arg1], "reset") == 0) {
     xmeter_reset_adc_voltage_out_config();
     xmeter_reset_dac_voltage_config(); 

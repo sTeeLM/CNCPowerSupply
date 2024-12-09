@@ -57,22 +57,26 @@ struct console_cmds cmds[] =
   {"cc", "calibrate current", 
                       "cc: dump paramenters\n"
                       "cc load: load paramenters from rom\n"
+                      "cc sadc a:b:c : set adc paramenters index a bits b value c\n"
+                      "cc sdac a:b:c : set dac paramenters index a bits b value c\n"
                       "cc reset: factory reset\n"
-                      "cc n xx: set record n value\n" 
+                      "cc n xx: set record n value to xx and load adc/dac bits from adc/dac\n" 
                       "cc save: save paramenters to rom",
                       con_cal_current}, 
   {"cvo", "calibrate voltage out", 
                       "cvo: dump paramenters\n"
                       "cvo load: load paramenters from rom\n"
+                      "cvo sadc a:b:c : set adc paramenters index a bits b value c\n"
+                      "cvo sdac a:b:c : set dac paramenters index a bits b value c\n"
                       "cvo reset: factory reset\n"
-                      "cvo n xx: set record n value\n" 
+                      "cvo n xx: set record n value to xx and load adc/dac bits from adc/dac\n" 
                       "cvo save: save paramenters to rom",
                       con_cal_voltage_out},
   {"cvd", "calibrate voltage diss", 
                       "cvd: dump paramenters\n" 
                       "cvd load: load paramenters from rom\n"
                       "cvd reset: factory reset\n"
-                      "cvd max xx: record max value (min value always 0)\n"
+                      "cvd max xx: record max value to xx (min value always 0) and load adc bits from adc\n"
                       "cvd save: do calibrate and save rom",
                       con_cal_voltage_diss}, 
   {"ct",  "calibrate temperature", 

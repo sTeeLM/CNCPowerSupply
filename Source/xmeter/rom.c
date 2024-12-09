@@ -100,8 +100,8 @@ void rom_write(uint16_t addr, uint8_t val)
   paddr = (addr >> 8) & PADDR_MASK;
   
   I2C_Init();
-  I2C_Put(ROM_I2C_ADDR | (paddr << 1), addr, val);
-  CDBG("rom_write [0x%02bx][0x%02bx] with 0x%02bx\n", paddr, addr, val);
+  I2C_Put(ROM_I2C_ADDR | (paddr << 1), baddr, val);
+  CDBG("rom_write [0x%02bx][0x%02bx] with 0x%02bx\n", paddr, baddr, val);
 }
 
 static void rom_reset(void)

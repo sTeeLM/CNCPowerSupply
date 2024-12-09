@@ -350,24 +350,30 @@ static void do_xmeter_set(uint8_t to_func, uint8_t to_state, enum task_events ev
     xmeter_fan_on();
   } else if(ev == EV_TEMP_LO) {
     xmeter_fan_off();
-  } else if(ev == EV_KEY_MOD_C || ev == EV_KEY_SET_C) {
+  } else {
+    
     if(!is_c) {
-      xmeter_inc_dac_v(ev == EV_KEY_MOD_C);
+      if(ev == EV_KEY_MOD_C || ev == EV_KEY_MOD_CC) {
+        ev == EV_KEY_MOD_C ?
+          xmeter_inc_dac_v(1) : xmeter_dec_dac_v(1);
+      } else if(ev == EV_KEY_SET_C || ev == EV_KEY_SET_CC) {
+        ev == EV_KEY_SET_C ?
+        xmeter_inc_dac_v(0) : xmeter_dec_dac_v(0);
+      }
       xmeter_write_dac_voltage();
+      sm_xmeter_reset_timeo();
     } else {
-      xmeter_inc_dac_c(ev == EV_KEY_SET_C);
+      if(ev == EV_KEY_SET_C || ev == EV_KEY_SET_CC) {
+        ev == EV_KEY_SET_C ?
+          xmeter_inc_dac_c(1) : xmeter_dec_dac_c(1);
+      } else if(ev == EV_KEY_MOD_C || ev == EV_KEY_MOD_CC) {
+        ev == EV_KEY_MOD_C ?
+        xmeter_inc_dac_c(0) : xmeter_dec_dac_c(0);
+      }
       xmeter_write_dac_current();
+      sm_xmeter_reset_timeo();
     }
-    sm_xmeter_reset_timeo();
-  } else if(ev == EV_KEY_MOD_CC || ev == EV_KEY_SET_CC) {
-    if(!is_c) {
-      xmeter_dec_dac_v(ev == EV_KEY_MOD_CC);
-      xmeter_write_dac_voltage();
-    } else {
-      xmeter_dec_dac_c(ev == EV_KEY_SET_CC);
-      xmeter_write_dac_current();
-    }
-    sm_xmeter_reset_timeo();
+    
   }  
 }
 
@@ -521,6 +527,7 @@ static const struct sm_trans_slot code  sm_trans_xmeter_set_v[] = {
   {EV_KEY_SET_C, SM_XMETER, SM_XMETER_SET_V, do_xmeter_set_v}, 
   {EV_KEY_SET_CC, SM_XMETER, SM_XMETER_SET_V, do_xmeter_set_v},
   {EV_KEY_MOD_PRESS, SM_XMETER, SM_XMETER_MAIN, do_xmeter_main},
+  {EV_KEY_SET_PRESS, SM_XMETER, SM_XMETER_MAIN, do_xmeter_main},  
   {EV_OVER_HEAT, SM_XMETER, SM_XMETER_OVER_HEAT, do_xmeter_overheat},
   {EV_OVER_PD, SM_XMETER, SM_XMETER_OVER_HEAT, do_xmeter_overpd},
   {EV_TEMP_HI, SM_XMETER, SM_XMETER_SET_V, do_xmeter_set_v},
@@ -536,6 +543,7 @@ static const struct sm_trans_slot code  sm_trans_xmeter_set_c[] = {
   {EV_KEY_MOD_CC, SM_XMETER, SM_XMETER_SET_C, do_xmeter_set_c},
   {EV_KEY_SET_C, SM_XMETER, SM_XMETER_SET_C, do_xmeter_set_c}, 
   {EV_KEY_SET_CC, SM_XMETER, SM_XMETER_SET_C, do_xmeter_set_c},
+  {EV_KEY_MOD_PRESS, SM_XMETER, SM_XMETER_MAIN, do_xmeter_main},
   {EV_KEY_SET_PRESS, SM_XMETER, SM_XMETER_MAIN, do_xmeter_main},
   {EV_OVER_HEAT, SM_XMETER, SM_XMETER_OVER_HEAT, do_xmeter_overheat},
   {EV_OVER_PD, SM_XMETER, SM_XMETER_OVER_HEAT, do_xmeter_overpd},

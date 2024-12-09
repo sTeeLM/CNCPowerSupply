@@ -17,6 +17,13 @@ int8_t con_cal_voltage_out(char arg1, char arg2)
     for(index = 0 ; index < XMETER_GRID_SIZE; index ++) {
       console_printf("[DAC][%u] %04x -> %f\n", index, con_grid_dac[index].bits, con_grid_dac[index].val);
     }
+  } else if(arg1 > 0 && strcmp(&console_buf[arg1], "reset") == 0) {
+    xmeter_reset_adc_voltage_out_config();
+    xmeter_reset_dac_voltage_config(); 
+    xmeter_reload_adc_voltage_out_config();
+    xmeter_reload_dac_voltage_config();
+    console_printf("reset ok!\n");
+    
   } else if(arg1 > 0 && strcmp(&console_buf[arg1], "load") == 0) {
     xmeter_read_rom_adc_voltage_out_g(con_grid_adc, XMETER_GRID_SIZE);
     xmeter_read_rom_dac_voltage_g(con_grid_dac, XMETER_GRID_SIZE); 

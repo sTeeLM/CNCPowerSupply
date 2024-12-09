@@ -61,6 +61,7 @@ void sm_run(enum task_events ev)
   while(p_trans && p_trans->sm_proc) {
     if(p_trans->event == ev) {
       p_trans->sm_proc(p_trans->to_function, p_trans->to_state, ev);
+      /*
       CDBG("[%s][%s][%s]->[%s][%s]\n",
         task_names[ev],
         sm_function[sm_cur_function].function_name,
@@ -68,6 +69,7 @@ void sm_run(enum task_events ev)
         sm_function[p_trans->to_function].function_name,
         sm_function[p_trans->to_function].function_states_array[p_trans->to_state].state_name
       );
+      */
       sm_cur_function = p_trans->to_function;
       sm_cur_state    = p_trans->to_state;
       break;

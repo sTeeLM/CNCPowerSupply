@@ -332,7 +332,7 @@ static void do_xmeter_pick_c(uint8_t to_func, uint8_t to_state, enum task_events
 
 static void do_xmeter_set(uint8_t to_func, uint8_t to_state, enum task_events ev, bit is_c)
 {  
-  if(sm_cur_state != to_state) {
+  if(sm_cur_state != to_state || ev == EV_CC_CHANGE) {
     if(!is_c)
       xmeter_read_dac_voltage();
     else
@@ -342,7 +342,7 @@ static void do_xmeter_set(uint8_t to_func, uint8_t to_state, enum task_events ev
     sm_xmeter_reset_timeo();
     return;
   }
-  if(ev == EV_250MS || ev == EV_CC_CHANGE) {
+  if(ev == EV_250MS) {
     xmeter_read_adc();
     sm_xmeter_fill_set(is_c);
     sm_xmeter_test_timeo();
@@ -549,7 +549,7 @@ static const struct sm_trans_slot code  sm_trans_xmeter_set_c[] = {
   {EV_OVER_PD, SM_XMETER, SM_XMETER_OVER_HEAT, do_xmeter_overpd},
   {EV_TEMP_HI, SM_XMETER, SM_XMETER_SET_C, do_xmeter_set_c},
   {EV_TEMP_LO, SM_XMETER, SM_XMETER_SET_C, do_xmeter_set_c},
-  {EV_CC_CHANGE, SM_XMETER, SM_XMETER_SET_V, do_xmeter_set_c},
+  {EV_CC_CHANGE, SM_XMETER, SM_XMETER_SET_C, do_xmeter_set_c},
   {NULL, NULL, NULL, NULL}
 };
 

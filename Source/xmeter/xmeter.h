@@ -182,6 +182,13 @@ void xmeter_read_rom_adc_voltage_diss_g(xmeter_grid_t * grid, uint16_t cnt);
 void xmeter_read_rom_dac_current_g(xmeter_grid_t * grid, uint16_t cnt);
 void xmeter_read_rom_dac_voltage_g(xmeter_grid_t * grid, uint16_t cnt);
 
+/* reset calibrate config */
+void xmeter_reset_adc_current_config(void);
+void xmeter_reset_adc_voltage_out_config(void);
+void xmeter_reset_adc_voltage_diss_config(void);
+void xmeter_reset_dac_current_config(void);
+void xmeter_reset_dac_voltage_config(void);
+
 /* 调整步长 */
 void xmeter_get_voltage_steps(xmeter_value_t * coarse, xmeter_value_t * fine);
 void xmeter_get_current_steps(xmeter_value_t * coarse, xmeter_value_t * fine);

@@ -10,7 +10,27 @@
 
 #define ROM_I2C_ADDR 0xA0
 
-void rom_read_struct(uint8_t addr, void * pval, uint8_t len)
+/*
+#define ROM_1K  // AT24C01
+#define ROM_2K  // AT24C02
+#define ROM_4K  // AT24C04
+#define ROM_8K  // AT24C08
+#define ROM_16K  // AT24C16
+*/
+
+#define ROM_4K
+
+#if defined ( ROM_1K ) || (defined ( ROM_2K ))
+  #define PADDR_MASK 0x0
+#elif defined (ROM_4K)
+  #define PADDR_MASK 0x1
+#elif defined (ROM_8K)
+  #define PADDR_MASK 0x3
+#elif defined (ROM_16K)
+  #define PADDR_MASK 0x7
+#endif
+
+void rom_read_struct(uint16_t addr, void * pval, uint8_t len)
 {
   uint8_t * p = (uint8_t *) pval;
   uint8_t index = 0;
@@ -23,7 +43,7 @@ void rom_read_struct(uint8_t addr, void * pval, uint8_t len)
   }
 }
 
-void rom_write_struct(uint8_t addr, void * pval, uint8_t len)
+void rom_write_struct(uint16_t addr, void * pval, uint8_t len)
 {
   uint8_t * p = (uint8_t *) pval;
   uint8_t index = 0, val;
@@ -37,41 +57,51 @@ void rom_write_struct(uint8_t addr, void * pval, uint8_t len)
   }
 }
 
-void rom_read32(uint8_t addr, void * pval)
+void rom_read32(uint16_t addr, void * pval)
 {
   rom_read_struct(addr, pval, 4);    
 }
 
-void rom_write32(uint8_t addr, void * pval)
+void rom_write32(uint16_t addr, void * pval)
 {
   rom_write_struct(addr, pval, 4);        
 }
 
 
-void rom_read16(uint8_t addr, void * pval)
+void rom_read16(uint16_t addr, void * pval)
 {
   rom_read_struct(addr, pval, 2);
 }
 
-void rom_write16(uint8_t addr, void * pval)
+void rom_write16(uint16_t addr, void * pval)
 {
   rom_write_struct(addr, pval, 2);
 }
 
-uint8_t rom_read(uint8_t addr)
+uint8_t rom_read(uint16_t addr)
 {
   uint8_t dat;
+  uint8_t baddr, paddr;
+  
+  baddr = addr & 0xff;
+  paddr = (addr >> 8) & PADDR_MASK;
+  
   I2C_Init();
-  I2C_Get(ROM_I2C_ADDR, addr, &dat);
-  CDBG("rom_read [0x%02bx] return 0x%02bx\n", addr, dat);
+  I2C_Get(ROM_I2C_ADDR | (paddr << 1), baddr, &dat);
+  CDBG("rom_read [0x%02bx][0x%02bx] return 0x%02bx\n", paddr, baddr, dat);
   return dat;
 }
 
-void rom_write(uint8_t addr, uint8_t val)
+void rom_write(uint16_t addr, uint8_t val)
 {
+  uint8_t baddr, paddr;
+  
+  baddr = addr & 0xff;
+  paddr = (addr >> 8) & PADDR_MASK;
+  
   I2C_Init();
-  I2C_Put(ROM_I2C_ADDR, addr, val);
-  CDBG("rom_write [0x%02bx] with 0x%02bx\n", addr, val);
+  I2C_Put(ROM_I2C_ADDR | (paddr << 1), addr, val);
+  CDBG("rom_write [0x%02bx][0x%02bx] with 0x%02bx\n", paddr, addr, val);
 }
 
 static void rom_reset(void)

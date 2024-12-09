@@ -23,17 +23,17 @@
 
 #define ROM_BEEPER_ENABLE 264
 
-uint8_t rom_read(uint8_t addr);
-void rom_write(uint8_t addr, uint8_t val);
+uint8_t rom_read(uint16_t addr);
+void rom_write(uint16_t addr, uint8_t val);
 
-void rom_read16(uint8_t addr, void * val);
-void rom_write16(uint8_t addr, void * val);
+void rom_read16(uint16_t addr, void * val);
+void rom_write16(uint16_t addr, void * val);
 
-void rom_read32(uint8_t addr, void * val);
-void rom_write32(uint8_t addr, void * val);
+void rom_read32(uint16_t addr, void * val);
+void rom_write32(uint16_t addr, void * val);
 
-void rom_read_struct(uint8_t addr, void * pval, uint8_t len);
-void rom_write_struct(uint8_t addr, void * pval, uint8_t len);
+void rom_read_struct(uint16_t addr, void * pval, uint8_t len);
+void rom_write_struct(uint16_t addr, void * pval, uint8_t len);
 
 void rom_initialize(void);
 bit rom_is_factory_reset(void);

@@ -8,8 +8,8 @@
 #include "debug.h"
 #include "gpio.h"
 
-#define LCD_LINE_BUFFER_SIZE 48
 #define LCD_LINE_BUFFER_SIZE_DEFAULT 16
+#define LCD_LINE_BUFFER_SIZE 32
 
 static uint8_t lcd_line[2][LCD_LINE_BUFFER_SIZE];
 static uint8_t lcd_line_len[2];

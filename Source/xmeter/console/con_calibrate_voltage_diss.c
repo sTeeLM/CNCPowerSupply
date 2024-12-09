@@ -15,6 +15,12 @@ int8_t con_cal_voltage_diss(char arg1, char arg2)
       console_printf("[ADC][%u] %04x -> %f\n", index, con_grid_adc[index].bits, con_grid_adc[index].val);
     }
     
+  } else if(arg1 > 0 && strcmp(&console_buf[arg1], "reset") == 0) {
+    xmeter_reset_adc_voltage_diss_config();
+    xmeter_reload_adc_voltage_diss_config();
+    
+    console_printf("reset ok!\n");
+    
   } else if(arg1 > 0 && strcmp(&console_buf[arg1], "load") == 0) {
     xmeter_read_rom_adc_voltage_diss_g(con_grid_adc, XMETER_GRID_SIZE);
     console_printf("load ok!\n");
@@ -26,9 +32,8 @@ int8_t con_cal_voltage_diss(char arg1, char arg2)
 
     console_printf("save ok!\n");
     
-  } else if(arg1 > 0 && arg2 > 0) {
-    if(index > XMETER_GRID_SIZE) 
-      return 1;
+  } else if(arg1 > 0 && strcmp(&console_buf[arg1], "max") == 0 && arg2 > 0) {
+
     sscanf(&console_buf[arg2], "%f", &value);
     bits = xmeter_get_adc_bits_voltage_diss();    
     xmeter_cal_grid(0x0, bits, 1, 0.0, value, con_grid_adc, XMETER_GRID_SIZE);

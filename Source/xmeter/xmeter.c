@@ -522,6 +522,58 @@ void xmeter_read_rom_dac_voltage_g(xmeter_grid_t * grid, uint16_t cnt)
   rom_read_struct(ROM_XMETER_DAC_VOLTAGE_G, grid, cnt * sizeof(xmeter_grid_t));
 }
 
+void xmeter_reset_adc_current_config(void)
+{
+  /* xmeter_adc_current, fsr is 0~5.0
+     0000 -> 0.0
+     7fff -> 10.24 (ADC输入电流)
+  */
+  xmeter_cal_grid(0x0, 0x7fff, 1, 0.0, 10.0, xmeter_adc_current_g, XMETER_GRID_SIZE);
+  xmeter_write_rom_adc_current_g(xmeter_adc_current_g, XMETER_GRID_SIZE);
+}
+
+void xmeter_reset_adc_voltage_out_config(void)
+{
+  /* xmeter_adc_voltage_out, fsr is 0~30
+     0000 -> 0.0
+     7fff -> 30 (ADC输入电压)
+  */  
+  xmeter_cal_grid(0x0, 0x7fff, 1, 0.0, 30, xmeter_adc_voltage_out_g, XMETER_GRID_SIZE); 
+  xmeter_write_rom_adc_voltage_out_g(xmeter_adc_voltage_out_g, XMETER_GRID_SIZE);
+}
+
+void xmeter_reset_adc_voltage_diss_config(void)
+{
+  /* xmeter_adc_voltage_in, fsr is 0~40
+     0000 -> 0.0
+     7fff -> 40 (ADC耗散电压)
+  */  
+  xmeter_cal_grid(0x0, 0x7fff, 1, 0.0, 40.0, xmeter_adc_voltage_diss_g, XMETER_GRID_SIZE);
+  xmeter_write_rom_adc_voltage_diss_g(xmeter_adc_voltage_diss_g, XMETER_GRID_SIZE);
+
+}
+
+void xmeter_reset_dac_current_config(void)
+{
+  /* xmeter_dac_current, fsr is 0~5.0
+     0000 -> 0.0
+     ffff -> 5.0 (DAC输出电流)
+  */    
+  xmeter_cal_grid(0x0, 0xffff, 0, 0.0, 5.0, xmeter_dac_current_g, XMETER_GRID_SIZE);
+  xmeter_write_rom_dac_current_g(xmeter_dac_current_g, XMETER_GRID_SIZE);
+}
+
+void xmeter_reset_dac_voltage_config(void)
+{
+  /* xmeter_dac_voltage, fsr is 0~30.0
+     0000 -> 0.0
+     ffff -> 30 (DAC输出电压)
+  */    
+  xmeter_cal_grid(0x0, 0xffff, 0, 0.0, 30, xmeter_dac_voltage_g, XMETER_GRID_SIZE);
+  xmeter_write_rom_dac_voltage_g(xmeter_dac_voltage_g, XMETER_GRID_SIZE);
+
+}
+
 void xmeter_rom_factory_reset(void)
 {
   
@@ -534,49 +586,23 @@ void xmeter_rom_factory_reset(void)
     输入部分保障ADC最大测量30/45V、5A
     输出部分保障DAC最大输出30V、5A
   */
-  
-  /* xmeter_adc_current, fsr is 0~5.0
-     0000 -> 0.0
-     7fff -> 10.24 (ADC输入电流)
-  */
-  xmeter_cal_grid(0x0, 0x7fff, 1, 0.0, 10.0, xmeter_adc_current_g, XMETER_GRID_SIZE);
-  xmeter_write_rom_adc_current_g(xmeter_adc_current_g, XMETER_GRID_SIZE);
+  xmeter_reset_adc_current_config();
   
   lcd_show_progress(1, 1);
   
-  /* xmeter_adc_voltage_out, fsr is 0~30
-     0000 -> 0.0
-     7fff -> 30 (ADC输入电压)
-  */  
-  xmeter_cal_grid(0x0, 0x7fff, 1, 0.0, 30, xmeter_adc_voltage_out_g, XMETER_GRID_SIZE); 
-  xmeter_write_rom_adc_voltage_out_g(xmeter_adc_voltage_out_g, XMETER_GRID_SIZE);
+  xmeter_reset_adc_voltage_out_config();
   
   lcd_show_progress(1, 2);
   
-  /* xmeter_adc_voltage_in, fsr is 0~40
-     0000 -> 0.0
-     7fff -> 40 (ADC耗散电压)
-  */  
-  xmeter_cal_grid(0x0, 0x7fff, 1, 0.0, 40.0, xmeter_adc_voltage_diss_g, XMETER_GRID_SIZE);
-  xmeter_write_rom_adc_voltage_diss_g(xmeter_adc_voltage_diss_g, XMETER_GRID_SIZE);
+  xmeter_reset_adc_voltage_diss_config();
   
   lcd_show_progress(1, 3);
   
-  /* xmeter_dac_current, fsr is 0~5.0
-     0000 -> 0.0
-     ffff -> 5.0 (DAC输出电流)
-  */    
-  xmeter_cal_grid(0x0, 0xffff, 0, 0.0, 5.0, xmeter_dac_current_g, XMETER_GRID_SIZE);
-  xmeter_write_rom_dac_current_g(xmeter_dac_current_g, XMETER_GRID_SIZE);
+  xmeter_reset_dac_current_config();
   
   lcd_show_progress(1, 4);
   
-  /* xmeter_dac_voltage, fsr is 0~30.0
-     0000 -> 0.0
-     ffff -> 30 (DAC输出电压)
-  */    
-  xmeter_cal_grid(0x0, 0xffff, 0, 0.0, 30, xmeter_dac_voltage_g, XMETER_GRID_SIZE);
-  xmeter_write_rom_dac_voltage_g(xmeter_dac_voltage_g, XMETER_GRID_SIZE);
+  xmeter_reset_dac_voltage_config();
   
   lcd_show_progress(1, 5);
   
@@ -950,7 +976,7 @@ static bit xmeter_wait_for_conv_ready(void)
   return wait_cnt != 0;
 }
 /* from x3 -> y3 */
-static double xmeter_interpolate(uint32_t x1, uint32_t x2, double y1, double y2, int32_t x3)
+static double xmeter_interpolate(int32_t x1, int32_t x2, double y1, double y2, int32_t x3)
 {
   double dy;
   int32_t dx;
@@ -967,7 +993,7 @@ static double xmeter_interpolate(uint32_t x1, uint32_t x2, double y1, double y2,
   return dy * x3 / dx + y1 - dy * x1 / dx;
 }
 /* from y3 -> x3 */
-static int32_t xmeter_interpolate_r(uint32_t x1, uint32_t x2, double y1, double y2, double y3)
+static int32_t xmeter_interpolate_r(int32_t x1, int32_t x2, double y1, double y2, double y3)
 {
   double dy;
   int32_t dx;
@@ -1060,7 +1086,7 @@ static double xmeter_bits2float(uint16_t bits, xmeter_grid_t * grid, uint16_t cn
     y1 = grid[i].val;
     y2 = grid[i+1].val;  
   }
-  
+   
   return xmeter_interpolate(x1, x2, y1, y2, x3);
 }
 
@@ -1145,7 +1171,7 @@ void xmeter_read_adc_current(void)
     XMETER_GRID_SIZE, 
     XMETER_RES_CURRENT, 1);
   
-  //xmeter_dump_value("ADC_c", &xmeter_adc_current, 1);
+  // xmeter_dump_value("ADC_c", &xmeter_adc_current, 1);
 }
 
 uint16_t xmeter_get_adc_bits_voltage_out(void)
@@ -1372,6 +1398,8 @@ void xmeter_read_adc(void)
     
   if(xmeter_output_status()) {
     if(xmeter_compare_value(&xmeter_power_diss, &xmeter_max_power_diss) >= 0) {
+      xmeter_dump_value("adc pd", &xmeter_power_diss, 1);
+      xmeter_dump_value("max adc pd", &xmeter_max_power_diss, 1);      
       task_set(EV_OVER_PD);
     }
   }

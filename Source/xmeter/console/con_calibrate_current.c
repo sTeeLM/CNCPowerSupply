@@ -18,6 +18,13 @@ int8_t con_cal_current(char arg1, char arg2)
     for(index = 0 ; index < XMETER_GRID_SIZE; index ++) {
       console_printf("[DAC][%u] %04x -> %f\n", index, con_grid_dac[index].bits, con_grid_dac[index].val);
     }
+  } else if(arg1 > 0 && strcmp(&console_buf[arg1], "reset") == 0) {
+    xmeter_reset_adc_current_config();
+    xmeter_reset_dac_current_config();
+    xmeter_reload_adc_current_config();
+    xmeter_reload_dac_current_config();
+    console_printf("reset ok!\n");
+    
   } else if(arg1 > 0 && strcmp(&console_buf[arg1], "load") == 0) {
     xmeter_read_rom_adc_current_g(con_grid_adc, XMETER_GRID_SIZE);
     xmeter_read_rom_dac_current_g(con_grid_dac, XMETER_GRID_SIZE); 
@@ -39,8 +46,8 @@ int8_t con_cal_current(char arg1, char arg2)
       return 1;
     sscanf(&console_buf[arg2], "%f", &con_grid_adc[index].val);
     con_grid_dac[index].val = con_grid_adc[index].val;
-    con_grid_adc[index].bits = xmeter_get_adc_bits_voltage_out();
-    con_grid_dac[index].bits = xmeter_get_dac_bits_v();
+    con_grid_adc[index].bits = xmeter_get_adc_bits_current();
+    con_grid_dac[index].bits = xmeter_get_dac_bits_c();
     console_printf("[ADC][%u] %04x -> %f\n", index, con_grid_adc[index].bits, con_grid_adc[index].val);
     console_printf("[DAC][%u] %04x -> %f\n", index, con_grid_dac[index].bits, con_grid_dac[index].val);
   } else {

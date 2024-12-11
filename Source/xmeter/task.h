@@ -29,7 +29,8 @@ enum task_events
   EV_TEMP_HI             = 20, // 超过风扇温度上限，并且风扇处于关闭状态
   EV_TEMP_LO             = 21, // 低于风扇温度下线，并且风扇处于打开状态
   EV_CC_CHANGE           = 22, // CC状态变化
-  EV_TIMEO               = 23, // 超时  
+  EV_TIMEO               = 23, // 超时（或者虚拟按键）
+  EV_EVKEY               = 24, // 虚拟按键
   EV_CNT  
 };
 

@@ -21,10 +21,8 @@ static void sm_set_param_init_fan()
 
 static void sm_set_param_fill_fan()
 {
-  lcd_set_char(0, 5, xmeter_temp_hi.neg ? '-' : ' ');
-  lcd_set_digit(0, 6, xmeter_temp_hi.integer, xmeter_temp_hi.decimal);
-  lcd_set_char(1, 5, xmeter_temp_lo.neg ? '-' : ' ');
-  lcd_set_digit(1, 6, xmeter_temp_lo.integer, xmeter_temp_lo.decimal);  
+  lcd_set_digit(0, 5, &xmeter_temp_hi);
+  lcd_set_digit(1, 5, &xmeter_temp_lo);  
 }
 
 static void sm_set_param_init_over()
@@ -37,10 +35,8 @@ static void sm_set_param_init_over()
 
 static void sm_set_param_fill_over()
 {
-  lcd_set_char(0, 6, xmeter_temp_overheat.neg ? '-' : ' ');
-  lcd_set_digit(0, 7, xmeter_temp_overheat.integer, xmeter_temp_overheat.decimal);
-
-  lcd_set_digit(1, 7, xmeter_max_power_diss.integer, xmeter_max_power_diss.decimal);
+  lcd_set_digit(0, 6, &xmeter_temp_overheat);
+  lcd_set_digit(1, 6, &xmeter_max_power_diss);
 }
 
 static void sm_set_param_init_sel_pre_vc(bit is_c)
@@ -51,26 +47,26 @@ static void sm_set_param_init_sel_pre_vc(bit is_c)
     lcd_set_string(1, 0, "s 0.000 0.000 A");
     xmeter_reset_preset_index_c();
     xmeter_load_preset_dac_c();  
-    lcd_set_digit(0, 2, xmeter_dac_current.integer, xmeter_dac_current.decimal); 
+    lcd_set_digit(0, 1, &xmeter_dac_current); 
     xmeter_next_preset_dac_c();
-    lcd_set_digit(0, 8, xmeter_dac_current.integer, xmeter_dac_current.decimal);
+    lcd_set_digit(0, 7, &xmeter_dac_current);
     xmeter_next_preset_dac_c();
-    lcd_set_digit(1, 2, xmeter_dac_current.integer, xmeter_dac_current.decimal);
+    lcd_set_digit(1, 1, &xmeter_dac_current);
     xmeter_next_preset_dac_c();
-    lcd_set_digit(1, 8, xmeter_dac_current.integer, xmeter_dac_current.decimal);
+    lcd_set_digit(1, 7, &xmeter_dac_current);
     xmeter_reset_preset_index_c();
   } else {
     lcd_set_string(0, 0, "V 0.000 0.000 V");
     lcd_set_string(1, 0, "s 0.000 0.000 V");
     xmeter_reset_preset_index_v();
     xmeter_load_preset_dac_v();  
-    lcd_set_digit(0, 2, xmeter_dac_voltage.integer, xmeter_dac_voltage.decimal); 
+    lcd_set_digit(0, 1, &xmeter_dac_voltage); 
     xmeter_next_preset_dac_v();
-    lcd_set_digit(0, 8, xmeter_dac_voltage.integer, xmeter_dac_voltage.decimal);
+    lcd_set_digit(0, 7, &xmeter_dac_voltage);
     xmeter_next_preset_dac_v();
-    lcd_set_digit(1, 2, xmeter_dac_voltage.integer, xmeter_dac_voltage.decimal);
+    lcd_set_digit(1, 1, &xmeter_dac_voltage);
     xmeter_next_preset_dac_v();
-    lcd_set_digit(1, 8, xmeter_dac_voltage.integer, xmeter_dac_voltage.decimal);
+    lcd_set_digit(1, 7, &xmeter_dac_voltage);
     xmeter_reset_preset_index_v();
   }
 }
@@ -111,24 +107,24 @@ static void sm_set_param_init_set_pre_vc(bit is_c)
   }
   if(index == 0) {
     if(is_c)
-      lcd_set_digit(0, 2, xmeter_dac_current.integer, xmeter_dac_current.decimal); 
+      lcd_set_digit(0, 1, &xmeter_dac_current); 
     else
-      lcd_set_digit(0, 2, xmeter_dac_voltage.integer, xmeter_dac_voltage.decimal);
+      lcd_set_digit(0, 1, &xmeter_dac_voltage);
   } else if(index == 1){
     if(is_c)
-      lcd_set_digit(0, 8, xmeter_dac_current.integer, xmeter_dac_current.decimal); 
+      lcd_set_digit(0, 7, &xmeter_dac_current); 
     else
-      lcd_set_digit(0, 8, xmeter_dac_voltage.integer, xmeter_dac_voltage.decimal);    
+      lcd_set_digit(0, 7, &xmeter_dac_voltage);    
   } else if(index == 2){
     if(is_c)
-      lcd_set_digit(1, 2, xmeter_dac_current.integer, xmeter_dac_current.decimal); 
+      lcd_set_digit(1, 1, &xmeter_dac_current); 
     else
-      lcd_set_digit(1, 2, xmeter_dac_voltage.integer, xmeter_dac_voltage.decimal);
+      lcd_set_digit(1, 1, &xmeter_dac_voltage);
   } else {
     if(is_c)
-      lcd_set_digit(1, 8, xmeter_dac_current.integer, xmeter_dac_current.decimal); 
+      lcd_set_digit(1, 7, &xmeter_dac_current); 
     else
-      lcd_set_digit(1, 8, xmeter_dac_voltage.integer, xmeter_dac_voltage.decimal);
+      lcd_set_digit(1, 7, &xmeter_dac_voltage);
   }
 }
 
@@ -143,30 +139,30 @@ static void sm_set_param_fill_set_pre_vc(bit is_c)
   switch(index) {
     case 0:
     if(is_c) {
-      lcd_set_digit(0, 2, xmeter_dac_current.integer, xmeter_dac_current.decimal); 
+      lcd_set_digit(0, 1, &xmeter_dac_current); 
     } else {
-      lcd_set_digit(0, 2, xmeter_dac_voltage.integer, xmeter_dac_voltage.decimal); 
+      lcd_set_digit(0, 1, &xmeter_dac_voltage); 
     }
     break;
     case 1:
     if(is_c) {
-      lcd_set_digit(0, 8, xmeter_dac_current.integer, xmeter_dac_current.decimal); 
+      lcd_set_digit(0, 7, &xmeter_dac_current); 
     } else {
-      lcd_set_digit(0, 8, xmeter_dac_voltage.integer, xmeter_dac_voltage.decimal); 
+      lcd_set_digit(0, 7, &xmeter_dac_voltage); 
     }
     break;
     case 2:
     if(is_c) {
-      lcd_set_digit(1, 2, xmeter_dac_current.integer, xmeter_dac_current.decimal); 
+      lcd_set_digit(1, 1, &xmeter_dac_current); 
     } else {
-      lcd_set_digit(1, 2, xmeter_dac_voltage.integer, xmeter_dac_voltage.decimal); 
+      lcd_set_digit(1, 1, &xmeter_dac_voltage); 
     }
     break;
     case 3:
     if(is_c) {
-      lcd_set_digit(1, 8, xmeter_dac_current.integer, xmeter_dac_current.decimal); 
+      lcd_set_digit(1, 7, &xmeter_dac_current); 
     } else {
-      lcd_set_digit(1, 8, xmeter_dac_voltage.integer, xmeter_dac_voltage.decimal); 
+      lcd_set_digit(1, 7, &xmeter_dac_voltage); 
     }
     break;    
   }

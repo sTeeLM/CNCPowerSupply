@@ -466,6 +466,11 @@
               <FileType>1</FileType>
               <FilePath>.\console.c</FilePath>
             </File>
+            <File>
+              <FileName>cal_common.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\cal_common.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -480,6 +485,11 @@
               <FileName>sm_set_param.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\state_machine\sm_set_param.c</FilePath>
+            </File>
+            <File>
+              <FileName>sm_calibrate.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\state_machine\sm_calibrate.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -505,11 +515,6 @@
               <FileName>con_calibrate_voltage_out.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\console\con_calibrate_voltage_out.c</FilePath>
-            </File>
-            <File>
-              <FileName>con_common.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\console\con_common.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -975,6 +980,11 @@
               <FileType>1</FileType>
               <FilePath>.\console.c</FilePath>
             </File>
+            <File>
+              <FileName>cal_common.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\cal_common.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -989,6 +999,11 @@
               <FileName>sm_set_param.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\state_machine\sm_set_param.c</FilePath>
+            </File>
+            <File>
+              <FileName>sm_calibrate.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\state_machine\sm_calibrate.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1014,11 +1029,6 @@
               <FileName>con_calibrate_voltage_out.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\console\con_calibrate_voltage_out.c</FilePath>
-            </File>
-            <File>
-              <FileName>con_common.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\console\con_common.c</FilePath>
             </File>
           </Files>
         </Group>

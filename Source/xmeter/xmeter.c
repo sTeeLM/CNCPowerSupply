@@ -28,16 +28,6 @@
 static uint16_t xmeter_dac_internal_bit_v;
 static uint16_t xmeter_dac_internal_bit_c;
 
-#define XMETER_RES_ZERO     0
-#define XMETER_RES_ONE      1
-#define XMETER_RES_TWO      2
-#define XMETER_RES_THREE    3
-
-#define XMETER_RES_VOLTAGE  XMETER_RES_THREE
-#define XMETER_RES_CURRENT  XMETER_RES_THREE
-#define XMETER_RES_TEMP     XMETER_RES_TWO
-#define XMETER_RES_POWER    XMETER_RES_THREE
-
 #define XMETER_ADC_MAX_WAIT_CNT 255
 
 /*

@@ -1,6 +1,8 @@
 #ifndef __XMETER_LCD_H__
 #define __XMETER_LCD_H__
 
+#include "protocol.h"
+
 #include <stdint.h>
 
 enum lcd_special_chars
@@ -27,7 +29,7 @@ uint8_t lcd_set_buffer_len(uint8_t row, uint8_t len);
 
 void lcd_set_char(uint8_t row, uint8_t col, char c);
 
-void lcd_set_digit(uint8_t row, uint8_t col, uint16_t integer, uint16_t decimal);
+void lcd_set_digit(uint8_t row, uint8_t col, const xmeter_value_t * value);
 
 void lcd_set_hex(uint8_t row, uint8_t col, uint16_t hex);
 

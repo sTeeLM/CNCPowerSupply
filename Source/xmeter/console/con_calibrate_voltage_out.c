@@ -1,5 +1,5 @@
 #include "con_calibrate_voltage_out.h"
-#include "con_common.h"
+#include "cal_common.h"
 #include "console.h"
 #include "xmeter.h"
 #include <stdio.h>
@@ -13,21 +13,21 @@ int8_t con_cal_voltage_out(char arg1, char arg2)
   
   if(arg1 == 0) {
     for(index = 0 ; index < XMETER_GRID_SIZE; index ++) {
-      console_printf("[ADC][%u] %04x -> %f\n", index, con_grid_adc[index].bits, con_grid_adc[index].val);
+      console_printf("[ADC][%u] %04x -> %f\n", index, cal_grid_adc[index].bits, cal_grid_adc[index].val);
     }
     for(index = 0 ; index < XMETER_GRID_SIZE; index ++) {
-      console_printf("[DAC][%u] %04x -> %f\n", index, con_grid_dac[index].bits, con_grid_dac[index].val);
+      console_printf("[DAC][%u] %04x -> %f\n", index, cal_grid_dac[index].bits, cal_grid_dac[index].val);
     }
   } else if(arg1 > 0 && strcmp(&console_buf[arg1], "sadc") == 0 && arg2 > 0) {
     sscanf(&console_buf[arg2], "%u:%x:%f", &index, &bits, &float_val);
-    con_grid_adc[index].bits = bits;
-    con_grid_adc[index].val = float_val;
-    console_printf("[ADC][%u] %04x -> %f\n", index, con_grid_adc[index].bits, con_grid_adc[index].val);
+    cal_grid_adc[index].bits = bits;
+    cal_grid_adc[index].val = float_val;
+    console_printf("[ADC][%u] %04x -> %f\n", index, cal_grid_adc[index].bits, cal_grid_adc[index].val);
   } else if(arg1 > 0 && strcmp(&console_buf[arg1], "sdac") == 0 && arg2 > 0) {
     sscanf(&console_buf[arg2], "%u:%x:%f", &index, &bits, &float_val);
-    con_grid_dac[index].bits = bits;
-    con_grid_dac[index].val = float_val;
-    console_printf("[ADC][%u] %04x -> %f\n", index, con_grid_dac[index].bits, con_grid_dac[index].val);
+    cal_grid_dac[index].bits = bits;
+    cal_grid_dac[index].val = float_val;
+    console_printf("[ADC][%u] %04x -> %f\n", index, cal_grid_dac[index].bits, cal_grid_dac[index].val);
     
   } else if(arg1 > 0 && strcmp(&console_buf[arg1], "reset") == 0) {
     xmeter_reset_adc_voltage_out_config();
@@ -37,13 +37,13 @@ int8_t con_cal_voltage_out(char arg1, char arg2)
     console_printf("reset ok!\n");
     
   } else if(arg1 > 0 && strcmp(&console_buf[arg1], "load") == 0) {
-    xmeter_read_rom_adc_voltage_out_g(con_grid_adc, XMETER_GRID_SIZE);
-    xmeter_read_rom_dac_voltage_g(con_grid_dac, XMETER_GRID_SIZE); 
+    xmeter_read_rom_adc_voltage_out_g(cal_grid_adc, XMETER_GRID_SIZE);
+    xmeter_read_rom_dac_voltage_g(cal_grid_dac, XMETER_GRID_SIZE); 
     console_printf("load ok!\n");
     
   } else if(arg1 > 0 && strcmp(&console_buf[arg1], "save") == 0) {
-    xmeter_write_rom_adc_voltage_out_g(con_grid_adc, XMETER_GRID_SIZE);
-    xmeter_write_rom_dac_voltage_g(con_grid_dac, XMETER_GRID_SIZE); 
+    xmeter_write_rom_adc_voltage_out_g(cal_grid_adc, XMETER_GRID_SIZE);
+    xmeter_write_rom_dac_voltage_g(cal_grid_dac, XMETER_GRID_SIZE); 
     
     xmeter_reload_adc_voltage_out_config();
     xmeter_reload_dac_voltage_config();
@@ -54,12 +54,12 @@ int8_t con_cal_voltage_out(char arg1, char arg2)
     sscanf(&console_buf[arg1], "%u", &index);
     if(index > XMETER_GRID_SIZE) 
       return 1;
-    sscanf(&console_buf[arg2], "%f", &con_grid_adc[index].val);
-    con_grid_dac[index].val = con_grid_adc[index].val;
-    con_grid_adc[index].bits = xmeter_get_adc_bits_voltage_out();
-    con_grid_dac[index].bits = xmeter_get_dac_bits_v();
-    console_printf("[ADC][%u] %04x -> %f\n", index, con_grid_adc[index].bits, con_grid_adc[index].val);
-    console_printf("[DAC][%u] %04x -> %f\n", index, con_grid_dac[index].bits, con_grid_dac[index].val);
+    sscanf(&console_buf[arg2], "%f", &cal_grid_adc[index].val);
+    cal_grid_dac[index].val = cal_grid_adc[index].val;
+    cal_grid_adc[index].bits = xmeter_get_adc_bits_voltage_out();
+    cal_grid_dac[index].bits = xmeter_get_dac_bits_v();
+    console_printf("[ADC][%u] %04x -> %f\n", index, cal_grid_adc[index].bits, cal_grid_adc[index].val);
+    console_printf("[DAC][%u] %04x -> %f\n", index, cal_grid_dac[index].bits, cal_grid_dac[index].val);
   } else {
     return 1;
   }

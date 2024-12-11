@@ -3,13 +3,14 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+#include "protocol.h"
 #include "lcd.h"
 #include "delay.h"
 #include "debug.h"
 #include "gpio.h"
 
 #define LCD_LINE_BUFFER_SIZE_DEFAULT 16
-#define LCD_LINE_BUFFER_SIZE 32
+#define LCD_LINE_BUFFER_SIZE 24
 
 static uint8_t lcd_line[2][LCD_LINE_BUFFER_SIZE];
 static uint8_t lcd_line_len[2];
@@ -231,44 +232,48 @@ void lcd_set_integer(uint8_t row, uint8_t col, uint8_t len, uint32_t val)
 integer: 1 ~ 999
 decimal: 0 ~ 999 (decimal / 1000 is real decimal)
 */
-void lcd_set_digit(uint8_t row, uint8_t col, uint16_t integer, uint16_t decimal)
+void lcd_set_digit(uint8_t row, uint8_t col, const xmeter_value_t * value)
 {
-  char buf[6] = {' '};
+  char buf[7] = {' '};
+  uint16_t integer = value->integer;
+  uint16_t decimal = value->decimal;
   
   row %= 2;
   buf[5] = 0;
   
   if(decimal > 999 || integer > 999) {
-    buf[0] = 'E';
-    buf[1] = 'R'; 
-    buf[2] = 'R';
-    buf[3] = ' ';
-    buf[4] = ' ';     
+    buf[1] = 'E';
+    buf[2] = 'R'; 
+    buf[3] = 'R';
+    buf[4] = ' ';
+    buf[5] = ' ';     
   } else if(integer >= 0 && integer <= 9) {
-    buf[0] = integer + 0x30;
-    buf[1] = '.';
-    buf[2] = (decimal / 100) + 0x30;
-    decimal %= 100;
-    buf[3] = (decimal / 10) + 0x30;
-    decimal %= 10;
-    buf[4] = decimal + 0x30;
-  } else if (integer >= 10 && integer <= 99) {
-    buf[0] = (integer / 10) + 0x30;
-    integer %= 10;
     buf[1] = integer + 0x30;
     buf[2] = '.';
     buf[3] = (decimal / 100) + 0x30;
     decimal %= 100;
     buf[4] = (decimal / 10) + 0x30;
-  } else if (integer >= 100 && integer <= 999) {
-    buf[0] = (integer / 100) + 0x30;
-    integer %= 100;
+    decimal %= 10;
+    buf[5] = decimal + 0x30;
+  } else if (integer >= 10 && integer <= 99) {
     buf[1] = (integer / 10) + 0x30;
     integer %= 10;
     buf[2] = integer + 0x30;
     buf[3] = '.';
     buf[4] = (decimal / 100) + 0x30;
+    decimal %= 100;
+    buf[5] = (decimal / 10) + 0x30;
+  } else if (integer >= 100 && integer <= 999) {
+    buf[1] = (integer / 100) + 0x30;
+    integer %= 100;
+    buf[2] = (integer / 10) + 0x30;
+    integer %= 10;
+    buf[3] = integer + 0x30;
+    buf[4] = '.';
+    buf[5] = (decimal / 100) + 0x30;
   }
+  
+  buf[0] = value->neg ? '-' : ' ';
   
   lcd_set_string(row, col, buf);
 }

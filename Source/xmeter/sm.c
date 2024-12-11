@@ -5,6 +5,7 @@
 
 #include "sm_xmeter.h"
 #include "sm_set_param.h"
+#include "sm_calibrate.h"
 
 uint8_t sm_cur_function;
 uint8_t sm_cur_state;
@@ -13,6 +14,7 @@ static const struct sm_function_slot code sm_function[] =
 {
   {"SM_XMETER", sm_function_xmeter},
   {"SM_SET_PARAM", sm_function_set_param},
+  {"SM_CALIBRATE", sm_function_calibrate},  
 };
 
 uint8_t sm_cur_function;

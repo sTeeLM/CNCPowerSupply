@@ -4,6 +4,16 @@
 #include "stdint.h"
 #include "protocol.h"
 
+#define XMETER_RES_ZERO     0
+#define XMETER_RES_ONE      1
+#define XMETER_RES_TWO      2
+#define XMETER_RES_THREE    3
+
+#define XMETER_RES_VOLTAGE  XMETER_RES_THREE
+#define XMETER_RES_CURRENT  XMETER_RES_THREE
+#define XMETER_RES_TEMP     XMETER_RES_TWO
+#define XMETER_RES_POWER    XMETER_RES_THREE
+
 extern const xmeter_value_t code xmeter_zero3;
 
 /*
@@ -158,8 +168,8 @@ void xmeter_assign_value(const xmeter_value_t * src, xmeter_value_t * dst);
 
 void xmeter_inc_voltage_value(xmeter_value_t * voltage, bit coarse);
 void xmeter_dec_voltage_value(xmeter_value_t * voltage, bit coarse);
-void xmeter_inc_current_value(xmeter_value_t * voltage, bit coarse);
-void xmeter_dec_current_value(xmeter_value_t * voltage, bit coarse);
+void xmeter_inc_current_value(xmeter_value_t * current, bit coarse);
+void xmeter_dec_current_value(xmeter_value_t * current, bit coarse);
 
 #define XMETER_GRID_SIZE 6
 

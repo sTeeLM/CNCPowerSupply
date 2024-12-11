@@ -10,6 +10,7 @@ enum sm_functions
 {
   SM_XMETER  = 0,         // 电压电路显示功能
   SM_SET_PARAM,           // 参数设置  
+  SM_CALIBRATE            // 读数校正
 };
 
 typedef void (*SM_PROC)(uint8_t to_func, uint8_t to_state, enum task_events ev);

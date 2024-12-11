@@ -37,6 +37,7 @@ const char * code task_names[] =
   "EV_TEMP_LO",
   "EV_CC_CHANGE",
   "EV_TIMEO",
+  "EV_EVKEY"
 };
 
 static void null_proc(enum task_events ev)
@@ -71,6 +72,7 @@ static const TASK_PROC task_procs[EV_CNT] =
   /* EV_KEY_MOD_SET_XX */
   button_mod_set_proc,
   button_mod_set_proc, 
+  null_proc,
   null_proc,
   null_proc,
   null_proc,

@@ -116,18 +116,18 @@ static void calibrate_fill_val_bits(bit is_bits)
   lcd_set_hex(0, 12, cal_grid_adc[calibrate_index].bits);
   
 
-    if(calibrate_type != CALIBRATE_VD) {
-      lcd_set_hex(1, 12, cal_grid_dac[calibrate_index].bits);
-    }
+  if(calibrate_type != CALIBRATE_VD) {
+    lcd_set_hex(1, 12, cal_grid_dac[calibrate_index].bits);
+  }
 
-    if(calibrate_type == CALIBRATE_VO || calibrate_type == CALIBRATE_VD) {
-      res = XMETER_RES_VOLTAGE;
-    } else {
-      res = XMETER_RES_CURRENT;
-    }
-    xmeter_float2val(cal_grid_adc[calibrate_index].val, &value, res);
-    lcd_set_digit(1, 3, &value);
-    lcd_set_char(1, 0, calibrate_index + 1 + 0x30);
+  if(calibrate_type == CALIBRATE_VO || calibrate_type == CALIBRATE_VD) {
+    res = XMETER_RES_VOLTAGE;
+  } else {
+    res = XMETER_RES_CURRENT;
+  }
+  xmeter_float2val(cal_grid_adc[calibrate_index].val, &value, res);
+  lcd_set_digit(1, 3, &value);
+  lcd_set_char(1, 0, calibrate_index + 1 + 0x30);
 
 }
 

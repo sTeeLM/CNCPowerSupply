@@ -28,7 +28,7 @@ int8_t con_cal_current(char arg1, char arg2)
     sscanf(&console_buf[arg2], "%u:%x:%f", &index, &bits, &float_val);
     cal_grid_dac[index].bits = bits;
     cal_grid_dac[index].val = float_val;
-    console_printf("[ADC][%u] %04x -> %f\n", index, cal_grid_dac[index].bits, cal_grid_dac[index].val);
+    console_printf("[DAC][%u] %04x -> %f\n", index, cal_grid_dac[index].bits, cal_grid_dac[index].val);
   } else if(arg1 > 0 && strcmp(&console_buf[arg1], "reset") == 0) {
     xmeter_reset_adc_current_config();
     xmeter_reset_dac_current_config();

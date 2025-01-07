@@ -518,7 +518,7 @@ void xmeter_reset_adc_current_config(void)
      0000 -> 0.0
      7fff -> 10.24 (ADC输入电流)
   */
-  xmeter_cal_grid(0x0, 0x7fff, 1, 0.0, 10.0, xmeter_adc_current_g, XMETER_GRID_SIZE);
+  xmeter_cal_grid(0x0, 0x3fff, 1, 0.0, 5.0, xmeter_adc_current_g, XMETER_GRID_SIZE);
   xmeter_write_rom_adc_current_g(xmeter_adc_current_g, XMETER_GRID_SIZE);
 }
 

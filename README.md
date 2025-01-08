@@ -7,6 +7,7 @@
 ### TODO ###
 1. 前置开关电源而不是变压器，以波纹换重量优化。
 2. 完成USB上位机的控制程序，内嵌Python解释器。
+3. 更好的校正设计甚至是自动校正。
 
 ## A CNC DC Power Supply with 4 independent channel ##
 The maximum output voltage of each channel is 30V, the current is 5A, and the ripple is less than 0.1mV. all channels can be connected in series or parallel.
@@ -16,3 +17,4 @@ Because it uses an original linear step-down design with a 200VA transformer, it
 ### TODO ###
 1. use switching power supply plus linear convertor instead of the transformer for weight optimization.
 2. Complete the control program on the USB host computer and embed the Python interpreter.
+3. Better calibration design or even automatic calibration.

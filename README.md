@@ -1,7 +1,7 @@
 ## 一个隔离四通道的数控+程控可调低波纹直流电源 ##
 ### 介绍 ###
 ![完成图](<Doc/Design/assets/IMG_5843.jpeg>)
-每通道最大输出电压30V，电流5A，波纹小于0.1mV，各通道独立可串联或者并联，可以通过USB远程用电脑程序化控制。
+每通道最大输出电压30V，电流5A，波纹小于1mV，各通道独立可串联或者并联，可以通过USB远程用电脑程序化控制。
 由于采用了原始的线性降压设计，带着4个200VA的变压器，加上外壳、散热器重量，所以很笨重。
 外壳采用酚醛树脂制作，第一次折腾AutoCAD，加上审美不在线，做出来浓浓的苏联风。
 成本量产500RMB以内，单个制作1000RMB左右，市面上类似电源一个2000～4000RMB不等。
@@ -20,7 +20,7 @@
 3. 更好的校正设计甚至是自动校正。
 
 ## A CNC DC Power Supply with 4 independent channel ##
-The maximum output voltage of each channel is 30V, the current is 5A, and the ripple is less than 0.1mV. all channels can be connected in series or parallel.
+The maximum output voltage of each channel is 30V, the current is 5A, and the ripple is less than 1mV. all channels can be connected in series or parallel.
 It can be programmed and controlled remotely via USB.
 Because it uses an original linear step-down design with a 200VA transformer, it is extremely bulky. The shell is made of phenolic resin and has a strong Soviet style.
 
